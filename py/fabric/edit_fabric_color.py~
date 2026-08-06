@@ -1,0 +1,39 @@
+    #!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+    import cgitb
+    import cgi
+    import pymysql
+
+    cgitb.enable()
+
+    print("Content-Type: text/html\n")
+
+    # 1. Database Connection
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2"
+    )
+
+    cursor = conn.cursor()
+
+    # 2. Get the form data
+    form = cgi.FieldStorage()
+    color_id = form.getvalue("color_id")
+    color_name = form.getvalue("color_name")
+    price_name = form.getvalue("price_name")
+
+    if color_id and color_name and price_name:
+        try:
+            # 3. Update the fabric name in the database
+            cursor.execute("UPDATE fabric_colors SET color_name = %s, price = %s WHERE id = %s", (color_name, price_name, color_id))
+            conn.commit()
+
+        except Exception as e:
+            print(f"<h3>Error: {e}</h3>")
+    else:
+        print("<h3>Error: ID, color name, or price name not received.</h3>")
+
+    cursor.close()
+    conn.close()

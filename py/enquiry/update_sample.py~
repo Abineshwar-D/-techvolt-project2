@@ -1,0 +1,21 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+import cgi
+import pymysql
+import json
+
+print("Content-Type: application/json\n")
+
+form = cgi.FieldStorage()
+enq_id = form.getvalue("enquiry_id")
+
+try:
+    db = pymysql.connect(host="localhost", user="root", password="", database="techvoltproject2")
+    cursor = db.cursor()
+    # Update sample_status to 1 (Sample Sent)
+    cursor.execute("UPDATE customers_enquiries SET sample_status = 1 WHERE enquiry_id = %s", (enq_id,))
+    db.commit()
+    print(json.dumps({"status": "success"}))
+except Exception as e:
+    print(json.dumps({"status": "error", "message": str(e)}))
+finally:
+    if 'db' in locals(): db.close()

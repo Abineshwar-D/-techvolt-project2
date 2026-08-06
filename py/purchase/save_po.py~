@@ -1,0 +1,218 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import json
+import pymysql
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+cgitb.enable()
+
+# Output JSON header for fetch()
+print("Content-Type: application/json\n\n")
+
+# ---------------------------------------------------------
+# EMAIL & COMPANY CONFIGURATION
+# ---------------------------------------------------------
+SENDER_EMAIL = "abineshwar68@gmail.com"
+SENDER_PASSWORD = "pjlo yemf queh tfrl".replace(" ", "")
+SMTP_SERVER = "smtp.gmail.com"
+SMTP_PORT = 587
+
+COMPANY_NAME = "Techvolt"
+COMPANY_EMAIL = "techvolt@gmail.com"
+COMPANY_PHONE = "06384930973"
+# ---------------------------------------------------------
+
+form = cgi.FieldStorage()
+
+
+# Helper function: Convert values to float safely
+def parse_float(value, default=0.0):
+    if value is None:
+        return default
+    try:
+        clean_val = str(value).strip().replace("₹", "").replace(",", "")
+        return float(clean_val) if clean_val else default
+    except (ValueError, TypeError):
+        return default
+
+
+# 1. READ FORM DATA
+supplier = form.getvalue("supplier_name", "").strip()
+material = form.getvalue("material_name", "").strip()
+available_stock = parse_float(form.getvalue("available_stock"), 0.0)
+required_qty = parse_float(form.getvalue("required_qty"), 0.0)
+expected_delivery = form.getvalue("expected_delivery", "").strip()
+remarks = form.getvalue("remarks", "").strip()
+
+
+# 2. VALIDATION
+errors = []
+if not supplier or supplier == "Select Supplier":
+    errors.append("Please select a supplier.")
+if not material or material == "Select Material":
+    errors.append("Please select a material.")
+if required_qty <= 0:
+    errors.append("Required quantity must be greater than 0.")
+if not expected_delivery:
+    errors.append("Expected delivery date is required.")
+
+if errors:
+    error_text = "Validation Errors: " + ", ".join(errors)
+    print(json.dumps({"success": False, "message": error_text}))
+    exit()
+
+
+# 3. DATABASE OPERATIONS & EMAIL SENDING
+try:
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2"
+    )
+    cursor = conn.cursor()
+
+    # Fetch Supplier Details
+    sup_contact_person = supplier
+    sup_shop_name = supplier
+    sup_address = "N/A"
+    sup_phone = "N/A"
+    sup_email = ""
+
+    cursor.execute("""
+        SELECT contact_person, supplier_name, address, city, state, pincode, phone, email 
+        FROM supplier 
+        WHERE LOWER(TRIM(supplier_name)) = LOWER(TRIM(%s)) 
+           OR LOWER(TRIM(supplier_code)) = LOWER(TRIM(%s)) 
+        LIMIT 1
+    """, (supplier, supplier))
+    sup_row = cursor.fetchone()
+
+    if sup_row:
+        sup_contact_person = sup_row[0] or supplier
+        sup_shop_name = sup_row[1] or supplier
+        addr_parts = [p for p in [sup_row[2], sup_row[3], sup_row[4], sup_row[5]] if p]
+        sup_address = ", ".join(addr_parts) if addr_parts else "N/A"
+        sup_phone = sup_row[6] or "N/A"
+        sup_email = sup_row[7] or ""
+
+    # Generate next PO Number
+    cursor.execute("""
+        SELECT po_number 
+        FROM purchased_order 
+        ORDER BY id DESC 
+        LIMIT 1
+    """)
+    last_po = cursor.fetchone()
+
+    if last_po and last_po[0]:
+        try:
+            last_num = int(str(last_po[0]).replace("PO", ""))
+            po_number = f"PO{last_num + 1:04d}"
+        except ValueError:
+            po_number = "PO0001"
+    else:
+        po_number = "PO0001"
+
+    # Insert EXACTLY into the matching table columns
+    sql = """
+        INSERT INTO purchased_order (
+            po_number, supplier, material,
+            available_stock, required_qty,
+            expected_delivery, remarks
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    values = (
+        po_number, supplier, material,
+        available_stock, required_qty,
+        expected_delivery, remarks
+    )
+
+    cursor.execute(sql, values)
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    # ---------------------------------------------------------
+    # SEND EMAIL TO SUPPLIER
+    # ---------------------------------------------------------
+    email_status_msg = ""
+    if sup_email:
+        try:
+            remarks_html = f"<div style='margin-top: 20px; padding-top: 10px; border-top: 1px solid " \
+                           f"#eee;'><p><strong>Remarks / Special Instructions:</strong> {remarks}</p></div>" if \
+                remarks else ""
+
+            html_body = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+                <div style="max-width: 700px; margin: auto; background: #ffffff; border: 1px solid #ddd; padding: 25px; border-radius: 8px;">
+                    <h2 style="text-align: center; color: #2c3e50; border-bottom: 2px solid #2c3e50; padding-bottom: 10px;">
+                        PURCHASE ORDER ({po_number})
+                    </h2>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-top: 15px;">
+                        <tr>
+                            <td width="50%" valign="top" style="border-right: 2px solid #333; padding-right: 15px;">
+                                <p style="margin: 8px 0;"><strong>Name :</strong> {sup_contact_person}</p>
+                                <p style="margin: 8px 0;"><strong>Shop Name :</strong> {sup_shop_name}</p>
+                                <p style="margin: 8px 0;"><strong>Address :</strong> {sup_address}</p>
+                                <p style="margin: 8px 0;"><strong>Phone :</strong> {sup_phone}</p>
+                                <p style="margin: 8px 0;"><strong>Email :</strong> {sup_email}</p>
+                            </td>
+
+                            <td width="50%" valign="top" style="padding-left: 15px;">
+                                <h3 style="margin-top: 0; color: #2c3e50;">Company details</h3>
+                                <p style="margin: 8px 0;"><strong>Company Name :</strong> {COMPANY_NAME}</p>
+                                <p style="margin: 8px 0;"><strong>Material :</strong> {material}</p>
+                                <p style="margin: 8px 0;"><strong>Quantity :</strong> {required_qty} Kg</p>
+                                <p style="margin: 8px 0;"><strong>Delivery date :</strong> {expected_delivery}</p>
+                                <p style="margin: 8px 0;"><strong>Email :</strong> {COMPANY_EMAIL}</p>
+                                <p style="margin: 8px 0;"><strong>Phone :</strong> {COMPANY_PHONE}</p>
+                            </td>
+                        </tr>
+                    </table>
+
+                    {remarks_html}
+                </div>
+            </body>
+            </html>
+            """
+
+            recipients = [sup_email]
+            if SENDER_EMAIL and SENDER_EMAIL not in recipients:
+                recipients.append(SENDER_EMAIL)
+
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"New Purchase Order Request - {po_number}"
+            msg["From"] = SENDER_EMAIL
+            msg["To"] = sup_email
+            msg.attach(MIMEText(html_body, "html"))
+
+            with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=15) as server:
+                server.starttls()
+                server.login(SENDER_EMAIL, SENDER_PASSWORD)
+                server.sendmail(SENDER_EMAIL, recipients, msg.as_string())
+
+            email_status_msg = f" & Email sent successfully to {sup_email}!"
+        except Exception as mail_err:
+            email_status_msg = f" (Email failed: {str(mail_err)})"
+    else:
+        email_status_msg = f" (No email found in supplier table for {supplier})."
+
+    print(json.dumps({
+        "success": True,
+        "message": f"Purchase Order {po_number} saved successfully!{email_status_msg}"
+    }))
+
+except Exception as e:
+    print(json.dumps({
+        "success": False,
+        "message": f"Database Error: {str(e)}"
+    }))
+    exit()

@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KnitFlow ERP - Textile Intelligence Platform</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        /* Reset */
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f7f9fb;
+            color: #191c1e;
+        }
+
+        /* ========== HEADER ========== */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1050;
+            background: rgba(247, 249, 251, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(198, 198, 205, 0.3);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header.scrolled {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header .brand-logo {
+            height: 32px;
+            width: auto;
+        }
+
+        .header .brand-name {
+            font-weight: 600;
+            font-size: 20px;
+            color: #000000;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-link-custom {
+            font-size: 14px;
+            font-weight: 600;
+            color: #45464d;
+            text-decoration: none;
+            transition: color 0.2s;
+            padding: 8px 0;
+        }
+
+        .nav-link-custom:hover {
+            color: #006a61;
+        }
+
+        .nav-link-custom.active {
+            color: #006a61;
+        }
+
+        .btn-sign-in {
+            font-size: 14px;
+            font-weight: 600;
+            color: #45464d;
+            background: none;
+            border: none;
+            padding: 8px 16px;
+            transition: color 0.2s;
+        }
+
+        .btn-sign-in:hover {
+            color: #000000;
+        }
+
+        .btn-demo {
+            padding: 10px 24px;
+            background: #006a61;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 106, 97, 0.2);
+        }
+
+        .btn-demo:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        /* ========== HERO ========== */
+        .hero-section {
+            min-height: 85vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 64px;
+        }
+
+        .hero-section .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+        }
+
+        .hero-section .hero-bg .bg-image {
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-section .hero-bg .bg-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, #f7f9fb, rgba(247, 249, 251, 0.9), transparent);
+        }
+
+        .hero-section .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            background: #9defe3;
+            color: #0d6f66;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-weight: 800;
+            font-size: 48px;
+            color: #000000;
+            line-height: 1.1;
+        }
+
+        .hero-title .highlight {
+            color: #006a61;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            color: #45464d;
+            line-height: 1.6;
+        }
+
+        .btn-request-demo {
+            padding: 16px 32px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn-request-demo:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        .btn-watch-tour {
+            padding: 16px 32px;
+            background: #ffffff;
+            color: #191c1e;
+            border: 1px solid #c6c6cd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-watch-tour:hover {
+            background: #f2f4f6;
+            transform: scale(0.98);
+        }
+
+        /* ========== GLASS PANEL ========== */
+        .glass-panel {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            position: relative;
+        }
+
+        .glass-panel .badge-float {
+            position: absolute;
+            top: -16px;
+            left: -16px;
+            background: #006a61;
+            color: #ffffff;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 106, 97, 0.2);
+        }
+
+        /* ========== SOCIAL PROOF ========== */
+        .social-proof .brand-item {
+            font-style: italic;
+            font-weight: 600;
+            font-size: 20px;
+            opacity: 0.6;
+            transition: all 0.7s;
+        }
+
+        .social-proof:hover .brand-item {
+            opacity: 1;
+        }
+
+        /* ========== FEATURES ========== */
+        .feature-card {
+            padding: 32px;
+            background: #f2f4f6;
+            border-radius: 12px;
+            border: 1px solid rgba(118, 119, 125, 0.2);
+            transition: all 0.3s;
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            box-shadow: 0 8px 40px rgba(0,0,0,0.06);
+            transform: translateY(-4px);
+        }
+
+        .feature-card .icon-box {
+            width: 56px;
+            height: 56px;
+            background: #9defe3;
+            color: #006a61;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover .icon-box {
+            transform: scale(1.1);
+        }
+
+        .feature-card .icon-box i {
+            font-size: 28px;
+        }
+
+        /* ========== VALUE PROPOSITION ========== */
+        .value-section {
+            background: #000000;
+            color: #ffffff;
+            padding: 80px 0;
+        }
+
+        .value-section .value-title {
+            font-weight: 800;
+            font-size: 48px;
+            color: #ffffff;
+        }
+
+        .value-section .value-subtitle {
+            font-size: 18px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .value-card {
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: background 0.2s;
+            height: 100%;
+        }
+
+        .value-card:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .value-card i {
+            color: #006a61;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .value-card h4 {
+            font-weight: 600;
+            font-size: 20px;
+            color: #ffffff;
+        }
+
+        .value-card p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* ========== TESTIMONIAL ========== */
+        .testimonial-section {
+            background: #f2f4f6;
+            padding: 80px 0;
+        }
+
+        .testimonial-section .quote-icon {
+            color: #006a61;
+            font-size: 48px;
+            margin-bottom: 24px;
+        }
+
+        .testimonial-section blockquote {
+            font-weight: 800;
+            font-size: 32px;
+            color: #000000;
+            font-style: italic;
+            line-height: 1.3;
+        }
+
+        .testimonial-section .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 2px solid #006a61;
+            padding: 4px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        /* ========== CTA ========== */
+        .cta-section {
+            padding: 96px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section .cta-bg {
+            position: absolute;
+            inset: 0;
+            background: rgba(134, 242, 228, 0.2);
+        }
+
+        .btn-start-trial {
+            padding: 20px 48px;
+            background: #006a61;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 106, 97, 0.3);
+        }
+
+        .btn-start-trial:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        .btn-talk-expert {
+            padding: 20px 48px;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #c6c6cd;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-talk-expert:hover {
+            background: #f2f4f6;
+            transform: scale(0.98);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            background: #ffffff;
+            border-top: 1px solid rgba(198, 198, 205, 0.3);
+            padding: 80px 0 32px;
+        }
+
+        .footer .footer-brand {
+            font-weight: 600;
+            font-size: 20px;
+            color: #000000;
+        }
+
+        .footer .footer-text {
+            font-size: 14px;
+            color: rgba(69, 70, 77, 0.8);
+        }
+
+        .footer .footer-heading {
+            font-size: 14px;
+            font-weight: 600;
+            color: #000000;
+            margin-bottom: 16px;
+        }
+
+        .footer .footer-link {
+            font-size: 14px;
+            color: rgba(69, 70, 77, 0.8);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: block;
+            padding: 4px 0;
+        }
+
+        .footer .footer-link:hover {
+            color: #006a61;
+        }
+
+        .footer .social-link {
+            color: rgba(69, 70, 77, 0.6);
+            transition: color 0.2s;
+            font-size: 22px;
+        }
+
+        .footer .social-link:hover {
+            color: #006a61;
+        }
+
+        .footer .iso-badge {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(69, 70, 77, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 991px) {
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .value-section .value-title {
+                font-size: 36px;
+            }
+
+            .testimonial-section blockquote {
+                font-size: 24px;
+            }
+
+            .btn-start-trial,
+            .btn-talk-expert {
+                font-size: 18px;
+                padding: 16px 32px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .value-section .value-title {
+                font-size: 28px;
+            }
+
+            .testimonial-section blockquote {
+                font-size: 20px;
+            }
+
+            .btn-start-trial,
+            .btn-talk-expert {
+                font-size: 16px;
+                padding: 14px 24px;
+                width: 100%;
+            }
+
+            .glass-panel .badge-float {
+                top: -12px;
+                left: -12px;
+                padding: 12px;
+            }
+
+            .glass-panel .badge-float .badge-value {
+                font-size: 18px;
+            }
+
+            .header .brand-name {
+                font-size: 16px;
+            }
+        }
+
+        /* ========== UTILITY ========== */
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<header class="header" id="header">
+    <nav class="container-fluid px-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBypn5zRtOtvMh89xvNH6IK6ENJgiWNMi1XJdE7h_EdijFc1mtFddk4g6PHAeYp2lCuSNmR3W1HQALaGtTjEgMue4MofJWR8jqAqTvl6snhTzn6v6oZTstG3Q77FU0RB47mDAhR4dXocwfyGNQ4stAXpDpqevxAzDwgPUoyYEICf2ZOhL-AGzSoKlLSrEk6VB6CEBk_ZTQ8IuGGRaEblGcpWXMin1qV1LvfDQyBmAUoEoDItz3nF4XiIlovUGYeGGAJLS4St5KrTT4" alt="KnitFlow ERP Logo" class="brand-logo">
+            <span class="brand-name d-none d-sm-inline">KnitFlow ERP</span>
+        </div>
+
+        <div class="d-none d-md-flex align-items-center gap-4">
+            <a href="#" class="nav-link-custom active">Features</a>
+            <a href="#" class="nav-link-custom">Modules</a>
+            <a href="#" class="nav-link-custom">Pricing</a>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn-sign-in d-none d-md-block" onclick="location.href='../pages/login.html'">Sign In</button>
+            <button class="btn-demo">Book a Demo</button>
+        </div>
+    </nav>
+</header>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero-section">
+    <div class="hero-bg">
+        <div class="bg-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCp10bqZule414OJidEi9M3Hwl_kqPKs5ZxyqTEIZXQ9vJrnQXDJIoDv_q64hTVlKLNFRUdGhJT-U09YHfqANxIHx3mmIkGb2Pv1rVko8CwmaShBkGRKeUXUZQLikvHxQqPeR5DyvCkzCwbOFYoIuTPuB8g8Odh3kQU6GXa8qfOIftyC4WhLwHM5Egud9sYRffYTzczU0WK1UVvGdepMrq0r1i2nwa71voLXCYBdsCIEln86sNEPu0x8qvSGuUFpdJCdhyqL2pYhQM')"></div>
+        <div class="bg-overlay"></div>
+    </div>
+
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 hero-content">
+                <div class="hero-badge mb-3">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Industry 4.0 Standard
+                </div>
+                <h1 class="hero-title">
+                    Precision Engineering for <span class="highlight">Textile Intelligence</span>
+                </h1>
+                <p class="hero-subtitle mb-4">
+                    The only enterprise ERP built exclusively for the modern knitting industry. From material procurement to global delivery.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <button class="btn-request-demo">
+                        Request Demo
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button class="btn-watch-tour">
+                        <i class="bi bi-play-circle"></i>
+                        Watch Product Tour
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== SOCIAL PROOF ==================== -->
+<section class="social-proof py-5 bg-white border-top border-bottom">
+    <div class="container">
+        <p class="text-center small text-uppercase text-muted fw-bold mb-4">Trusted by world-class manufacturers</p>
+        <div class="d-flex flex-wrap justify-content-center align-items-center gap-5">
+            <span class="brand-item">LoomTech</span>
+            <span class="brand-item">GlobalKnits</span>
+            <span class="brand-item">ThreadLine</span>
+            <span class="brand-item">ApexFabrics</span>
+            <span class="brand-item">TextilePro</span>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== FEATURES ==================== -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold fs-1">Core Operating Modules</h2>
+            <p class="text-muted fs-5" style="max-width: 600px; margin: 0 auto;">Engineered to solve the unique challenges of large-scale circular and flat knitting operations.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="bi bi-sliders2"></i>
+                    </div>
+                    <h3 class="fw-bold fs-4 mb-3">Smart Production Planning</h3>
+                    <p class="text-muted">Automate complex scheduling across thousands of looms. Real-time bottleneck detection and automatic job rescheduling for peak efficiency.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h3 class="fw-bold fs-4 mb-3">Real-time Inventory Intelligence</h3>
+                    <p class="text-muted">Granular tracking of yarn batches, dye lots, and finished rolls. Dynamic QR-based identification and predictive restock alerts.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="icon-box">
+                        <i class="bi bi-hub"></i>
+                    </div>
+                    <h3 class="fw-bold fs-4 mb-3">Marketing &amp; CRM Precision</h3>
+                    <p class="text-muted">Unified sales pipeline integrated with production capacity. Direct customer portal for order tracking and automated sample dispatch.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== VALUE PROPOSITION ==================== -->
+<section class="value-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <h2 class="value-title mb-4">Why KnitFlow?</h2>
+                <p class="value-subtitle mb-5">Generic ERPs fail when they hit the complex logic of knitting machinery. We built our kernel from the factory floor up.</p>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="value-card">
+                            <i class="bi bi-speedometer2"></i>
+                            <h4>Efficiency</h4>
+                            <p>Reduce setup downtime by 24% through AI sequencing.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="value-card">
+                            <i class="bi bi-bullseye"></i>
+                            <h4>Precision</h4>
+                            <p>Batch-level traceability for 100% compliance accountability.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="value-card">
+                            <i class="bi bi-graph-up-arrow"></i>
+                            <h4>Scalability</h4>
+                            <p>Cloud-native infrastructure that grows with your loom count.</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="value-card">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <h4>Integration</h4>
+                            <p>Native API hooks for major knitting machine protocols.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="position-absolute top-50 start-50 translate-middle" style="width: 400px; height: 400px; background: rgba(0, 106, 97, 0.1); border-radius: 50%; filter: blur(120px);"></div>
+                    <img class="position-relative rounded-4 shadow-lg border" style="z-index: 1; width: 100%;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6uIFMV3y53n-OopJ7QKP4hItiIRzHxxj0wuqu3Rfr0Zf00SVj_qnyFIIzl_yzxDWmUJSvtyAPdhYCFhwjb6tE9UurEFt93C8IFXBiBnv5zRfOE7EIyBK-YZFxEA7--bc7gGCmliA2d5_wyUtmGcUw5JFIyQFnepkfUZIWKy8kdFtPVNYyIqm0xQDeIFRZDDMoLBWjAO553nYDtN7wD_R-B86xlQo7Jl9u5kzl0RjxcO9Z-F2JDZO2imXgnqDTtrBtntOgJwmSM3o" alt="Dashboard">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== SCREENSHOT SHOWCASE ==================== -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold fs-1">Command &amp; Control</h2>
+            <p class="text-muted fs-5" style="max-width: 600px; margin: 0 auto;">One central nervous system for your entire manufacturing ecosystem.</p>
+        </div>
+
+        <div class="rounded-4 overflow-hidden shadow-lg border">
+            <div style="width: 100%; aspect-ratio: 16/9; background-size: cover; background-position: center; background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBNVPDKKUBYQwUqrffF_OAxF1UL9jmOIrgKECoa8XPGWQ-x03EOzCGUia7f7kaGglDwXSxBFzTYaAg55WTG2sbvmHbHearKw_URlaAQiQMTGpwG1GOdGaUiyV8IkMLE950DxtzHD-cinDWZ7hxmA9Zp6fhSneHZMlm2VQb9Rz-VQl28c1D6oiOd03xfpMh5ID9PFTQkeN5dcPH88kr4GXv0xrgDx1lK2ycZiHUJAOXKFOoI4foCxdT12wj4vfLvnqG6oLD_NHqPgG0');">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== TESTIMONIAL ==================== -->
+<section class="testimonial-section">
+    <div class="container">
+        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
+            <i class="bi bi-quote quote-icon"></i>
+            <blockquote>
+                "KnitFlow ERP didn't just digitize our records; it transformed our factory floor logic. We've seen a 30% increase in throughput within the first six months."
+            </blockquote>
+
+            <div class="d-flex flex-column align-items-center mt-4">
+                <img class="avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcqEdDXG15jS1x_B9lxIMyoqJN0LdqoP0ozzmrmlr1kV-gs8uOa4ziCnlDzVO8a0C7XJfPT6uk6m8nZp6rIMID45x012sKIDUI89hQOy-b3YcoT5JkhXFl7Jl6UKDhbuql51s1NCv3tBfqEUUZh-io9hGnDGAczwoSNWZx-deoIN7OY0PEXrsQVkPwyBDMlrlqpSQFEYNRTuGpoVqB0b2wUVh98JEtRTPcNJRWVWLBpgCauiOe3i5ZuL0pc1hu6rXfv8J7xngX0Co" alt="Marcus Vancraft">
+                <cite class="not-italic text-center">
+                    <span class="fw-bold d-block fs-5">Marcus Vancraft</span>
+                    <span class="text-muted">CEO, Vancraft Textile Group</span>
+                </cite>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== CTA ==================== -->
+<section class="cta-section">
+    <div class="cta-bg"></div>
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="text-center">
+            <h2 class="fw-bold fs-1 mb-4">Ready to scale your production?</h2>
+            <p class="text-muted fs-5 mb-5" style="max-width: 600px; margin: 0 auto;">Join the 400+ world-class manufacturers running their operations on KnitFlow ERP.</p>
+
+            <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+                <button class="btn-talk-expert">Talk to an Expert</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBypn5zRtOtvMh89xvNH6IK6ENJgiWNMi1XJdE7h_EdijFc1mtFddk4g6PHAeYp2lCuSNmR3W1HQALaGtTjEgMue4MofJWR8jqAqTvl6snhTzn6v6oZTstG3Q77FU0RB47mDAhR4dXocwfyGNQ4stAXpDpqevxAzDwgPUoyYEICf2ZOhL-AGzSoKlLSrEk6VB6CEBk_ZTQ8IuGGRaEblGcpWXMin1qV1LvfDQyBmAUoEoDItz3nF4XiIlovUGYeGGAJLS4St5KrTT4" alt="Logo" style="height: 32px;">
+                    <span class="footer-brand">KnitFlow ERP</span>
+                </div>
+                <p class="footer-text" style="max-width: 280px;">Leading the industry with precision engineering and textile manufacturing intelligence.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="social-link"><i class="bi bi-globe"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-envelope"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-people"></i></a>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <h5 class="footer-heading">Solutions</h5>
+                <a href="#" class="footer-link">Production</a>
+                <a href="#" class="footer-link">Inventory Control</a>
+                <a href="#" class="footer-link">Supply Chain</a>
+                <a href="#" class="footer-link">Quality Assurance</a>
+            </div>
+
+            <div class="col-md-3">
+                <h5 class="footer-heading">Company</h5>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">Marketing</a>
+                <a href="#" class="footer-link">Contact Us</a>
+                <a href="#" class="footer-link">Careers</a>
+            </div>
+
+            <div class="col-md-3">
+                <h5 class="footer-heading">Legal</h5>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Cookie Policy</a>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-5 pt-4 border-top">
+            <p class="footer-text mb-0">© 2024 KnitFlow ERP. Precision Engineering for Textile Manufacturing.</p>
+            <div class="iso-badge">
+                <i class="bi bi-shield-check"></i>
+                ISO 27001 Certified
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Header scroll behavior
+    let lastScroll = 0;
+    const

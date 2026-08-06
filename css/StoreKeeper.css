@@ -1,0 +1,530 @@
+  * {
+            font-family: 'Inter', sans-serif;
+        }
+
+       #storekeeper body {
+            background: #f7f9fb;
+            min-height: 100vh;
+        }
+
+        /* ========== SIDEBAR ========== */
+        #storekeeper .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: #f2f4f6;
+            border-right: 1px solid #c6c6cd;
+            z-index: 1050;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        #storekeeper .sidebar .brand-title {
+            font-weight: 800;
+            font-size: 20px;
+            color: #000000;
+        }
+
+        #storekeeper .sidebar .brand-subtitle {
+            font-size: 14px;
+            color: #45464d;
+            opacity: 0.7;
+        }
+
+        #storekeeper .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #45464d;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-bottom: 4px;
+        }
+
+        #storekeeper .nav-item:hover {
+            background: #e0e3e5;
+        }
+
+        #storekeeper .nav-item.active {
+            background: #86f2e4;
+            color: #006f66;
+            font-weight: 600;
+        }
+
+        #storekeeper .nav-item i {
+            font-size: 20px;
+        }
+
+        #storekeeper .nav-item span {
+            font-size: 14px;
+        }
+
+        #storekeeper .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid #c6c6cd;
+        }
+
+        #storekeeper .sidebar-footer .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* ========== HEADER ========== */
+        #storekeeper .header {
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            background: #f7f9fb;
+            border-bottom: 1px solid rgba(198, 198, 205, 0.3);
+            padding: 0 32px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-left: 260px;
+            width: calc(100% - 260px);
+            transition: all 0.4s ease-out;
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        #storekeeper .header.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #storekeeper .header .notification-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: #ba1a1a;
+            border-radius: 50%;
+        }
+
+        /* ========== MAIN CONTENT ========== */
+        #keeper.main-content {
+            margin-left: 260px;
+            padding: 32px;
+            min-height: calc(100vh - 64px);
+        }
+
+        /* ========== KPI CARDS ========== */
+        .kpi-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(198, 198, 205, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            height: 100%;
+        }
+
+        .kpi-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .kpi-card .icon-box {
+            padding: 12px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .kpi-card .icon-box.bg-primary-fixed {
+            background: #dae2fd;
+            color: #131b2e;
+        }
+
+        .kpi-card .icon-box.bg-secondary-fixed {
+            background: #89f5e7;
+            color: #00201d;
+        }
+
+        .kpi-card .icon-box.bg-error-container {
+            background: #ffdad6;
+            color: #ba1a1a;
+        }
+
+        .kpi-card .icon-box.bg-tertiary-fixed {
+            background: #d3e4fe;
+            color: #0b1c30;
+        }
+
+        .kpi-card.warning {
+            border-color: rgba(186, 26, 26, 0.2);
+        }
+
+        /* ========== LOW STOCK ALERTS ========== */
+        .low-stock-item {
+            padding: 16px;
+            background: rgba(255, 218, 214, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(186, 26, 26, 0.1);
+            margin-bottom: 16px;
+        }
+
+        .low-stock-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .progress-low {
+            height: 6px;
+            border-radius: 50px;
+            background: #ffdad6;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-low .progress-fill {
+            height: 100%;
+            background: #ba1a1a;
+            border-radius: 50px;
+        }
+
+        /* ========== STOCK SUMMARY ========== */
+        .stock-item {
+            padding: 24px;
+            background: #eceef0;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            text-align: center;
+            height: 100%;
+        }
+
+        .stock-item:hover {
+            border-color: #86f2e4;
+        }
+
+        .stock-item .icon-circle {
+            width: 48px;
+            height: 48px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .stock-item .icon-circle i {
+            color: #006a61;
+            font-size: 22px;
+        }
+
+        .progress-stock {
+            height: 4px;
+            border-radius: 50px;
+            background: #e0e3e5;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .progress-stock .progress-fill {
+            height: 100%;
+            background: #006a61;
+            border-radius: 50px;
+        }
+
+        /* ========== MATERIAL MOVEMENT ========== */
+        .movement-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            border-left: 4px solid #006a61;
+            margin-bottom: 12px;
+            background: #ffffff;
+        }
+
+        .movement-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .movement-item.issue {
+            border-left-color: #000000;
+        }
+
+        .movement-item:hover {
+            background: #f2f4f6;
+        }
+
+        .movement-item .badge-verified {
+            font-size: 10px;
+            background: #86f2e4;
+            color: #006f66;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .movement-item .badge-production {
+            font-size: 10px;
+            background: #131b2e;
+            color: #7c839b;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* ========== TIMELINE ========== */
+        .timeline {
+            position: relative;
+            padding-left: 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 8px;
+            bottom: 8px;
+            width: 1px;
+            background: #c6c6cd;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 32px;
+        }
+
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-item .timeline-dot {
+            position: absolute;
+            left: 4px;
+            top: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item .timeline-dot.bg-secondary {
+            background: #006a61;
+        }
+
+        .timeline-item .timeline-dot.bg-dark {
+            background: #000000;
+        }
+
+        .timeline-item .timeline-dot.bg-tertiary {
+            background: #b7c8e1;
+        }
+
+        .timeline-item .timeline-dot.bg-teal {
+            background: #006f66;
+        }
+
+        .timeline-item .time-label {
+            font-size: 10px;
+            color: rgba(69, 70, 77, 0.6);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* ========== MOBILE TOGGLE ========== */
+        #storekeeper .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #191c1e;
+            padding: 4px 8px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 991px) {
+           #storekeeper  .sidebar {
+                transform: translateX(-100%);
+            }
+
+            #storekeeper .sidebar.open {
+                transform: translateX(0);
+            }
+
+           #storekeeper  .header {
+                margin-left: 0;
+                width: 100%;
+                padding: 0 16px;
+            }
+
+           #storekeeper  .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+           #storekeeper  .sidebar-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 767px) {
+            #storekeeper .header .welcome-text {
+                display: none;
+            }
+        }
+
+          /* ========================== LOGOUT ================ */
+
+         /* ========== MAIN CONTENT ========== */
+     #logout {
+    position: relative;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+        /* ========== BACKGROUND PLACEHOLDER ========== */
+       #logout .bg-placeholder {
+            position: absolute;
+            inset: 0;
+            padding: 32px;
+            opacity: 0.4;
+            pointer-events: none;
+            user-select: none;
+        }
+
+       #logout .bg-placeholder .placeholder-card {
+            background: #eceef0;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            height: 100%;
+        }
+
+        /* ========== OVERLAY ========== */
+       #logout .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(25, 28, 30, 0.08);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        /* ========== LOGOUT MODAL ========== */
+       #logout .logout-modal {
+            position: relative;
+            z-index: 20;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 32px;
+            border: 1px solid #c6c6cd;
+            max-width: 400px;
+            width: 100%;
+            margin: 16px;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+       #logout .logout-modal.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+       #logout .logout-modal .icon-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffdad6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+      #logout  .logout-modal .icon-container i {
+            color: #ba1a1a;
+            font-size: 36px;
+        }
+
+        .logout-modal .modal-title {
+            font-weight: 700;
+            font-size: 24px;
+            color: #191c1e;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+       #logout .logout-modal .modal-message {
+            color: #45464d;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+       #logout .btn-logout {
+            width: 100%;
+            padding: 14px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+       #logout .btn-logout:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+       #logout .btn-logout:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+      #logout  .btn-cancel {
+            width: 100%;
+            padding: 14px;
+            background: #e6e8ea;
+            color: #191c1e;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+       #logout .btn-cancel:hover {
+            background: #d8dadc;
+            transform: scale(0.98);
+        }
+
+      #logout  .btn-logout .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }

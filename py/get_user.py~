@@ -1,0 +1,152 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+import cgi
+import cgitb
+import pymysql
+
+cgitb.enable()
+
+# Return HTML directly to browser (No JavaScript needed)
+print("Content-Type: text/html\n")
+
+con = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="techvoltproject2",
+    autocommit=True,  # Commit changes to MySQL immediately
+)
+cur = con.cursor()
+form = cgi.FieldStorage()
+
+# -------------------------------------------------------------
+# 1. Process Form Action (Block / Unblock) Without JS
+# -------------------------------------------------------------
+action = form.getvalue("action")
+target_emp_id = form.getvalue("emp_id")
+
+if action and target_emp_id:
+    if action == "block":
+        cur.execute(
+            "UPDATE users SET status = 'InActive' WHERE employee_id = %s",
+            (target_emp_id,),
+        )
+    elif action == "unblock":
+        cur.execute(
+            "UPDATE users SET status = 'Active' WHERE employee_id = %s",
+            (target_emp_id,),
+        )
+
+# -------------------------------------------------------------
+# 2. Fetch Updated User List
+# -------------------------------------------------------------
+cur.execute(
+    """ SELECT employee_id,fullname,email,password,role,status FROM users """
+)
+row = cur.fetchall()
+
+# Initialize KPI Counters
+total_users = len(row)
+active_users = 0
+inactive_users = 0
+
+table_rows = ""
+
+for i in row:
+    status_val = str(i[5]).strip().lower() if i[5] else "inactive"
+
+    if status_val == "active":
+        active_users += 1
+        # BLOCK FORM (Submits directly back to Python CGI)
+        toggle_button = f"""
+            <form method="POST" style="display:inline;">
+                <input type="hidden" name="emp_id" value="{i[0]}">
+                <input type="hidden" name="action" value="block">
+                <button type="submit" class="table-action-btn delete" title="Deactivate/Block">
+                    <i class="bi bi-ban"></i>
+                </button>
+            </form>
+        """
+    else:
+        inactive_users += 1
+        # UNBLOCK FORM (Submits directly back to Python CGI)
+        toggle_button = f"""
+            <form method="POST" style="display:inline;">
+                <input type="hidden" name="emp_id" value="{i[0]}">
+                <input type="hidden" name="action" value="unblock">
+                <button type="submit" class="table-action-btn text-success" title="Activate/Unblock">
+                    <i class="bi bi-check-circle"></i>
+                </button>
+            </form>
+        """
+
+    first_letter = i[1][0].upper() if i[1] else ""
+    table_rows += f"""
+        <tr>
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-sm bg-teal">{first_letter}</div>
+                    <span class="fw-semibold small">{i[0]}</span>
+                </div>
+            </td>
+
+            <td class="text-muted small">{i[1]}</td>
+
+            <td>
+                <span class="role-badge">{i[4].upper() if i[4] else ''}</span>
+            </td>
+
+            <td>
+                <span class="status-badge">
+                    <span class="dot"></span>
+                    {i[5]}
+                </span>
+            </td>
+
+            <td class="text-right">
+                <div class="d-flex justify-content-end gap-1">
+                    <button class="table-action-btn view" title="View"><i class="bi bi-person"></i></button>
+                    <button class="table-action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                    {toggle_button}
+                </div>
+            </td>
+        </tr>
+    """
+
+con.close()
+
+# -------------------------------------------------------------
+# 3. Output Full HTML Page Directly
+# -------------------------------------------------------------
+print(f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex gap-3 mb-3">
+            <div>Total Users: <strong>{total_users}</strong></div>
+            <div>Active: <strong>{active_users}</strong></div>
+            <div>Inactive: <strong>{inactive_users}</strong></div>
+        </div>
+
+        <table class="table border">
+            <thead>
+                <tr>
+                    <th>NAME</th>
+                    <th>USERNAME</th>
+                    <th>ROLE</th>
+                    <th>STATUS</th>
+                    <th class="text-end">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {table_rows}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+""")

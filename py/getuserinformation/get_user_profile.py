@@ -1,0 +1,141 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import pymysql
+import json
+import os
+import time
+
+cgitb.enable()
+print("Content-Type: application/json\r\n\r\n")
+
+form = cgi.FieldStorage()
+action = form.getvalue("action")
+user_id = form.getvalue("user_id")
+
+response = {"success": False, "message": "Invalid request or missing User ID"}
+
+
+def get_db_connection():
+    return pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2",
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+
+if user_id:
+    user_id = user_id.strip()
+    try:
+        con = get_db_connection()
+        cur = con.cursor()
+
+        # FETCH USER DETAILS
+        if action == "fetch":
+            cur.execute("SELECT employee_id, fullname, email, role, profile_pic FROM users WHERE employee_id=%s",
+                        (user_id,))
+            user_data = cur.fetchone()
+
+            if not user_data:
+                cur.execute(
+                    "SELECT employee_id, fullname, email, 'Admin' as role, profile_pic FROM admin WHERE employee_id=%s",
+                    (user_id,))
+                user_data = cur.fetchone()
+
+            if user_data:
+                if not user_data.get("email"):
+                    user_data["email"] = ""
+                response = {"success": True, "data": user_data}
+            else:
+                response = {"success": False, "message": f"User ID '{user_id}' not found"}
+
+        # UPLOAD PROFILE PICTURE
+        elif action == "upload_pic":
+            if "profile_pic" in form:
+                fileitem = form["profile_pic"]
+
+                # Check for file content
+                if fileitem.file or fileitem.value:
+                    # Explicit absolute path to XAMPP htdocs uploads folder
+                    upload_dir = r"C:\xampp\htdocs\techvoltInstituteProject\uploads"
+
+                    if not os.path.exists(upload_dir):
+                        try:
+                            os.makedirs(upload_dir, exist_ok=True)
+                        except Exception as mkdir_err:
+                            raise Exception(f"Cannot create uploads directory at {upload_dir}: {str(mkdir_err)}")
+
+                    filename_orig = getattr(fileitem, 'filename', 'avatar.png')
+                    ext = os.path.splitext(os.path.basename(filename_orig))[1].lower()
+                    if not ext or len(ext) > 5:
+                        ext = ".png"
+
+                    new_filename = f"avatar_{user_id}_{int(time.time())}{ext}"
+                    filepath = os.path.join(upload_dir, new_filename)
+
+                    # Extract file bytes properly
+                    data_to_write = None
+                    if hasattr(fileitem, 'file') and fileitem.file:
+                        fileitem.file.seek(0)
+                        data_to_write = fileitem.file.read()
+                    elif hasattr(fileitem, 'value') and fileitem.value:
+                        data_to_write = fileitem.value
+
+                    if data_to_write:
+                        # Write binary bytes to physical disk
+                        try:
+                            with open(filepath, "wb") as f:
+                                if isinstance(data_to_write, str):
+                                    f.write(data_to_write.encode('utf-8', errors='ignore'))
+                                else:
+                                    f.write(data_to_write)
+                        except Exception as write_err:
+                            raise Exception(f"Write Permission Denied for {filepath}: {str(write_err)}")
+
+                        # Verify file exists on disk
+                        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                            # Absolute URL Path for XAMPP Browser
+                            web_path = f"/techvoltInstituteProject/uploads/{new_filename}"
+
+                            rows = cur.execute("UPDATE users SET profile_pic=%s WHERE employee_id=%s",
+                                               (web_path, user_id))
+                            if rows == 0:
+                                cur.execute("UPDATE admin SET profile_pic=%s WHERE employee_id=%s", (web_path, user_id))
+
+                            con.commit()
+
+                            response = {
+                                "success": True,
+                                "message": "Profile picture updated successfully!",
+                                "image_url": web_path
+                            }
+                        else:
+                            response = {"success": False, "message": f"File could not be verified at {filepath}"}
+                    else:
+                        response = {"success": False, "message": "Unable to read binary contents of file upload."}
+                else:
+                    response = {"success": False, "message": "No file content received."}
+            else:
+                response = {"success": False, "message": "Form input parameter 'profile_pic' missing."}
+
+        # CHANGE PASSWORD
+        elif action == "change_password":
+            new_password = form.getvalue("new_password")
+            if new_password:
+                rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                if rows == 0:
+                    cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
+
+                con.commit()
+                response = {"success": True, "message": "Password updated successfully!"}
+            else:
+                response = {"success": False, "message": "New password is required"}
+
+        con.close()
+    except Exception as e:
+        response = {"success": False, "message": f"Server Error: {str(e)}"}
+
+print(json.dumps(response))

@@ -1,0 +1,279 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import json
+import pymysql
+import re
+import sys
+
+cgitb.enable()
+
+# Output JSON header
+print("Content-Type: application/json\n\n")
+
+
+def send_response(success, message, redirect=None):
+    """Returns JSON payload to JS client and exits execution"""
+    response = {"success": success, "message": message}
+    if redirect:
+        response["redirect"] = redirect
+    print(json.dumps(response))
+    sys.exit()
+
+
+form = cgi.FieldStorage()
+
+
+def extract_user_id(form_obj):
+    """Safely extracts clean user_id from multipart form data"""
+    for key in ["admin_id", "user_id"]:
+        val = form_obj.getvalue(key)
+        if val:
+            if isinstance(val, list):
+                val = val[0] if val else ""
+            clean_val = str(val).strip()
+            if clean_val and clean_val.lower() not in ["none", "null", "undefined"]:
+                return clean_val
+    return None
+
+
+# Extract parameters
+logged_in_user_id = extract_user_id(form)
+
+# Database Config
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "techvoltproject2"
+}
+
+# Resolve Creator Full Name based on user_id
+creator_name = "System User"
+if logged_in_user_id:
+    try:
+        conn_check = pymysql.connect(**DB_CONFIG)
+        cur_check = conn_check.cursor()
+
+        # Check 'users' table first
+        cur_check.execute("SELECT fullname FROM users WHERE employee_id=%s", (logged_in_user_id,))
+        u_row = cur_check.fetchone()
+
+        if u_row and u_row[0]:
+            creator_name = u_row[0].strip()
+        else:
+            # Check 'admin' table if not found in 'users'
+            cur_check.execute("SELECT fullname FROM admin WHERE employee_id=%s", (logged_in_user_id,))
+            a_row = cur_check.fetchone()
+            if a_row and a_row[0]:
+                creator_name = a_row[0].strip()
+            elif a_row:
+                creator_name = "Admin"
+
+        cur_check.close()
+        conn_check.close()
+    except Exception:
+        pass
+
+# Extract current page filename
+current_page = form.getvalue("current_page", "Marketing.html")
+if isinstance(current_page, list):
+    current_page = current_page[0]
+current_page = str(current_page).strip()
+
+# Target redirect path maintaining user_id query parameter
+if logged_in_user_id:
+    redirect_target = f"/techvoltInstituteProject/pages/{current_page}?user_id={logged_in_user_id}#Enquiry"
+else:
+    redirect_target = "/techvoltInstituteProject/pages/login.html"
+
+
+# ==================== HELPER VALIDATION FUNCTIONS ====================
+
+def get_val(key):
+    val = form.getvalue(key, "")
+    if isinstance(val, list):
+        val = val[0] if val else ""
+    return str(val).strip()
+
+
+def validate_email(email):
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(pattern, email) is not None
+
+
+def validate_phone(phone):
+    pattern = r"^[6-9][0-9]{9}$"
+    return re.match(pattern, phone) is not None
+
+
+def validate_gst(gst):
+    if not gst:
+        return True
+    pattern = r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
+    return len(gst) == 15 and re.match(pattern, gst) is not None
+
+
+def validate_pincode(pin):
+    if not pin:
+        return True
+    pincode = str(pin).strip()
+    pattern = r"^[1-9][0-9]{5}$"
+    return len(pincode) == 6 and re.match(pattern, pincode) is not None
+
+
+# ==================== CAPTURE DATA ====================
+
+f_data = {
+    "c_name": get_val("customer_name"),
+    "comp": get_val("company_name"),
+    "gst": get_val("gst_number").upper(),
+    "phone": get_val("phone_number"),
+    "email": get_val("email"),
+    "f_type": get_val("fabric_type"),
+    "gsm": get_val("fabric_gsm") or "0",
+    "color": get_val("color"),
+    "qty": get_val("quantity") or "0",
+    "source": get_val("source"),
+    "rem": get_val("remarks"),
+    "addr": get_val("address"),
+    "city": get_val("city"),
+    "state": get_val("state"),
+    "pin": get_val("pincode"),
+}
+
+# ==================== SERVER VALIDATION ====================
+
+errors = []
+required_fields = {
+    "c_name": "Customer Name",
+    "phone": "Phone Number",
+    "email": "Email",
+    "qty": "Quantity",
+}
+
+for field, label in required_fields.items():
+    if not f_data[field]:
+        errors.append(f"{label} is required")
+
+if f_data["email"] and not validate_email(f_data["email"]):
+    errors.append("Invalid email format")
+
+if f_data["phone"] and not validate_phone(f_data["phone"]):
+    errors.append("Phone must be 10 digits starting with 6-9")
+
+if f_data["gst"] and not validate_gst(f_data["gst"]):
+    errors.append("Invalid GST format (must be 15 characters)")
+
+if f_data["pin"] and not validate_pincode(f_data["pin"]):
+    errors.append("Invalid Pincode")
+
+if errors:
+    send_response(False, "Validation Errors:\n• " + "\n• ".join(errors))
+
+# ==================== DATABASE TRANSACTION ====================
+
+con = None
+try:
+    con = pymysql.connect(**DB_CONFIG)
+    cur = con.cursor()
+
+    # Duplicate Record Checks
+    if f_data["gst"]:
+        cur.execute(
+            "SELECT enquiry_id, customer_name FROM customers_enquiries WHERE gst_number = %s",
+            (f_data["gst"],),
+        )
+        gst_exists = cur.fetchone()
+        if gst_exists:
+            send_response(
+                False,
+                f"GST Number '{f_data['gst']}' is already registered to '{gst_exists[1]}'",
+            )
+
+    cur.execute(
+        "SELECT enquiry_id, customer_name FROM customers_enquiries WHERE email = %s",
+        (f_data["email"],),
+    )
+    email_exists = cur.fetchone()
+    if email_exists:
+        send_response(
+            False,
+            f"Email '{f_data['email']}' is already registered to '{email_exists[1]}'",
+        )
+
+    cur.execute(
+        "SELECT enquiry_id, customer_name FROM customers_enquiries WHERE phone_number = %s",
+        (f_data["phone"],),
+    )
+    phone_exists = cur.fetchone()
+    if phone_exists:
+        send_response(
+            False,
+            f"Phone '{f_data['phone']}' is already registered to '{phone_exists[1]}'",
+        )
+
+    # Price Lookup
+    cur.execute(
+        "SELECT price FROM fabric_colors WHERE color_name=%s LIMIT 1",
+        (f_data["color"],),
+    )
+    p_row = cur.fetchone()
+    price = p_row[0] if p_row else 0.00
+
+    # Auto-generate Enquiry ID (e.g. ENQ001)
+    cur.execute("SELECT MAX(id) FROM customers_enquiries")
+    max_id_row = cur.fetchone()
+    next_id_num = (max_id_row[0] + 1) if (max_id_row and max_id_row[0]) else 1
+    enq_id = f"ENQ{next_id_num:03d}"
+
+    # Insert SQL with created_by_id and created_by_name
+    ins_sql = """INSERT INTO customers_enquiries (
+                    enquiry_id, customer_name, company_name, gst_number, 
+                    phone_number, email, fabric_type, 
+                    fabric_gsm, color, price, quantity, 
+                    source, remarks, address, city, state, pincode,
+                    created_by_id, created_by_name
+                 ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+
+    cur.execute(
+        ins_sql,
+        (
+            enq_id,
+            f_data["c_name"],
+            f_data["comp"],
+            f_data["gst"],
+            f_data["phone"],
+            f_data["email"],
+            f_data["f_type"],
+            f_data["gsm"],
+            f_data["color"],
+            price,
+            f_data["qty"],
+            f_data["source"],
+            f_data["rem"],
+            f_data["addr"],
+            f_data["city"],
+            f_data["state"],
+            f_data["pin"],
+            logged_in_user_id,
+            creator_name,
+        ),
+    )
+
+    con.commit()
+
+    # Success Response with Redirect
+    send_response(
+        True,
+        f"Enquiry {enq_id} Saved Successfully!",
+        redirect_target,
+    )
+
+except Exception as e:
+    send_response(False, f"Database Error: {str(e)}")
+finally:
+    if con:
+        cur.close()
+        con.close()

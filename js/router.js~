@@ -1,0 +1,44 @@
+document.addEventListener("DOMContentLoaded", async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userId = urlParams.get('user_id');
+
+  // 1. Missing user_id parameter check
+  if (!userId || userId.trim() === "") {
+    alert("Unauthorized access! User ID is missing.");
+    window.location.href = "/techvoltInstituteProject/pages/login.html";
+    return;
+  }
+
+  try {
+    // 2. Fetch actual user role dynamically from DB via Python backend
+    const verifyUrl = `../py/verify_user.py?user_id=${encodeURIComponent(userId)}`;
+
+    const response = await fetch(verifyUrl);
+    const data = await response.json();
+
+    // 3. Handle authorization errors or blocked accounts
+    if (data.status !== "success") {
+      alert(`Access Blocked: ${data.message}`);
+      window.location.href = "/techvoltInstituteProject/pages/login.html";
+      return;
+    }
+
+    // 4. Define acceptable roles for THIS specific page dynamically
+    const userRoleFromDB = data.role.toLowerCase();
+    const requiredRole = "production executive"; // Page requirement
+
+    // Allow access if user is either the assigned role OR an Admin
+    if (userRoleFromDB === requiredRole || userRoleFromDB === "admin") {
+      console.log(`User ${userId} verified dynamically as: ${data.role}`);
+    } else {
+      // Trigger alert if user manually changed employee_id to another user with a different role
+      alert(`Access Blocked: Your assigned role (${data.role}) does not have permission for this page.`);
+      window.location.href = "/techvoltInstituteProject/pages/login.html";
+    }
+
+  } catch (error) {
+    console.error("Verification error:", error);
+    alert("Authentication failed. Returning to login.");
+    window.location.href = "/techvoltInstituteProject/pages/login.html";
+  }
+});

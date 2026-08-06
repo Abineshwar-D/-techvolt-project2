@@ -1,0 +1,99 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+import pymysql
+import cgitb
+import json
+
+cgitb.enable()
+print("Content-Type: application/json\n")
+
+try:
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2"
+    )
+    cursor = conn.cursor()
+
+    # 1. Total Materials Count (Card 1)
+    cursor.execute("SELECT COUNT(*) FROM materials")
+    total_materials = cursor.fetchone()[0] or 0
+
+    # 2. Total Available Stock Volume (Card 2)
+    cursor.execute("SELECT COALESCE(SUM(opening_stock), 0) FROM materials")
+    available_stock = float(cursor.fetchone()[0] or 0)
+
+    # 3. Total PO Count (Card 3: count of purchased_order table)
+    try:
+        cursor.execute("SELECT COUNT(*) FROM purchased_order")
+        po_matched_materials = cursor.fetchone()[0] or 0
+    except Exception:
+        po_matched_materials = 0
+
+    # 4. Deliveries Count (Card 4)
+    try:
+        cursor.execute(
+            "SELECT COUNT(*) FROM purchased_order WHERE expected_delivery IS NOT NULL AND expected_delivery <= CURDATE()")
+        due_deliveries = cursor.fetchone()[0] or 0
+    except Exception:
+        due_deliveries = 0
+
+    # 5. Fetch Materials to generate Main Inventory Summary Bento Cards
+    # (Removed 'reorder_level' column from SQL query)
+    cursor.execute("""
+        SELECT material_name, opening_stock, unit 
+        FROM materials 
+        ORDER BY material_id DESC
+    """)
+    materials_list = cursor.fetchall()
+
+    icons = ["bi-grid", "bi-water", "bi-arrows-expand", "bi-box-seam", "bi-tags", "bi-layers"]
+    stock_cards_html = ""
+
+    for index, item in enumerate(materials_list):
+        mat_name, opening_stock, unit = item
+
+        # Formatting stock display
+        stock_val = float(opening_stock or 0)
+        stock_formatted = f"{stock_val:,.0f}" if stock_val.is_integer() else f"{stock_val:,.2f}"
+        unit_str = unit if unit else "Kg"
+
+        # Safe progress percentage without relying on reorder_level
+        percentage = min(100, max(20, int((stock_val / 1000) * 100))) if stock_val > 0 else 10
+
+        icon_class = icons[index % len(icons)]
+
+        stock_cards_html += f"""
+        <div class="col-md-4 mb-3">
+            <div class="stock-item border p-3 rounded-3 shadow-sm bg-white">
+                <div class="icon-circle mb-2">
+                    <i class="bi {icon_class}"></i>
+                </div>
+                <p class="fw-bold mb-0 text-dark">{mat_name}</p>
+                <h4 class="fw-bold mt-2">{stock_formatted} <span class="fs-6 fw-normal text-muted">{unit_str}</span></h4>
+                <div class="progress-stock mt-2" style="height: 6px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
+                    <div class="progress-fill bg-primary" style="width: {percentage}%; height: 100%;"></div>
+                </div>
+            </div>
+        </div>
+        """
+
+    conn.close()
+
+    # Output JSON Response
+    print(json.dumps({
+        "status": "success",
+        "kpis": {
+            "total_materials1": total_materials,
+            "available_stock": available_stock,
+            "po_matched_materials1": po_matched_materials,
+            "due_deliveries": due_deliveries
+        },
+        "stock_cards_html": stock_cards_html if stock_cards_html else "<div class='col-12'><p class='text-muted small'>No materials available.</p></div>"
+    }))
+
+except Exception as e:
+    print(json.dumps({
+        "status": "error",
+        "message": str(e)
+    }))

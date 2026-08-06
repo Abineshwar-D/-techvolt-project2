@@ -1,0 +1,105 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgitb
+
+cgitb.enable()
+import json
+from datetime import datetime, date
+import pymysql
+
+# JSON Header
+print("Content-Type: application/json\n")
+
+
+def safe_format_date(d_val):
+    if not d_val:
+        return "N/A"
+    if isinstance(d_val, (date, datetime)):
+        return d_val.strftime("%d-%m-%Y")
+    try:
+        return datetime.strptime(str(d_val).split()[0], "%Y-%m-%d").strftime("%d-%m-%Y")
+    except Exception:
+        return str(d_val)
+
+
+today = date.today()
+
+try:
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2"
+    )
+    cursor = conn.cursor()
+
+    # --- KPI Queries ---
+    cursor.execute("SELECT COUNT(*) FROM production_plan")
+    total_plan = cursor.fetchone()[0] or 0
+
+    cursor.execute("SELECT COUNT(*) FROM machine_allocations WHERE status = 'running'")
+    running_plan = cursor.fetchone()[0] or 0
+
+    cursor.execute("SELECT COUNT(*) FROM machine_allocations WHERE status = 'completed'")
+    completed_plan = cursor.fetchone()[0] or 0
+
+    cursor.execute("SELECT COUNT(*) FROM production_plan WHERE end_date >= %s", (today,))
+    pending_plan = cursor.fetchone()[0] or 0
+
+    # --- Table Rows Query ---
+    cursor.execute("""
+        SELECT plan_no, order_no, machine, start_date, end_date    
+        FROM production_plan
+        ORDER BY plan_no DESC
+    """)
+    rows = cursor.fetchall()
+
+    table_html = ""
+    for row in rows:
+        plan_no = row[0] or "N/A"
+        order_no = row[1] or "N/A"
+        machine = row[2] or "N/A"
+        start_date = safe_format_date(row[3])
+        end_date = safe_format_date(row[4])
+
+        table_html += f"""
+        <tr>
+            <td><span class="plan-number">{plan_no}</span></td>
+            <td class="text-muted">{order_no}</td>
+            <td>
+                <div class="machine-indicator">
+                    <span class="dot"></span>
+                    {machine}
+                </div>
+            </td>
+            <td>
+                <div class="date-range">
+                    <span>{start_date}</span>
+                    <span class="sub">to {end_date}</span>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex justify-content-center gap-1">
+                    <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
+                    <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                    <button class="action-btn" title="Settings"><i class="bi bi-gear"></i></button>
+                </div>
+            </td>
+        </tr>
+        """
+
+    cursor.close()
+    conn.close()
+
+    # Send data as JSON
+    response = {
+        "total_plan": total_plan,
+        "running_plan": running_plan,
+        "completed_plan": completed_plan,
+        "pending_plan": pending_plan,
+        "table_html": table_html
+    }
+    print(json.dumps(response))
+
+except Exception as e:
+    print(json.dumps({"error": str(e)}))

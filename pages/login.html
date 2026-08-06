@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | K.E.S. ERP</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons (Alternative) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+     <!-- link of css page -->
+     <link rel="stylesheet" href="../css/login.css">
+
+
+</head>
+<body class="industrial-grid">
+
+    <div class="login-container position-relative">
+
+
+        <div class="row g-0 h-100">
+            <!-- this div contain image and the top text -->
+            <div class="col-lg-7 d-none d-lg-block brand-panel">
+                <div class="overlay"></div>
+                <div class="brand-content">
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="brand-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <div>
+                                <div class="brand-title">K.E.S. ERP</div>
+                                <div class="brand-subtitle">Knitting Executive Schema</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="max-width: 400px;">
+                        <h2 class="brand-heading">Streamlining Textile Intelligence.</h2>
+                        <p class="brand-text">Access the central nervous system of your manufacturing operations. Monitor knit schedules, inventory flow, and production efficiency in real-time.</p>
+
+                        <div class="brand-stats">
+                            <div>
+                                <div class="label">NODE STATUS</div>
+                                <div class="value">Operational</div>
+                            </div>
+                            <div>
+                                <div class="label">ENCRYPTION</div>
+                                <div class="value">AES-256 AES</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-lg-5 login-panel">
+
+                <!-- Mobile Brand -->
+                <div class="mobile-brand d-lg-none">
+                    <div class="icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <span class="title">K.E.S. ERP</span>
+                </div>
+
+                <div class="login-form">
+
+                    <!-- Welcome Text -->
+                    <div class="mb-4">
+                        <h3 style="font-weight: 800; font-size: 28px; color: #191c1e;">Welcome Back</h3>
+                        <p style="color: #45464d; font-size: 16px;">Please sign in to your executive account.</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="loginForm" method="post" action="../login.py">
+
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label class="form-label-custom d-block mb-2">UserId</label>
+                            <div class="input-group-custom">
+                                <span class="input-icon"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your ID">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label-custom">Password</label>
+                                <a href="#" class="forgot-link">Forgot?</a>
+                            </div>
+                            <div class="input-group-custom">
+                                <span class="input-icon"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" placeholder="••••••••"  name="password">
+                                <button type="button" class="toggle-password"  id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="mb-4">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="rememberMe" name="rememberMe">
+                                <span>Remember Me</span>
+                            </label>
+                        </div>
+
+                        <!-- Login Button -->
+                               <button type="submit" class="btn-login" id="loginBtn" name="login">
+                            <span>Sign In to Terminal</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+                    <!-- Footer -->
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="security-badge mb-2">
+                            <i class="bi bi-shield-check"></i>
+                            <span>ISO 27001 Certified Environment</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="footer-text">v4.8.2-stable</span>
+                            <div class="d-flex gap-3">
+                                <a href="#" class="footer-link">Terms</a>
+                                <a href="#" class="footer-link">Privacy</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+   <!-- link of js page  -->
+    <script src="../js/login.js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

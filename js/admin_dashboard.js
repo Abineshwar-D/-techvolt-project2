@@ -1,0 +1,1371 @@
+/* ==========================================================================
+   ADMIN DASHBOARD JS
+   - Strictly preserved original functions and logic
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. GLOBAL LAYOUT & SIDEBAR NAVIGATION
+   ========================================================================== */
+
+// Mobile Sidebar Toggle
+document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('open');
+});
+
+// Close sidebar on outside click (mobile)
+document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('sidebar');
+    const toggle = document.getElementById('sidebarToggle');
+    if (window.innerWidth < 992) {
+        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+            sidebar.classList.remove('open');
+        }
+    }
+});
+
+// Simulate live data updates
+setInterval(() => {
+    const alertCards = document.querySelectorAll('.kpi-card.warning h3');
+    alertCards.forEach(card => {
+        if (Math.random() > 0.7) {
+            card.classList.add('scale-110');
+            setTimeout(() => card.classList.remove('scale-110'), 300);
+        }
+    });
+}, 5000);
+
+// Nav Item Click Handler
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+        });
+        this.classList.add('active');
+    });
+});
+
+
+/* ==========================================================================
+   02. ADMIN DASHBOARD (MAIN OVERVIEW SCREEN)
+   ========================================================================== */
+// ADMIN KPI CARD COUNT FUNCTION
+function loadDashboardCounts() {
+    // Adding a timestamp prevent browser caching issues
+    fetch("../py/dashboard/get_admindashboard.py?t=" + new Date().getTime())
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "error") {
+                console.error("Database error:", data.message);
+                return;
+            }
+
+            // Populate KPI Cards safely
+            if (document.getElementById("totalUsersCount1"))
+                document.getElementById("totalUsersCount1").innerText = data.active_users;
+            if (document.getElementById("totalCustomersCount"))
+                document.getElementById("totalCustomersCount").innerText = data.total_customers;
+            if (document.getElementById("totalOrdersCount"))
+                document.getElementById("totalOrdersCount").innerText = data.total_orders;
+            if (document.getElementById("totalSuppliersCount1"))
+                document.getElementById("totalSuppliersCount1").innerText = data.total_suppliers;
+            if (document.getElementById("runningOrdersCount"))
+                document.getElementById("runningOrdersCount").innerText = data.running_orders;
+            if (document.getElementById("totalPoCount"))
+                document.getElementById("totalPoCount").innerText = data.total_po;
+
+            // Populate System Roles safely
+            if (document.getElementById("marketingUsersCount"))
+                document.getElementById("marketingUsersCount").innerText = data.marketing_users + " Users";
+            if (document.getElementById("merchandiserUsersCount"))
+                document.getElementById("merchandiserUsersCount").innerText = data.merchandiser_users + " Users";
+            if (document.getElementById("productionUsersCount"))
+                document.getElementById("productionUsersCount").innerText = data.production_users + " Users";
+            if (document.getElementById("storeKeeperUsersCount"))
+                document.getElementById("storeKeeperUsersCount").innerText = data.storekeeper_users + " Users";
+        })
+        .catch(error => console.error("Error fetching dashboard statistics:", error));
+}
+
+// Automatically start polling when page loads
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Fetch immediately on page load
+    loadDashboardCounts();
+
+    // 2. Refresh counts automatically every 5 seconds (5000ms)
+    setInterval(loadDashboardCounts, 5000);
+});
+
+// 3. Instant refresh when the admin switches back to the dashboard tab
+window.addEventListener("focus", function () {
+    loadDashboardCounts();
+});
+
+
+/* ==========================================================================
+   03. FABRIC TYPE SCREEN
+   ========================================================================== */
+
+//THIS FUNCTION LOADS THE FABRIC TABLE
+function loadFabricTable() {
+    // Adding ?t= prevents Python CGI browser caching
+    fetch("../py/fabric/get_all_fabric.py?t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP Error ${response.status}`);
+            }
+            return response.text();
+        })
+        .then(data => {
+            const tableBody = document.getElementById("FabricTablebody");
+            if (tableBody) {
+                tableBody.innerHTML = data;
+            }
+        })
+        .catch(error => {
+            console.error("Error loading fabric table:", error);
+        });
+}
+
+// 1. Load when DOM is ready
+document.addEventListener("DOMContentLoaded", function () {
+    loadFabricTable();
+});
+
+// 2. Auto-refresh when switching back to this browser TAB/WINDOW
+window.addEventListener("focus", function () {
+    loadFabricTable();
+});
+
+//THIS FUNCTION LOADS THE FABRIC DETAILS
+function viewFabric(fab_id){
+    fetch("../py/fabric/view_fabric.py",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/x-www-form-urlencoded"
+        },
+        body:"fab_id="+encodeURIComponent(fab_id)
+    })
+    .then(response=>response.text())
+    .then(data=>{
+        document.getElementById("productTablebody").innerHTML=data;
+    });
+}
+
+// Dynamic Delete Fabric Handler (Preserves user_id parameter)
+function handleDelete(formElement) {
+    if (!confirm('Delete this fabric?')) {
+        return false;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id') || urlParams.get('uid') || '';
+
+    formElement.querySelector('.dynamic-user-id').value = userId;
+    return true;
+}
+
+//THIS FUNCTION UPDATES THE FABRIC
+function loadFabricDetails(fab_id){
+    alert("Update clicked ID: " + fab_id);
+    console.log("UPDATE ID:", fab_id);
+
+    let fabric_name = document.getElementById("fabric_name").value;
+    console.log("NAME:", fabric_name);
+    console.log("UPDATE FABRIC ID:", fab_id);
+
+    fetch("../py/fabric/update_fabric.py", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body:
+            "fab_id=" + encodeURIComponent(fab_id) +
+            "&fabric_name=" + encodeURIComponent(fabric_name)
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log(data);
+        alert("Fabric updated successfully");
+        location.reload();
+    })
+    .catch(error => {
+        console.log("Update Error:", error);
+    });
+}
+
+//THIS FUNCTION EDITS THE FABRIC
+function editFabric() {
+    let colorId = document.getElementById("color_id").value.trim();
+    let colorName = document.getElementById("color_name").value.trim();
+    let priceName = document.getElementById("price_name").value.trim();
+
+    console.log("Sending Data:", { colorId, colorName, priceName });
+
+    if (!colorId || !colorName || !priceName) {
+        alert("Please fill in all fields (ID, Color Name, and Price).");
+        return;
+    }
+
+    fetch("../py/fabric/edit_fabric_color.py", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `color_id=${encodeURIComponent(colorId)}&color_name=${encodeURIComponent(colorName)}&price_name=${encodeURIComponent(priceName)}`
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Response:", data);
+        alert("Fabric color updated successfully!");
+        location.reload();
+    })
+    .catch(error => {
+        console.error('Network error:', error);
+    });
+}
+
+//THIS FUNCTION DELETES THE FABRIC
+function deleteFabric(colorId) {
+    if (!confirm("Are you sure you want to delete this color?")) {
+        return;
+    }
+
+    fetch("../py/fabric/delete_color.py", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "color_id=" + encodeURIComponent(colorId)
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Response:", data);
+        if (data.trim() === "success") {
+            alert("Color deleted successfully!");
+            location.reload();
+        } else {
+            alert("Failed to delete: " + data);
+        }
+    })
+    .catch(error => {
+        console.error('Network error:', error);
+        alert("An error occurred while deleting.");
+    });
+}
+
+//THIS FUNCTION SETS THE MODAL DATA
+function setEditModalData(colorId, colorName, priceName) {
+    console.log("Setting modal data:", { colorId, colorName, priceName });
+
+    document.getElementById('color_id').value = colorId;
+    document.getElementById('color_name').value = colorName;
+    document.getElementById('price_name').value = priceName;
+}
+
+//THIS FUNCTION IS USED FOR SEARCHING FABRIC IN THE TABLE
+document.addEventListener('DOMContentLoaded', function () {
+    const searchFabric = document.getElementById('searchFabric');
+    const fabricTableBody = document.getElementById('FabricTablebody');
+
+    // Filter function
+    function filterFabrics() {
+        // Get typing value and convert to lowercase
+        const query = searchFabric.value.toLowerCase().trim();
+
+        // Get all rows in the table body
+        const rows = fabricTableBody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            // Get text from the first column (Fabric Name)
+            const fabricName = row.children[0]?.textContent.toLowerCase() || '';
+
+            // Check if search matches fabric name
+            if (fabricName.includes(query)) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
+    }
+
+    // Trigger filter every time user types or backspaces
+    searchFabric.addEventListener('input', filterFabrics);
+});
+
+
+/* ==========================================================================
+   04. ADD FABRIC SCREEN
+   ========================================================================== */
+/* Note: Save Fabric utilizes direct standard HTML form asubmission to save_fbric.py */
+
+
+/* ==========================================================================
+   05. CUSTOMER SCREEN
+   ========================================================================== */
+
+/**
+ * ADMIN CUSTOMER MANAGEMENT JS
+ * Allowed Actions: View All Enquiries, Assign Unassigned Enquiries, Block / Unblock Status.
+ */
+
+// 1. Extract user_id from URL (?user_id=AMD007)
+function getUserIdFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('user_id') || '';
+}
+
+// 2. Load Table Data for Admin
+function loadCustomerTable() {
+    const userId = getUserIdFromURL();
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
+        .then(res => res.text())
+        .then(data => {
+            const tableBody = document.getElementById("customerTableBody");
+            if (tableBody) {
+                tableBody.innerHTML = data;
+            }
+        })
+        .catch(error => console.error("Error fetching admin customer data:", error));
+}
+
+// 3. Open Assign Modal and Populate Marketing Staff
+function openAssignModal(enquiryId) {
+    document.getElementById("assignEnquiryId").value = enquiryId;
+
+    fetch('../py/customer/get_marketing_users.py')
+        .then(res => res.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const select = document.getElementById("marketingPersonSelect");
+                select.innerHTML = '<option value="">-- Select Marketing Person --</option>';
+
+                res.data.forEach(emp => {
+                    select.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.id})</option>`;
+                });
+
+                const assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
+                assignModal.show();
+            } else {
+                alert("Failed to load marketing staff list.");
+            }
+        })
+        .catch(error => console.error("Error loading marketing users:", error));
+}
+
+// 4. Submit Assignment to Marketing Person
+function submitAssignment() {
+    const enquiryId = document.getElementById("assignEnquiryId").value;
+    const selectedEmpId = document.getElementById("marketingPersonSelect").value;
+    const userId = getUserIdFromURL();
+
+    if (!selectedEmpId) {
+        alert("Please select a marketing person!");
+        return;
+    }
+
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&action=assign&id=${enquiryId}&assigned_emp_id=${selectedEmpId}`)
+        .then(response => response.text())
+        .then(() => {
+            const modalEl = document.getElementById('assignModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            loadCustomerTable();
+        })
+        .catch(error => console.error("Error submitting assignment:", error));
+}
+
+// 5. Admin Block / Unblock Toggle Function
+function toggleStatus(id, actionType) {
+    const userId = getUserIdFromURL();
+    const actionText = actionType === 'block' ? 'block' : 'unblock';
+
+    if (!confirm(`Are you sure you want to ${actionText} this enquiry?`)) return;
+
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&action=${actionType}&id=${id}`)
+        .then(response => response.text())
+        .then(() => {
+            loadCustomerTable();
+        })
+        .catch(error => console.error("Error toggling status:", error));
+}
+
+// 6. Search Filter
+document.getElementById("searchCustomer")?.addEventListener("keyup", function () {
+    let search = this.value.toLowerCase();
+    document.querySelectorAll("#customerTableBody tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(search) ? "" : "none";
+    });
+});
+
+// 7. Event Listeners for Auto-Refresh & Tab Focus
+document.addEventListener("DOMContentLoaded", function () {
+    loadCustomerTable();
+    setInterval(loadCustomerTable, 5000);
+});
+
+window.addEventListener("focus", function () {
+    loadCustomerTable();
+});
+/* ==========================================================================
+   06. ORDERS SCREEN
+   ========================================================================== */
+
+//THIS FUNCTION LOAD TABLE DATA
+function loadOrdersAndKPIs() {
+    var ordersTableBody = document.getElementById("ordersTableBody");
+
+    if (ordersTableBody) {
+        fetch("../py/orders/get_orders.py")
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success" || data.kpis) {
+                document.getElementById("kpiTotalOrders").innerText = data.kpis.total.toLocaleString();
+                document.getElementById("kpiRunningOrders").innerText = data.kpis.running.toLocaleString();
+                document.getElementById("kpiCompletedOrders").innerText = data.kpis.completed.toLocaleString();
+                document.getElementById("kpiPendingOrders").innerText = data.kpis.pending.toLocaleString();
+
+                ordersTableBody.innerHTML = data.rows_html;
+            } else {
+                ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Failed to load data.</td></tr>";
+            }
+        })
+        .catch(err => {
+            console.error("Error loading orders and KPIs:", err);
+            ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Error connecting to server.</td></tr>";
+        });
+    }
+}
+
+// Auto-refresh logic
+document.addEventListener("DOMContentLoaded", function() {
+    loadOrdersAndKPIs();
+    setInterval(loadOrdersAndKPIs, 5000);
+});
+
+window.addEventListener("focus", function() {
+    loadOrdersAndKPIs();
+});
+
+
+//THIS FUNCTION IS USED TO SEARCH ORDER
+document.addEventListener('DOMContentLoaded', function () {
+    const searchOrder = document.getElementById('searchOrder');
+    const ordersTableBody = document.getElementById('ordersTableBody');
+
+    function filterOrders() {
+        const query = searchOrder.value.toLowerCase().trim();
+        const rows = ordersTableBody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            // Get text from each column
+            const orderNo = row.children[0]?.textContent.toLowerCase() || '';
+            const customer = row.children[1]?.textContent.toLowerCase() || '';
+            const quantity = row.children[2]?.textContent.toLowerCase() || '';
+            const deliveryDate = row.children[3]?.textContent.toLowerCase() || '';
+
+            // Match query against ANY column (Order No, Customer, Quantity, or Date)
+            const matches = orderNo.includes(query) ||
+                            customer.includes(query) ||
+                            quantity.includes(query) ||
+                            deliveryDate.includes(query);
+
+            if (matches) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
+    }
+
+    // Trigger search on input
+    searchOrder.addEventListener('input', filterOrders);
+});
+
+
+/* ==========================================================================
+   07. CREATE ORDER SCREEN
+   ========================================================================== */
+
+// Show Toast
+function showorderToast() {
+    const toast = document.getElementById('createorderToast');
+    if (toast) toast.classList.add('show');
+
+    setTimeout(() => {
+        hideorderToast();
+    }, 5000);
+}
+
+// Hide Toast
+function hideorderToast() {
+    const toast = document.getElementById('createorderToast');
+    if (toast) toast.classList.remove('show');
+}
+
+
+/* ==========================================================================
+   08. SUPPLIER SCREEN
+   ========================================================================== */
+
+    // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
+    function loadSuppliersAndKPIs() {
+        var supplierTableBody = document.getElementById("supplierTableBody");
+
+        if (supplierTableBody) {
+            // Adding ?t= prevents browser caching
+            fetch("../py/supplier/get_supplier.py?t=" + new Date().getTime())
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Database Error:", data.error);
+                    return;
+                }
+
+                // Update KPI Cards
+                const totalElem = document.getElementById("totalSuppliersCount");
+                const activeElem = document.getElementById("activeSuppliersCount");
+                const inactiveElem = document.getElementById("inactiveSuppliersCount");
+
+                if (totalElem) totalElem.innerText = data.total ?? 0;
+                if (activeElem) activeElem.innerText = data.active ?? 0;
+                if (inactiveElem) inactiveElem.innerText = data.inactive ?? 0;
+
+                // Update Table HTML
+                supplierTableBody.innerHTML = data.table_html || '';
+            })
+            .catch(error => {
+                console.error("Error fetching supplier data:", error);
+                supplierTableBody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error connecting to server.</td></tr>";
+            });
+        }
+    }
+
+// Auto-refresh logic on DOM load and 5-second interval
+document.addEventListener("DOMContentLoaded", function () {
+    loadSuppliersAndKPIs();
+    setInterval(loadSuppliersAndKPIs, 5000);
+});
+
+// Auto-refresh when switching back to this window/screen
+window.addEventListener("focus", function () {
+    loadSuppliersAndKPIs();
+});
+
+
+//THIS FUNCTION IS USED TO SEARCH SUPPLIER
+document.addEventListener('DOMContentLoaded', function () {
+    const searchSupplier = document.getElementById('searchSupplier');
+    const supplierStatus = document.getElementById('supplierStatus');
+    const supplierRefresh = document.getElementById('supplierRefresh');
+    const supplierTableBody = document.getElementById('supplierTableBody');
+
+    // Filter Function
+    function filterSuppliers() {
+        const query = searchSupplier.value.toLowerCase().trim();
+        const selectedStatus = supplierStatus.value.toLowerCase().trim();
+        const rows = supplierTableBody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            // Get text from columns
+            const name = row.children[0]?.textContent.toLowerCase() || '';
+            const contact = row.children[1]?.textContent.toLowerCase() || '';
+            const phone = row.children[2]?.textContent.toLowerCase() || '';
+            const email = row.children[3]?.textContent.toLowerCase() || '';
+            const address = row.children[4]?.textContent.toLowerCase() || '';
+            const status = row.children[5]?.textContent.toLowerCase() || '';
+
+            // Check if search matches ANY text column
+            const matchesSearch = name.includes(query) ||
+                                  contact.includes(query) ||
+                                  phone.includes(query) ||
+                                  email.includes(query) ||
+                                  address.includes(query);
+
+            // Check if status dropdown matches
+            const matchesStatus = (selectedStatus === '') || status.includes(selectedStatus);
+
+            // Toggle visibility
+            if (matchesSearch && matchesStatus) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Event Listeners
+    searchSupplier.addEventListener('input', filterSuppliers);
+    supplierStatus.addEventListener('change', filterSuppliers);
+
+    // Refresh/Reset Button
+    supplierRefresh.addEventListener('click', function () {
+        searchSupplier.value = '';
+        supplierStatus.value = '';
+        filterSuppliers();
+    });
+});
+
+/* ==========================================================================
+   09. ADD SUPPLIER SCREEN
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   10. PURCHASE ORDERS (PO) SCREEN
+   ========================================================================== */
+
+//SEARCH PO
+document.getElementById("SearchPo").addEventListener("keyup", function () {
+    let search = this.value.toLowerCase();
+
+    document.querySelectorAll("#poTableBody tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(search)
+            ? ""
+            : "none";
+    });
+});
+
+
+
+// Master function to fetch both the Table and the KPIs
+function refreshAllData() {
+    const tableBody = document.getElementById("poTableBody");
+
+    // 1. FETCH TABLE DATA (HTML)
+    // Removed the "children.length === 0" check so it can refresh anytime!
+    fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.text();
+        })
+        .then(data => {
+            if (data.trim() && tableBody) {
+                tableBody.innerHTML = data;
+            } else {
+                loadSampleData();
+            }
+            if (typeof initializeTableEvents === "function") {
+                initializeTableEvents();
+            }
+        })
+        .catch(err => {
+            console.error("Table fetch error:", err);
+            loadSampleData();
+        });
+
+    // 2. FETCH KPI DATA (JSON)
+    fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === "success") {
+                const totalPoElem = document.getElementById("kpi-total-po");
+                const pendingPoElem = document.getElementById("kpi-pending-po");
+
+                if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
+                if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
+            } else {
+                console.error("Error fetching PO KPIs:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("KPI fetch error:", error);
+        });
+}
+
+// 1. Trigger when DOM page finishes loading
+document.addEventListener('DOMContentLoaded', function() {
+    refreshAllData();
+});
+
+// 2. Trigger automatically whenever the user switches back to this browser tab!
+window.addEventListener("focus", function () {
+    refreshAllData();
+});
+
+
+/* ==========================================================================
+   11. ADD PURCHASE ORDER SCREEN
+   ========================================================================== */
+
+document.querySelectorAll('input[name="priority"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const badge = document.getElementById('priorityBadge');
+        if (!badge) return;
+        const label = this.nextElementSibling.textContent;
+        badge.textContent = label + ' Priority';
+        badge.className = 'priority-badge';
+
+        if (label === 'High') {
+            badge.classList.add('bg-error-container', 'text-on-error-container');
+        } else if (label === 'Medium') {
+            badge.classList.add('medium');
+        } else {
+            badge.classList.add('low');
+        }
+    });
+});
+
+function showpurchasedToast() {
+    const toast = document.getElementById('SuccessAddPO');
+    if (toast) toast.style.display = 'flex';
+}
+
+function hidepurchasedToast() {
+    const toast = document.getElementById('SuccessAddPO');
+    if (toast) toast.style.display = 'none';
+}
+
+function handlepurchasedSubmit(e) {
+    e.preventDefault();
+    showpurchasedToast();
+    setTimeout(hidepurchasedToast, 5000);
+}
+
+fetch("../py/purchase/get_supplier_option.py")
+.then(res => res.text())
+.then(data => {
+    const supplier = document.getElementById("supplier");
+    if (supplier) {
+        supplier.innerHTML = '<option value="">Select Supplier</option>' + data;
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const material = document.getElementById("material");
+    if (!material) return;
+
+    material.addEventListener("change", function () {
+        const materialId = this.value;
+
+        fetch("../py/purchase/get_material_details.py", {
+            method: "POST",
+            body: new URLSearchParams({ id: materialId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("available_stock").value = data.stock;
+            document.getElementById("reorder_level").value = data.reorder;
+            document.getElementById("unit_cost").value = data.cost;
+        });
+    });
+});
+
+const poForm = document.getElementById("poForm");
+if (poForm) {
+    poForm.addEventListener("submit", function(e){
+        let formData = new FormData(this);
+
+        fetch("../py/purchase/save_po.py", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(data => {
+            console.log(data);
+            alert("PO Saved Successfully");
+        });
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetch("../py/purchase/get_supplier_option.py")
+    .then(res => res.text())
+    .then(data => {
+        const supplier = document.getElementById("supplier");
+        if (supplier) supplier.innerHTML = '<option value="">Select Supplier</option>' + data;
+    });
+
+    fetch("../py/purchase/get_material_option.py")
+    .then(res => res.text())
+    .then(data => {
+        const material = document.getElementById("material");
+        if (material) material.innerHTML = '<option value="">Select Material</option>' + data;
+    });
+
+    fetch("../py/purchase/get_po_list.py")
+    .then(res => res.text())
+    .then(data => {
+        const poTableBody = document.getElementById("poTableBody");
+        if (poTableBody) poTableBody.innerHTML = data;
+    });
+});
+
+
+/* ==========================================================================
+   12. INVENTORY SCREEN
+   ========================================================================== */
+
+// THIS FUNCTION LOADS MATERIAL TABLE DATA & KPIS
+function loadMaterialsAndKPIs() {
+    var materialTableBody = document.getElementById("materialTableBody");
+
+    if (materialTableBody) {
+        // Adding ?t= prevents browser caching
+        fetch("../py/inventory/get_material.py?t=" + new Date().getTime())
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Database Error:", data.error);
+                return;
+            }
+
+            // Update KPI Cards
+            document.getElementById("totalMaterials").innerText = data.total_materials;
+            document.getElementById("availableStock").innerText = data.available_stock;
+            document.getElementById("poMatchedMaterials").innerText = data.po_matched_count;
+
+            // Update Table
+            materialTableBody.innerHTML = data.table_html;
+        })
+        .catch(err => {
+            console.error("Error loading materials and KPIs:", err);
+            materialTableBody.innerHTML = "<tr><td colspan='4' class='text-danger text-center'>Error connecting to server.</td></tr>";
+        });
+    }
+}
+
+// Auto-refresh logic on DOM load and 5-second interval
+document.addEventListener("DOMContentLoaded", function() {
+    loadMaterialsAndKPIs();
+    setInterval(loadMaterialsAndKPIs, 5000);
+});
+
+// Auto-refresh when switching back to this window/screen
+window.addEventListener("focus", function() {
+    loadMaterialsAndKPIs();
+});
+
+//THIS FUNCTION IS USED TO SEARCH INVENTORY
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInventory = document.getElementById('searchInventory');
+    const inventoryRefresh = document.getElementById('inventoryRefresh');
+    const materialTableBody = document.getElementById('materialTableBody');
+
+    // Filter Function
+    function filterInventory() {
+        const query = searchInventory.value.toLowerCase().trim();
+        const rows = materialTableBody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            // Get text from columns (0 = Material Name, 1 = Stock, 2 = Date)
+            const materialName = row.children[0]?.textContent.toLowerCase() || '';
+            const availableStock = row.children[1]?.textContent.toLowerCase() || '';
+            const deliveryDate = row.children[2]?.textContent.toLowerCase() || '';
+
+            // Check if search query matches ANY column
+            const matchesSearch = materialName.includes(query) ||
+                                  availableStock.includes(query) ||
+                                  deliveryDate.includes(query);
+
+            if (matchesSearch) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
+    }
+
+    // Event Listener for live search as you type
+    searchInventory.addEventListener('input', filterInventory);
+
+    // Refresh Button Listener (Clears search & displays all rows)
+    inventoryRefresh.addEventListener('click', function () {
+        searchInventory.value = '';
+        filterInventory();
+    });
+});
+
+
+/* ==========================================================================
+   13. ADD MATERIAL SCREEN
+   ========================================================================== */
+
+function showAddMaterialToast() {
+    const toast = document.getElementById('SuccessAddMatrial');
+    if (toast) toast.classList.add('show');
+}
+
+function hideAddMaterialToast() {
+    const toast = document.getElementById('SuccessAddMatrial');
+    if (toast) toast.classList.remove('show');
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const dateInput = document.getElementById("delivery_date");
+    if (dateInput) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute("min", today);
+    }
+});
+
+function loadSupplierDropdown() {
+    fetch("../py/inventory/get_suppliers_dropdown.py")
+        .then(response => response.json())
+        .then(suppliers => {
+            const selectElement = document.getElementById("supplierSelect");
+            if (!selectElement) return;
+            selectElement.innerHTML = '<option value="" disabled selected>Select Supplier</option>';
+
+            suppliers.forEach(supplierName => {
+                const option = document.createElement("option");
+                option.value = supplierName;
+                option.textContent = supplierName;
+                selectElement.appendChild(option);
+            });
+        })
+        .catch(error => console.error("Error loading suppliers:", error));
+}
+
+document.addEventListener("DOMContentLoaded", loadSupplierDropdown);
+
+
+/* ==========================================================================
+   14. PRODUCTION PLANNING SCREEN
+   ========================================================================== */
+
+// Function to load production plans IN TABLE
+function loadProductionPlans() {
+    fetch("../py/inventory/get_production_plan.py")
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error("Backend Error:", data.error);
+            return;
+        }
+
+        if (document.getElementById("totalPlans"))
+            document.getElementById("totalPlans").textContent = data.total_plan;
+
+        if (document.getElementById("runningPlans"))
+            document.getElementById("runningPlans").textContent = data.running_plan;
+
+        if (document.getElementById("completedPlans"))
+            document.getElementById("completedPlans").textContent = data.completed_plan;
+
+        if (document.getElementById("pendingPlans"))
+            document.getElementById("pendingPlans").textContent = data.pending_plan;
+
+        const tableBody = document.getElementById("productionPlanTable");
+        if (tableBody) {
+            tableBody.innerHTML = data.table_html;
+        }
+    })
+    .catch(error => console.error("Error loading production plans:", error));
+}
+
+// 1. Initial load when DOM is ready
+document.addEventListener("DOMContentLoaded", function() {
+    loadProductionPlans();
+
+    // 2. Auto-refresh every 5 seconds
+    setInterval(loadProductionPlans, 5000);
+});
+
+// 3. Instant refresh when switching back to this tab
+window.addEventListener("focus", function() {
+    loadProductionPlans();
+});
+
+//THIS FUNCTION SEARCH PRODUCTION PLAN
+const searchPp = document.getElementById("SearchPp");
+if (searchPp) {
+    searchPp.addEventListener("keyup", function () {
+        let search = this.value.toLowerCase();
+
+        document.querySelectorAll("#productionPlanTable tr").forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(search)
+                ? ""
+                : "none";
+        });
+    });
+}
+
+
+/* ==========================================================================
+   15. CREATE PRODUCTION PLAN SCREEN
+   ========================================================================== */
+
+fetch("../py/production/get_order_list.py")
+.then(res => res.text())
+.then(data => {
+    const orderSelect = document.getElementById("orderSelect");
+    if (orderSelect) orderSelect.innerHTML = data;
+});
+
+const orderSelectElem = document.getElementById("orderSelect");
+if (orderSelectElem) {
+    orderSelectElem.addEventListener("change", function () {
+        fetch("../py/production/get_order_details.py?order=" + this.value)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("customer").value = data.customer;
+            document.getElementById("fabric").value = data.fabric;
+            document.getElementById("orderQty").value = data.quantity + " Kg";
+        });
+    });
+}
+
+
+/* ==========================================================================
+   16. PRODUCTION REPORT & DELIVERY SCREEN
+   ========================================================================== */
+
+document.querySelectorAll('.search-box input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.closest('.search-box').style.boxShadow = '0 0 0 3px rgba(0, 106, 97, 0.2)';
+        this.closest('.search-box').style.borderRadius = '8px';
+    });
+    input.addEventListener('blur', function() {
+        this.closest('.search-box').style.boxShadow = 'none';
+    });
+});
+
+function showdeliveryToast() {
+    const toast = document.getElementById('successdeliveryToast');
+    if (toast) toast.classList.add('show');
+
+    clearTimeout(window.toastTimeout);
+    window.toastTimeout = setTimeout(() => {
+        hidedeliveryToast();
+    }, 5000);
+}
+
+function hidedeliveryToast() {
+    const toast = document.getElementById('successdeliveryToast');
+    if (toast) toast.classList.remove('show');
+}
+
+function handledeliverySubmit(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    const originalHTML = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
+
+    setTimeout(() => {
+        showdeliveryToast();
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+    }, 800);
+}
+
+
+/* ==========================================================================
+   17. USER MANAGEMENT SCREEN
+   ========================================================================== */
+
+
+// Variable to store the currently viewed employee ID
+let currentViewEmpId = null;
+
+// Function to load user data AND KPI Counts
+function loadUserData() {
+    // Add ?t= timestamp to prevent browser CGI caching
+    fetch("../py/get_user.py?t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            const tbody = document.getElementById("userTableBody");
+            if (tbody && data.table_html) tbody.innerHTML = data.table_html;
+
+            if (document.getElementById("totalUsersCount")) {
+                document.getElementById("totalUsersCount").innerText = data.total_users ?? 0;
+            }
+            if (document.getElementById("activeUsersCount")) {
+                document.getElementById("activeUsersCount").innerText = data.active_users ?? 0;
+            }
+            if (document.getElementById("inactiveUsersCount")) {
+                document.getElementById("inactiveUsersCount").innerText = data.inactive_users ?? 0;
+            }
+        })
+        .catch(error => console.error("Error fetching user data:", error));
+}
+
+// Function to view user details
+function viewUser(empid) {
+    if (!empid) return;
+
+    // Save current employee ID so it can auto-refresh on tab switch
+    currentViewEmpId = empid;
+    console.log("Employee ID:", empid);
+
+    fetch("../py/users/view_details.py?t=" + new Date().getTime(), {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "employee_id=" + encodeURIComponent(empid)
+    })
+    .then(response => {
+        console.log("Status:", response.status);
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        return response.text();
+    })
+    .then(data => {
+        console.log("Python Response:", data);
+        const detailsContainer = document.getElementById("userDetails");
+        if (detailsContainer) {
+            detailsContainer.innerHTML = data;
+        }
+    })
+    .catch(error => {
+        console.log("Fetch Error:", error);
+    });
+}
+
+// 1. Initial load when DOM is ready
+document.addEventListener("DOMContentLoaded", function () {
+    loadUserData();
+});
+
+// 2. Auto-refresh both User Table and User Details when switching back to the tab
+window.addEventListener("focus", function () {
+    loadUserData();
+
+    // If a user detail modal/section is currently open, refresh its data too
+    if (currentViewEmpId) {
+        viewUser(currentViewEmpId);
+    }
+});
+
+//THIS FUNCTION IS FOR EDITING USER DETAILS
+function editUser(employee_id){
+    fetch("../py/users/get_edit_user.py",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/x-www-form-urlencoded"
+        },
+        body:"employee_id="+employee_id
+    })
+    .then(response=>response.json())
+    .then(data=>{
+        document.getElementById("edit_employee_id").value=data.employee_id;
+        document.getElementById("edit_email").value=data.email;
+        document.getElementById("edit_phone").value=data.phone;
+        document.getElementById("edit_state").value=data.state;
+
+        loadCities("edit_state","edit_city");
+        document.getElementById("edit_city").value=data.city;
+    });
+}
+
+//THIS FUNCTION IS FOR INACTIVATING USER
+function inactive(employee_id){
+    fetch("../py/users/user_inactive.py",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/x-www-form-urlencoded"
+        },
+        body:"employee_id="+employee_id
+    })
+    .then(response=>response.text())
+    .then(data=>{
+        console.log(data);
+        location.reload();
+    })
+    .catch(error=>{
+        console.log(error);
+    });
+}
+
+//THIS FUNCTION IS USED FOR SEARCHING USER IN THE TABLE
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Get references to input elements and table body
+    const searchInput = document.getElementById('searchUser');
+    const roleFilter = document.getElementById('filterRole');
+    const statusFilter = document.getElementById('filterStatus');
+    const refreshBtn = document.getElementById('btnRefresh');
+    const tableBody = document.getElementById('userTableBody');
+
+    // 2. Main Filter Function
+    function filterTable() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedRole = roleFilter.value.toLowerCase().trim();
+        const selectedStatus = statusFilter.value.toLowerCase().trim();
+
+        // Get all rows currently inside <tbody>
+        const rows = tableBody.getElementsByTagName('tr');
+
+        // Loop through every table row
+        Array.from(rows).forEach(row => {
+            // Get cells (0 = Name, 1 = Username, 2 = Role, 3 = Status)
+            const nameCell = row.children[0]?.textContent.toLowerCase() || '';
+            const usernameCell = row.children[1]?.textContent.toLowerCase() || '';
+            const roleCell = row.children[2]?.textContent.toLowerCase() || '';
+            const statusCell = row.children[3]?.textContent.toLowerCase() || '';
+
+            // Check if search matches Name OR Username
+            const matchesSearch = nameCell.includes(searchTerm) || usernameCell.includes(searchTerm);
+
+            // Check if Role dropdown matches (or if dropdown is default "")
+            const matchesRole = (selectedRole === "") || roleCell.includes(selectedRole);
+
+            // Check if Status dropdown matches (or if dropdown is default "")
+            const matchesStatus = (selectedStatus === "") || statusCell.includes(selectedStatus);
+
+            // Show row ONLY if all 3 filter criteria match
+            if (matchesSearch && matchesRole && matchesStatus) {
+                row.style.display = ''; // Visible
+            } else {
+                row.style.display = 'none'; // Hidden
+            }
+        });
+    }
+
+    // 3. Event Listeners for Live Filtering
+    searchInput.addEventListener('input', filterTable);  // Fires as you type
+    roleFilter.addEventListener('change', filterTable);  // Fires when Role selected
+    statusFilter.addEventListener('change', filterTable);// Fires when Status selected
+
+    // 4. Refresh Button Listener (Clears inputs and shows all rows)
+    refreshBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        roleFilter.value = '';
+        statusFilter.value = '';
+        filterTable(); // Re-run filter to restore all rows
+    });
+});
+
+// TOGGLE USER STATUS (BLOCK / UNBLOCK) FUNCTION
+function toggleUserStatus(empId, actionType) {
+    const confirmText = actionType === 'block' ? 'deactivate' : 'activate';
+    if (!confirm(`Are you sure you want to ${confirmText} this user?`)) return;
+
+    // Send action parameter to get_user.py
+    fetch(`../py/get_user.py?emp_id=${empId}&action=${actionType}&t=${new Date().getTime()}`)
+        .then(response => response.json())
+        .then(data => {
+            // Instantly refresh user table and KPI count numbers
+            loadUserData();
+        })
+        .catch(error => console.error("Error updating user status:", error));
+}
+
+
+/* ==========================================================================
+   18. CREATE USER SCREEN
+   ========================================================================== */
+
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye-slash';
+    }
+}
+
+function showcreateuserToast() {
+    const toast = document.getElementById('successcreateuserToast');
+    if (toast) toast.classList.add('show');
+    setTimeout(hidecreateuserToast, 5000);
+}
+
+function hidecreateuserToast() {
+    const toast = document.getElementById('successcreateuserToast');
+    if (toast) toast.classList.remove('show');
+}
+
+// 18+ Date Picker Validation
+document.addEventListener("DOMContentLoaded", function() {
+    const dobInput = document.getElementById('DOB');
+
+    if (dobInput) {
+        const today = new Date();
+        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+        const year = maxDate.getFullYear();
+        const month = String(maxDate.getMonth() + 1).padStart(2, '0');
+        const day = String(maxDate.getDate()).padStart(2, '0');
+
+        dobInput.max = `${year}-${month}-${day}`;
+    }
+});
+
+
+/* ==========================================================================
+   19. LOGOUT MODAL & ACTIONS
+   ========================================================================== */
+
+const modal = document.getElementById('logoutModal');
+const btnLogout = document.getElementById('btnLogout');
+const btnCancel = document.getElementById('btnCancel');
+
+// Show modal smoothly when page/section loads
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        if (modal) modal.classList.add('show');
+    }, 100);
+});
+
+// "No, Stay Logged In" Action
+if (btnCancel) {
+    btnCancel.addEventListener('click', function() {
+        if (modal) {
+            modal.style.transform = 'scale(0.95)';
+            modal.style.opacity = '0';
+            modal.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        }
+
+        setTimeout(() => {
+            // Option 1: Go back in browser history if came from a page
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Option 2: Fallback hash navigation to main dashboard section
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('user_id') || '';
+                window.location.hash = '#page1';
+            }
+
+            // Reset modal styles for future display
+            if (modal) {
+                modal.style.transform = 'scale(1)';
+                modal.style.opacity = '1';
+            }
+        }, 300);
+    });
+}
+
+// "Yes, Logout" Action
+if (btnLogout) {
+    btnLogout.addEventListener('click', function() {
+        // Show loading spinner animation
+        this.innerHTML = '<span class="spinner"><i class="bi bi-arrow-repeat spin"></i></span> Logging out...';
+        this.disabled = true;
+        this.style.opacity = '0.7';
+
+        // Add optional CSS animation class if icon needs spinning
+        const icon = this.querySelector('i');
+        if (icon) icon.style.animation = 'spin 1s linear infinite';
+
+        setTimeout(() => {
+            // Smoothly fade out body
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-out';
+
+            setTimeout(() => {
+                // Clear all session storage & local storage data
+                sessionStorage.clear();
+                localStorage.clear();
+
+                // Redirect to actual Login page
+                window.location.href = '/techvoltInstituteProject/pages/login.html';
+            }, 500);
+        }, 800);
+    });
+}

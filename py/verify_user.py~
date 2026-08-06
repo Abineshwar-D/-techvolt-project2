@@ -1,0 +1,86 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import json
+import pymysql
+
+cgitb.enable()
+print("Content-Type: application/json\n")
+
+form = cgi.FieldStorage()
+user_id = form.getvalue("user_id")
+current_page = form.getvalue("page")  # Sent from auth.js (e.g. "Marketing.html")
+
+# Match exact filenames from your screenshot
+ROLE_PAGES = {
+    "merchandising": "Merchandising.html",
+    "marketing": "Marketing.html",
+    "production": "Production.html",
+    "storekeeper": "StoreKeeper.html"
+}
+
+response = {"status": "error", "message": "Access Denied"}
+
+if not user_id or not current_page:
+    response["message"] = "Missing user_id or page parameter."
+    print(json.dumps(response))
+    exit()
+
+try:
+    con = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2"
+    )
+    cur = con.cursor()
+
+    # 1. STEP 1: Check 'admin' table first
+    cur.execute("SELECT role FROM admin WHERE employee_id=%s", (user_id,))
+    admin_data = cur.fetchone()
+
+    if admin_data:
+        admin_role = admin_data[0] if admin_data[0] else "Admin"
+        response = {
+            "status": "success",
+            "message": "Admin Authorized",
+            "role": admin_role.strip()
+        }
+    else:
+        # 2. STEP 2: Check 'users' table
+        cur.execute("SELECT role, status FROM users WHERE employee_id=%s", (user_id,))
+        user_data = cur.fetchone()
+
+        if user_data:
+            db_role, db_status = user_data[0].strip(), user_data[1]
+
+            # Check if user status is blocked/inactive
+            if db_status and db_status.lower() == 'inactive':
+                response["message"] = "Your account is blocked by Admin."
+            else:
+                # FIX: Convert db_role to lowercase (.lower()) so "Marketing" matches "marketing"
+                db_role_clean = db_role.lower()
+                expected_page = ROLE_PAGES.get(db_role_clean)
+
+                # Validate if user is visiting their permitted page
+                if expected_page and expected_page.lower() in current_page.lower():
+                    response = {
+                        "status": "success",
+                        "message": "Authorized access",
+                        "role": db_role
+                    }
+                else:
+                    response["message"] = f"Access Blocked: Your assigned role ({db_role}) does not have permission " \
+                                          f"for this page."
+        else:
+            response["message"] = "Invalid User ID or user does not exist."
+
+except Exception as e:
+    response = {"status": "error", "message": f"Database Error: {str(e)}"}
+
+finally:
+    if 'con' in locals():
+        con.close()
+
+print(json.dumps(response))

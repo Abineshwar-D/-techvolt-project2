@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../js/router.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knit-IT ERP | Inventory Dashboard</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/storekeeper.css">
+    <link rel="stylesheet" href="../css/admin_dashboard.css">
+</head>
+<body id="storekeeper">
+
+<!-- ========================================================================== -->
+<!-- GLOBAL SIDEBAR NAVIGATION                                                 -->
+<!-- ========================================================================== -->
+<aside class="sidebar" id="sidebar">
+    <div class="mb-4 px-2">
+        <h1 class="brand-title">Knit-IT ERP</h1>
+        <p class="brand-subtitle">Knitting Management</p>
+    </div>
+
+    <nav class="flex-grow-1">
+        <div onclick="showpage('Store')" class="nav-item active">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+        </div>
+        <div onclick="showpage('page6')" class="nav-item">
+            <i class="bi bi-boxes"></i>
+            <span>Inventory</span>
+        </div>
+        <div onclick="showpage('page4')" class="nav-item">
+            <i class="bi bi-buildings"></i>
+            <span>Suppliers</span>
+        </div>
+        <div onclick="showpage('page5')" class="nav-item">
+            <i class="bi bi-cart"></i>
+            <span>Purchase Orders</span>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="nav-item logout" onclick="showpage('logout')">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </div>
+
+<!--        <div class="d-flex align-items-center gap-3 mt-3 px-2">-->
+<!--            <img class="user-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1cHYSImRS2hLFrXelwgJxBspBeFh8flZ6nrhSd_DtU4KlkPR_Ngp3U0iSZ18NKeQjN_BoSTxezk63H&#45;&#45;vp_OndLiGZm8h85eEakW0Mu803R566UJlpMePqqmOaPt23DPchI4ni51Dn3iCQa8sq8_G6PiBnAU_Bn0-45b69fwNIOGcBemTlm0zzDDGzcUQ-GjoYxKgTyXwvqg1yKU-oNeGOrjk4mxg7DkQA1Lu6IT5Nm11r-kkeOSMCj4S_lNJmBQZZMpa9IFEPcs" alt="User Avatar">-->
+<!--            <div class="overflow-hidden">-->
+<!--                <p class="fw-bold mb-0 small text-truncate" id="header-user-name"></p>-->
+<!--                <p class="text-muted small mb-0 text-truncate" id="header-user-role"></p>-->
+<!--            </div>-->
+<!--        </div>-->
+    </div>
+</aside>
+
+<!-- ========================================================================== -->
+<!-- GLOBAL HEADER                                                             -->
+<!-- ========================================================================== -->
+<header class="header" id="header">
+    <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h2 class="fw-bold fs-5 text-dark mb-0">Inventory Dashboard</h2>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+        
+
+     <div class="d-flex align-items-center gap-3 ps-3 border-start">
+    <div class="user-details text-end">
+        <p class="fw-semibold mb-0 small" id="header-user-name">Loading...</p>
+        <p class="text-muted small mb-0" id="header-user-role" style="font-size: 12px;">Loading...</p>
+    </div>
+
+    <!-- Dropdown Trigger Wrapper -->
+    <div class="dropdown">
+        <img class="user-avatar dropdown-toggle" id="header-user-avatar"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJPJKf9zB2OGh1LbAKFCorboRbXM0DaEVKXIOKWfLAiCIEzZ43jXwUtc2C1rFuRfUw_usMGdraAJ1UddmT3uqR9NuRZchsWnwwP6x0ks6axW46HHqsIb4bKggw2XYTSVaUDzSpbAxqYyLqaDYYrl4ZtpTv1qw0SEBrrcLXuELAtNCUci6JxdQkPpRvp_AbJBeyPJ2l9ZAyMqGgzgGu_19nO7udK7aCqQX2RshfP4Ag57haajX1BmNrWWwg-bve-HxC18HflOSdiOk"
+             alt="User Avatar"
+             data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+
+        <!-- Dropdown Menu -->
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="header-user-avatar">
+            <li class="px-3 py-2 border-bottom">
+                <span class="d-block text-muted small">Logged in as:</span>
+                <strong id="header-dropdown-userid" class="text-primary">EMP000</strong>
+            </li>
+            <li>
+                <label class="dropdown-item mb-0" style="cursor: pointer;">
+                    <i class="bi bi-camera me-2"></i> Add Profile Picture
+                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+                </label>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key me-2"></i> Change Password
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+<!--                <a class="dropdown-item text-danger" href="/techvoltInstituteProject/pages/login.html" onclick="localStorage.clear(); sessionStorage.clear();">-->
+<!--                    <i class="bi bi-box-arrow-right me-2"></i> Logout-->
+<!--                </a>-->
+            </li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+</header>
+
+<!-- ========================================================================== -->
+<!-- MAIN SCREEN VIEW CONTAINER                                                 -->
+<!-- ========================================================================== -->
+<main id="keeper" class="main-content">
+
+    <!-- ==================== SCREEN 1: STOREKEEPER DASHBOARD ==================== -->
+    <section id="Store" class="page">
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-primary-fixed"><i class="bi bi-boxes"></i></div>
+                        <span class="text-muted small fw-medium">Total SKU</span>
+                    </div>
+                    <h3 class="fw-bold text-dark" id="totalMaterials1">0</h3>
+                    <p class="text-muted small mb-0">Material Categories</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-secondary-fixed"><i class="bi bi-building"></i></div>
+                        <span class="text-muted small fw-medium">Current Volume</span>
+                    </div>
+                    <h3 class="fw-bold text-dark"><span id="availableStock1">0</span> <span class="fs-6 fw-normal">Kg</span></h3>
+                    <p class="text-muted small mb-0">Across all warehouses</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card warning">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-error-container"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                        <span class="text-danger small fw-medium">Total Orders</span>
+                    </div>
+                    <h3 class="fw-bold text-danger" id="poMatchedMaterials1">0</h3>
+                    <p class="text-muted small mb-0">Purchase Order Count</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-tertiary-fixed"><i class="bi bi-cart"></i></div>
+                        <span class="text-muted small fw-medium">Pending Orders</span>
+                    </div>
+                    <h3 class="fw-bold text-dark" id="dueDeliveries">0</h3>
+                    <p class="text-muted small mb-0">Active POs in transit</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Summary Bento Card -->
+        <div class="row g-4">
+            <div class="col-12 col-lg-12">
+                <div class="bg-white p-4 rounded-3 border shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold text-dark mb-0">Main Inventory Summary</h5>
+                        <span class="d-flex align-items-center gap-1 px-3 py-1 bg-light rounded-pill small">
+                            <span class="bg-secondary rounded-circle d-inline-block" style="width: 8px; height: 8px;"></span>
+                            In Stock
+                        </span>
+                    </div>
+
+                    <div class="row g-3" id="stockSummaryRow"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 2: INVENTORY ==================== -->
+    <section id="page6" class="page" style="display: none;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div>
+                <h2 class="page-title">Inventory</h2>
+                <p class="page-subtitle">Manage raw materials and stock availability</p>
+            </div>
+            <button class="btn btn-dark px-4 py-2 rounded-3 d-flex align-items-center gap-2 mt-3 mt-md-0" onclick="showpage('AddMaterial')">
+                <i class="bi bi-plus-lg"></i>
+                + Add Material
+            </button>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box"><i class="bi bi-tags"></i></div>
+                        <span class="trend-label">+4% from last month</span>
+                    </div>
+                    <p class="kpi-label mb-0">Total Materials</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="totalMaterials">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box"><i class="bi bi-box-seam"></i></div>
+                    </div>
+                    <p class="kpi-label mb-0">Available Stock</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="availableStock">0 Kg</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card warning">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box"><i class="bi bi-exclamation-triangle"></i></div>
+                        <span class="trend-label">Requires Attention</span>
+                    </div>
+                    <p class="kpi-label mb-0">Low Stock Items</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="poMatchedMaterials">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box"><i class="bi bi-currency-rupee"></i></div>
+                    </div>
+                    <p class="kpi-label mb-0">Inventory Value</p>
+                    <h3 class="fw-bold fs-2 mb-0">₹12.5L</h3>
+                </div>
+            </div>
+        </div>
+
+          <!-- ===== FILTER BAR ===== -->
+        <div class="filter-bar mb-4">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search User" id="searchInventory">
+            </div>
+
+            <button class="btn-refresh" id="inventoryRefresh">
+                <i class="bi bi-arrow-repeat fs-5"></i>
+            </button>
+        </div>
+
+       <div class="row g-4">
+    <!-- Changed col-lg-13 to col-12 (Bootstrap grid is 12 columns) -->
+    <div class="col-12">
+        <div class="d-flex flex-column gap-3">
+
+            <div class="table-container">
+                <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                    <h5 class="fw-bold mb-0">Inventory Materials</h5>
+                    <a href="#" class="text-secondary fw-bold text-decoration-none small">View All</a>
+                </div>
+
+                <div class="table-responsive">
+                    <!-- Added 'align-middle' to ensure vertical centering -->
+                    <table class="table-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-start">Material Name</th>
+                                <th scope="col" class="text-end">Available Stock</th>
+                                <th scope="col" class="text-center">Delivery Date</th>
+                                <th scope="col" class="text-start">Created By</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="materialTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+    </section>
+
+    <!-- ==================== SCREEN 3: ADD MATERIAL ==================== -->
+    <section id="AddMaterial" class="page" style="display: none;">
+        <div class="page-header">
+            <div>
+                <nav class="breadcrumb-custom">
+                    <span>Inventory</span>
+                    <i class="bi bi-chevron-right"></i>
+                    <span class="current">Add New Material</span>
+                </nav>
+                <h2 class="page-title">Material Registration</h2>
+            </div>
+            <div class="action-buttons d-flex gap-2">
+                <button class="btn btn-outline-secondary px-4 py-2 rounded-3">Cancel</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-3 d-flex align-items-center gap-2" type="submit" form="material_form">
+                    <i class="bi bi-save"></i>
+                    Save Material
+                </button>
+            </div>
+        </div>
+
+        <div class="form-scroll custom-scrollbar">
+            <div class="row g-4">
+                <div class="col-lg-13">
+                    <form action="../py/inventory/add_material.py" method="post" id="material_form">
+                        <input type="hidden" name="user_id" id="user_id_input">
+
+                        <div class="form-card">
+                            <div class="card-header">
+                                <i class="bi bi-plus-circle"></i>
+                                <h5>Material Specification</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Material Name <span class="required">*</span></label>
+                                        <input type="text" class="form-control-custom" value="" name="material_name" id="materialName" minlength="3" maxlength="30" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Category</label>
+                                        <select class="form-select-custom" name="category" required>
+                                            <option selected>Yarn</option>
+                                            <option>Dye</option>
+                                            <option>Chemical</option>
+                                            <option>Packaging Material</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Unit of Measurement</label>
+                                        <select class="form-select-custom" name="unit" required>
+                                            <option selected>Kg</option>
+                                            <option>Cone</option>
+                                            <option>Roll</option>
+                                            <option>Box</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Opening Stock</label>
+                                        <div class="input-with-suffix">
+                                            <input type="number" class="form-control-custom" value="" name="opening_stock" required min="0" step="0.01">
+                                            <span class="suffix">KG</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Supplier</label>
+                                        <select class="form-select-custom" name="supplier" id="supplierSelect" required>
+                                            <option selected>select option</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Delivery Date <span class="required">*</span></label>
+                                        <input type="date" class="form-control-custom" value="" name="delivery_date" id="delivery_date" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Status</label>
+                                        <div class="radio-group-custom">
+                                            <label class="radio-item"><input type="radio" name="status" checked value="Active"><span>Active</span></label>
+                                            <label class="radio-item"><input type="radio" name="status" value="InActive"><span>Inactive</span></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label-custom">Description</label>
+                                        <textarea class="form-control-custom" rows="3" placeholder="Enter additional material notes here..." name="description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="toast-custom" id="SuccessAddMatrial">
+            <div class="toast-icon"><i class="bi bi-check-lg"></i></div>
+            <div>
+                <div class="fw-bold small">Material Added Successfully</div>
+                <div class="small opacity-75">Code: MAT001 | Cotton Yarn 30s</div>
+            </div>
+            <button class="toast-dismiss" onclick="hideAddMaterialToast()">DISMISS</button>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: SUPPLIERS ==================== -->
+    <section id="page4" class="page" style="display: none;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <h1 class="page-title">Suppliers</h1>
+                <p class="page-subtitle">Manage supplier information and contacts</p>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Total Suppliers</p>
+                        <h3 class="fw-bold fs-2 mb-0" id="totalSuppliersCount">0</h3>
+                    </div>
+                    <div class="icon-box bg-dark"><i class="bi bi-buildings"></i></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Active Suppliers</p>
+                        <h3 class="fw-bold fs-2 text-secondary mb-0" id="activeSuppliersCount">0</h3>
+                    </div>
+                    <div class="icon-box bg-teal"><i class="bi bi-check-circle"></i></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Inactive Suppliers</p>
+                        <h3 class="fw-bold fs-2 text-danger mb-0" id="inactiveSuppliersCount">0</h3>
+                    </div>
+                    <div class="icon-box bg-red"><i class="bi bi-x-circle"></i></div>
+                </div>
+            </div>
+        </div>
+
+           <!-- ===== FILTER BAR ===== -->
+        <div class="filter-bar mb-4">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search User" id="searchSupplier">
+            </div>
+
+            <select class="filter-select" id="supplierStatus">
+                <option value="">Filter by Status</option>
+                <option>Active</option>
+                <option>Inactive</option>
+            </select>
+            <button class="btn-refresh" id="supplierRefresh">
+                <i class="bi bi-arrow-repeat fs-5"></i>
+            </button>
+        </div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Supplier Name</th>
+                            <th>Contact Person</th>
+                            <th>Phone Number</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTableBody"></tbody>
+                </table>
+            </div>
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center px-4 py-3 border-top gap-2"></div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 5: PURCHASE ORDERS ==================== -->
+    <section id="page5" class="page" style="display: none;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <h1 class="page-title">Purchase Orders</h1>
+                <p class="page-subtitle">Manage and approve material purchase orders for knit production.</p>
+            </div>
+        </div>
+
+        <div class="filter-bar mb-4">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="SearchPo" placeholder="Search Purchase Order">
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <label class="text-muted small fw-medium">Filter by Status:</label>
+                <select class="filter-select">
+                    <option>All Statuses</option>
+                    <option>Pending</option>
+                    <option>Approved</option>
+                    <option>Rejected</option>
+                </select>
+            </div>
+            <button class="btn-filter"><i class="bi bi-funnel"></i> More Filters</button>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box bg-dark"><i class="bi bi-receipt"></i></div>
+                        <span class="trend-label text-secondary">+12%</span>
+                    </div>
+                    <p class="kpi-label mb-0">Total POs</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpi-total-po">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
+                        <span class="trend-label text-warning">24 High</span>
+                    </div>
+                    <p class="kpi-label mb-0">Pending Approvals</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpi-pending-po">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
+                        <span class="trend-label text-success">88% Rate</span>
+                    </div>
+                    <p class="kpi-label mb-0">Approved Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="icon-box bg-red"><i class="bi bi-x-circle"></i></div>
+                        <span class="trend-label text-danger">-5% MoM</span>
+                    </div>
+                    <p class="kpi-label mb-0">Rejected Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <div class="table-container">
+                    <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>PO NUMBER</th>
+                                        <th>SUPPLIER ID</th>
+                                        <th>MATERIAL ID</th>
+                                        <th>QUANTITY</th>
+                                        <th>Created By</th>
+                                        <th class="text-end">ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="poTableBody"></tbody>
+                            </table>
+                    </div>
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center px-4 py-3 border-top gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 6: LOGOUT MODAL ==================== -->
+    <section id="logout" class="page" style="display: none;">
+        <div class="bg-placeholder">
+            <div class="row g-3 h-100">
+                <div class="col-8"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+            </div>
+        </div>
+
+        <div class="overlay"></div>
+
+        <div class="logout-modal" id="logoutModal">
+            <div class="text-center">
+                <div class="icon-container"><i class="bi bi-box-arrow-right"></i></div>
+                <h2 class="modal-title">Logout</h2>
+                <p class="modal-message">Are you sure you want to logout from the system? You will be redirected to the Login Screen.</p>
+
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn-logout" id="btnLogout"><span>Yes, Logout</span></button>
+                    <button class="btn-cancel" id="btnCancel">No, Stay Logged In</button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+ <!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel"><i class="bi bi-shield-lock me-2"></i>Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email ID</label>
+                        <input type="email" class="form-control" id="pwd_email" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="pwd_new" required placeholder="Enter new password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="pwd_confirm" required placeholder="Confirm new password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================================================================== -->
+<!-- SCRIPTS & INLINE ROUTING                                                  -->
+<!-- ========================================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/storekeeper.js"></script>
+<script src="../js/common.js"></script>
+
+
+<script>
+    function showpage(pageId) {
+        // 1. Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.style.display = "none";
+        });
+
+        // 2. Remove 'active' class from all sidebar navigation items
+        document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 3. Show the selected page
+        const page = document.getElementById(pageId);
+        if (!page) return;
+
+        if (pageId === "logout") {
+            page.style.display = "flex";
+        } else {
+            page.style.display = "block";
+        }
+
+        // 4. Update active CSS class in sidebar
+        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+        if (activeNavItem) {
+            activeNavItem.classList.add('active');
+        }
+
+        // 5. Save current page in URL hash and localStorage
+        if (pageId !== "logout") {
+            window.location.hash = pageId;
+            localStorage.setItem("activePage", pageId);
+        }
+    }
+
+    // Function to restore active page on Page Refresh or URL direct access
+    function restoreActivePage() {
+        // Priority 1: Check if there's a hash in URL (e.g., #page6)
+        let hashPage = window.location.hash.replace("#", "");
+
+        // Priority 2: Check localStorage if no URL hash exists
+        if (!hashPage) {
+            hashPage = localStorage.getItem("activePage");
+        }
+
+        // Priority 3: Fallback to default "Store" dashboard
+        if (!hashPage || !document.getElementById(hashPage)) {
+            hashPage = "Store";
+        }
+
+        showpage(hashPage);
+    }
+
+    function getActiveUserId() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId =
+            urlParams.get("user_id") ||
+            urlParams.get("admin_id") ||
+            urlParams.get("id") ||
+            localStorage.getItem("user_id") ||
+            localStorage.getItem("admin_id") ||
+            sessionStorage.getItem("user_id") ||
+            sessionStorage.getItem("admin_id");
+
+        if (userId && userId.trim() !== "" && userId !== "null" && userId !== "undefined") {
+            return userId.trim();
+        }
+        return null;
+    }
+
+    // Session validation and page state restoration
+    const currentUserId = getActiveUserId();
+
+    if (!currentUserId || currentUserId.trim() === "") {
+        alert("Session invalid or User ID missing. Please log in again.");
+        window.location.href = "/techvoltInstituteProject/pages/login.html";
+    } else {
+        localStorage.setItem('user_id', currentUserId);
+        sessionStorage.setItem('user_id', currentUserId);
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Populate hidden form user input field
+            const userInput = document.getElementById('user_id_input');
+            if (userInput) {
+                userInput.value = currentUserId.trim();
+            }
+
+            // Restore active view page on refresh
+            restoreActivePage();
+        });
+    }
+
+    // Listen for browser hash changes (Back/Forward arrows)
+    window.addEventListener("hashchange", function () {
+        restoreActivePage();
+    });
+</script>
+<script src="../js/user_profile_password_update.js"></script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+import cgi
+import cgitb
+import json
+import pymysql
+
+cgitb.enable()
+
+# Set Header to return JSON
+print("Content-Type: application/json\n\n")
+
+con = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="techvoltproject2",
+    autocommit=True,  # Keeps database updates synced instantly
+)
+cur = con.cursor()
+form = cgi.FieldStorage()
+
+# -------------------------------------------------------------
+# Handle Block / Unblock Actions when clicked
+# -------------------------------------------------------------
+action = form.getvalue("action")
+target_emp_id = form.getvalue("emp_id")
+
+if action and target_emp_id:
+    if action == "block":
+        cur.execute(
+            "UPDATE users SET status = 'InActive' WHERE employee_id = %s",
+            (target_emp_id,),
+        )
+    elif action == "unblock":
+        cur.execute(
+            "UPDATE users SET status = 'Active' WHERE employee_id = %s",
+            (target_emp_id,),
+        )
+
+# Fetch user list
+cur.execute(
+    """ SELECT employee_id,fullname,email,password,role,status FROM users """
+)
+row = cur.fetchall()
+
+# Initialize KPI Counters
+total_users = len(row)
+active_users = 0
+inactive_users = 0
+
+table_html = ""
+
+for i in row:
+    # 1. KPI Count Logic (Case-insensitive check)
+    status_val = str(i[5]).strip().lower() if i[5] else "inactive"
+
+    if status_val == "active":
+        active_users += 1
+        # ACTIVE USER -> Show Block / Ban Button (Red)
+        toggle_button = f"""
+            <button class="table-action-btn delete" onclick="toggleUserStatus('{i[0]}', 'block')" title="Block User" value="{i[0]}">
+                <i class="bi bi-ban"></i>
+            </button>
+        """
+    else:
+        inactive_users += 1
+        # INACTIVE USER -> Show Unblock Button (Green Checkmark)
+        toggle_button = f"""
+            <button class="table-action-btn text-success" onclick="toggleUserStatus('{i[0]}', 'unblock')" title="Unblock User" value="{i[0]}">
+                <i class="bi bi-check-circle"></i>
+            </button>
+        """
+
+    # 2. Your Original Table HTML Structure (Unchanged layout)
+    first_letter = i[1][0].upper() if i[1] else ""
+    table_html += f"""
+        <tr data-name="{i[0]}" data-username="{i[1]}" data-role="{i[4]}" data-status="{i[5]}" data-email="{i[2]}">
+
+            <td>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="user-avatar-sm bg-teal">{first_letter}</div>
+                    <span class="fw-semibold small">{i[0]}</span>
+                </div>
+            </td>
+
+            <td class="text-muted small">{i[1]}</td>
+
+            <td>
+                <span class="role-badge">{i[4].upper() if i[4] else ''}</span>
+            </td>
+
+            <td>
+                <span class="status-badge">
+                    <span class="dot"></span>
+                    {i[5]}
+                </span>
+            </td>
+
+            <td class="text-right">
+                <div class="d-flex justify-content-end gap-1">
+                    <button 
+                        class="table-action-btn view"
+                        value="{i[0]}"
+                        data-bs-toggle="modal"
+                        data-bs-target="#userModal" 
+                        onclick="viewUser(this.value)">
+                        <i class="bi bi-person"></i>
+                    </button>
+
+                    <button 
+                        class="table-action-btn"
+                        value="{i[0]}"
+                        onclick="editUser(this.value)"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editUserModal">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+
+                    {toggle_button}
+                </div>
+            </td>
+        </tr>
+    """
+
+con.close()
+
+# Prepare final data payload
+response_data = {
+    "table_html": table_html,
+    "total_users": total_users,
+    "active_users": active_users,
+    "inactive_users": inactive_users,
+}
+
+# Output as JSON
+print(json.dumps(response_data))

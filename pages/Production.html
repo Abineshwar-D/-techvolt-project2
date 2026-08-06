@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../js/router.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Production Executive Dashboard | KnitERP Pro</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/production.css">
+    <link rel="stylesheet" href="../css/admin_dashboard.css">
+</head>
+<body id="productionexecutive">
+
+<!-- ========================================================================== -->
+<!-- GLOBAL SIDEBAR NAVIGATION                                                 -->
+<!-- ========================================================================== -->
+<aside class="sidebar custom-scrollbar" id="sidebar">
+    <div class="px-4 mb-4">
+        <h1 class="brand-title">Slate &amp; Teal ERP</h1>
+        <p class="brand-subtitle">Knitting Management</p>
+    </div>
+
+    <nav class="flex-grow-1">
+        <div onclick="showpage('Dashboard')" class="nav-item active">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+        </div>
+        <div onclick="showpage('page7')" class="nav-item">
+            <i class="bi bi-calendar3"></i>
+            <span>Production Planning</span>
+        </div>
+        <div onclick="showpage('page12')" class="nav-item">
+            <i class="bi bi-tools"></i>
+            <span>ADD Machine</span>
+        </div>
+        <div onclick="showpage('page13')" class="nav-item">
+            <i class="bi bi-person-check"></i>
+            <span>ADD Supervisor</span>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="nav-item logout" onclick="showpage('logout')">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </div>
+    </div>
+</aside>
+
+<!-- ========================================================================== -->
+<!-- GLOBAL HEADER                                                             -->
+<!-- ========================================================================== -->
+<header class="header">
+    <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <h2 class="fw-bold fs-5 text-dark mb-0">Welcome Production Executive</h2>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+        <div class="search-box d-none d-md-block">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search orders...">
+        </div>
+
+        <button class="btn btn-link text-muted p-2 text-decoration-none">
+            <i class="bi bi-gear fs-5"></i>
+        </button>
+
+      <div class="d-flex align-items-center gap-3 ps-3 border-start">
+    <div class="user-details text-end">
+        <p class="fw-semibold mb-0 small" id="header-user-name">Loading...</p>
+        <p class="text-muted small mb-0" id="header-user-role" style="font-size: 12px;">Loading...</p>
+    </div>
+
+    <!-- Dropdown Trigger Wrapper -->
+    <div class="dropdown">
+        <img class="user-avatar dropdown-toggle" id="header-user-avatar"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJPJKf9zB2OGh1LbAKFCorboRbXM0DaEVKXIOKWfLAiCIEzZ43jXwUtc2C1rFuRfUw_usMGdraAJ1UddmT3uqR9NuRZchsWnwwP6x0ks6axW46HHqsIb4bKggw2XYTSVaUDzSpbAxqYyLqaDYYrl4ZtpTv1qw0SEBrrcLXuELAtNCUci6JxdQkPpRvp_AbJBeyPJ2l9ZAyMqGgzgGu_19nO7udK7aCqQX2RshfP4Ag57haajX1BmNrWWwg-bve-HxC18HflOSdiOk"
+             alt="User Avatar"
+             data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+
+        <!-- Dropdown Menu -->
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="header-user-avatar">
+            <li class="px-3 py-2 border-bottom">
+                <span class="d-block text-muted small">Logged in as:</span>
+                <strong id="header-dropdown-userid" class="text-primary">EMP000</strong>
+            </li>
+            <li>
+                <label class="dropdown-item mb-0" style="cursor: pointer;">
+                    <i class="bi bi-camera me-2"></i> Add Profile Picture
+                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+                </label>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key me-2"></i> Change Password
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+<!--                <a class="dropdown-item text-danger" href="/techvoltInstituteProject/pages/login.html" onclick="localStorage.clear(); sessionStorage.clear();">-->
+<!--                    <i class="bi bi-box-arrow-right me-2"></i> Logout-->
+<!--                </a>-->
+            </li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+</header>
+
+<!-- ========================================================================== -->
+<!-- MAIN SCREEN VIEW CONTAINER                                                 -->
+<!-- ========================================================================== -->
+<main id="production" class="main-content">
+
+    <!-- ==================== SCREEN 1: DASHBOARD OVERVIEW ==================== -->
+    <section id="Dashboard" class="page">
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Today's Production</p>
+                        <h3 class="fw-bold text-dark" id="todayProduction">0 <span class="fs-6 fw-normal text-muted">Kg</span></h3>
+                    </div>
+                    <div class="icon-box"><i class="bi bi-gear"></i></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Production Target</p>
+                        <h3 class="fw-bold text-dark" id="productionTarget">0 <span class="fs-6 fw-normal text-muted">Kg</span></h3>
+                    </div>
+                    <div class="icon-box"><i class="bi bi-bullseye"></i></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Running Orders</p>
+                        <h3 class="fw-bold text-dark" id="runningOrders">0 <span class="fs-6 fw-normal text-muted">Active</span></h3>
+                    </div>
+                    <div class="icon-box"><i class="bi bi-boxes"></i></div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div>
+                        <p class="text-muted small mb-1">Pending Production</p>
+                        <h3 class="fw-bold text-dark" id="pendingProduction">0 <span class="fs-6 fw-normal text-muted">Kg</span></h3>
+                    </div>
+                    <div class="icon-box"><i class="bi bi-hourglass"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Section -->
+        <div class="row g-4">
+            <div class="col-12 col-lg-13">
+                <div class="d-flex flex-column gap-4">
+                    <div class="performance-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold text-dark mb-0">Production Performance</h5>
+                            <span class="bg-teal bg-opacity-10 text-secondary px-3 py-1 rounded-pill small fw-bold">Live Status</span>
+                        </div>
+
+                        <div class="row align-items-center g-4">
+                            <div class="col-md-4 text-center">
+                                <div class="circular-progress mx-auto">
+                                    <svg width="160" height="160" viewBox="0 0 160 160">
+                                        <circle cx="80" cy="80" r="70" fill="transparent" stroke="#e6e8ea" stroke-width="12"></circle>
+                                        <circle cx="80" cy="80" r="70" fill="transparent" stroke="#006a61" stroke-width="12" stroke-dasharray="440" stroke-dashoffset="132" id="progressCircle"></circle>
+                                    </svg>
+                                    <div class="center-text">
+                                        <div class="value" id="completionPercentage">0%</div>
+                                        <div class="label">Complete</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <div class="metric-item">
+                                            <p class="text-muted small mb-0">Target</p>
+                                            <p class="fw-bold fs-5 mb-0" id="targetValue">0 Kg</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="metric-item produced">
+                                            <p class="text-muted small mb-0">Produced</p>
+                                            <p class="fw-bold fs-5 mb-0" id="producedValue">0 Kg</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="metric-item pending">
+                                            <p class="text-muted small mb-0">Pending</p>
+                                            <p class="fw-bold fs-5 mb-0" id="pendingValue">0 Kg</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 2: PRODUCTION PLANNING ==================== -->
+    <section id="page7" class="page" style="display: none;">
+        <div class="row g-3 mb-4" id="loadkpidata">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Total Plans</span>
+                        <div class="icon-box bg-dark"><i class="bi bi-list-ul" style="color: white;"></i></div>
+                    </div>
+                    <div class="mt-2">
+                        <h3 class="fw-bold fs-2 mb-0" id="totalPlans">0</h3>
+                        <p class="trend-up"><i class="bi bi-arrow-up-short"></i> +12% this month</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Running Plans</span>
+                        <div class="icon-box bg-teal"><i class="bi bi-play-circle-fill"></i></div>
+                    </div>
+                    <div class="mt-2">
+                        <h3 class="fw-bold fs-2 mb-0" id="runningPlans">0</h3>
+                        <p class="text-muted small">On 15 machines</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Completed Plans</span>
+                        <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
+                    </div>
+                    <div class="mt-2">
+                        <h3 class="fw-bold fs-2 mb-0" id="completedPlans">0</h3>
+                        <p class="text-muted small">98% success rate</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Pending Plans</span>
+                        <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
+                    </div>
+                    <div class="mt-2">
+                        <h3 class="fw-bold fs-2 mb-0" id="pendingPlans">0</h3>
+                        <p class="text-danger small d-flex align-items-center gap-1"><i class="bi bi-exclamation-triangle-fill"></i> 2 High Priority</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-bar mb-4">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search Production Plans..." id="SearchPp">
+            </div>
+            <div class="select-wrapper">
+                <select class="filter-select">
+                    <option>All Status</option>
+                    <option>Running</option>
+                    <option>Completed</option>
+                    <option>Pending</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <button class="btn-create" onclick="showpage('ProductionPlan')">
+                <i class="bi bi-plus-lg"></i> Create Production Plan
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                        <h5 class="fw-bold mb-0 d-flex align-items-center gap-2"><i class="bi bi-table text-secondary"></i> Active Production Plans</h5>
+                        <span class="text-muted small">Showing 3 of 124 plans</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Plan No</th>
+                                    <th>Order No</th>
+                                    <th>Machine</th>
+                                    <th>Dates</th>
+                                    <th>Created By</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productionPlanTable"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-3 border-top text-center bg-light bg-opacity-30">
+                        <a href="#" class="text-secondary fw-semibold text-decoration-none small">Load More Plans</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 3: CREATE PRODUCTION PLAN ==================== -->
+    <section id="ProductionPlan" class="page" style="display: none;">
+        <nav class="breadcrumb-nav">
+            <a href="#">Production Planning</a>
+            <span><i class="bi bi-chevron-right"></i></span>
+            <span class="current">Create Plan</span>
+        </nav>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <div class="form-card">
+                    <div class="card-header">
+                        <i class="bi bi-gear-fill"></i>
+                        <h2>Create Production Plan</h2>
+                    </div>
+                    <div class="card-body">
+                        <form id="planForm" method="post" action="../py/production/save_plan.py">
+                            <input type="hidden" name="user_id" id="user_id_input2">
+
+                            <div class="form-group-dashed mb-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Order Number</label>
+                                        <select class="form-select-custom" name="orderSelect" id="orderSelect" required></select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Customer Name</label>
+                                        <input type="text" class="form-control-custom readonly-highlight" value=" " readonly name="customer" id="customer">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-custom">Fabric Type</label>
+                                        <input type="text" class="form-control-custom readonly-highlight" value=" " readonly name="fabric" id="fabric">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Order Quantity (Total)</label>
+                                    <input type="text" class="form-control-custom readonly-highlight" value=" " readonly name="orderQty" id="orderQty">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">End Date</label>
+                                    <input type="date" class="form-control-custom" value="" name="end_date" id="endDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Machine</label>
+                                    <select class="form-select-custom" name="machine" id="machine1" required>
+                                        <option selected>Select Machine</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Supervisor</label>
+                                    <select class="form-select-custom" name="supervisor" id="supervisor" required>
+                                        <option selected>Select Supervisor</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label-custom">Remarks</label>
+                                    <textarea class="form-control-custom" rows="3" placeholder="Enter planning notes..." name="remarks" maxlength="100"></textarea>
+                                </div>
+                                <div class="col-12 d-flex flex-wrap gap-3 pt-3 border-top">
+                                    <button type="submit" class="btn-save"><i class="bi bi-save"></i> Save Plan</button>
+                                    <button type="submit" class="btn-cancel">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: MACHINE ALLOCATION ==================== -->
+    <section id="Machine" class="page" style="display: none;">
+        <div class="content-scroll">
+            <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div>
+                    <h2 class="page-title">Machine Allocation</h2>
+                    <p class="page-subtitle">Optimize your production floor efficiency and operator workload.</p>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <div class="view-toggle">
+                        <button class="view-btn active">Grid View</button>
+                        <button class="view-btn">List View</button>
+                    </div>
+                    <button class="btn-assign-machine" onclick="showpage('CreateMachine')">
+                        <i class="bi bi-plus-lg"></i> Assign Machine
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-13">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="row g-3">
+                            <div class="col-6 col-lg-3">
+                                <div class="kpi-card">
+                                    <span class="text-muted small text-uppercase fw-medium">Total Machines</span>
+                                    <div class="d-flex justify-content-between align-items-end mt-2">
+                                        <span class="fw-black fs-1" id="kpi_total">0</span>
+                                        <div class="icon-box"><i class="bi bi-gear"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="kpi-card border-left-teal">
+                                    <span class="text-muted small text-uppercase fw-medium">Running</span>
+                                    <div class="d-flex justify-content-between align-items-end mt-2">
+                                        <span class="fw-black fs-1 text-secondary" id="kpi_running1">18</span>
+                                        <div class="icon-box" style="background: rgba(0, 106, 97, 0.15); color: #006a61;"><i class="bi bi-play-fill"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="kpi-card">
+                                    <span class="text-muted small text-uppercase fw-medium">Idle</span>
+                                    <div class="d-flex justify-content-between align-items-end mt-2">
+                                        <span class="fw-black fs-1" id="kpi_assigned">0</span>
+                                        <div class="icon-box"><i class="bi bi-pause"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-3">
+                                <div class="kpi-card border-left-red">
+                                    <span class="text-muted small text-uppercase fw-medium">Maintenance</span>
+                                    <div class="d-flex justify-content-between align-items-end mt-2">
+                                        <span class="fw-black fs-1 text-danger" id="kpi_maintenance1">0</span>
+                                        <div class="icon-box" style="background: rgba(186, 26, 26, 0.15); color: #ba1a1a;"><i class="bi bi-tools"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="filter-bar">
+                            <span class="filter-label">Filter Status:</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="filter-chip">All</span>
+                                <span class="filter-chip">Running</span>
+                                <span class="filter-chip">Idle</span>
+                                <span class="filter-chip">Maintenance</span>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="table-custom">
+                                    <thead>
+                                        <tr>
+                                            <th>Machine Name</th>
+                                            <th>Order No</th>
+                                            <th>Operator</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="allocations_table_body1"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h5 class="fw-bold mb-3">Status Overview</h5>
+                            <div class="row g-2">
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item">
+                                        <div class="status-bar teal"></div>
+                                        <span class="status-label">Mach. A</span>
+                                        <span class="status-value teal d-block">RUNNING</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item">
+                                        <div class="status-bar teal"></div>
+                                        <span class="status-label">Mach. B</span>
+                                        <span class="status-value teal d-block">RUNNING</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item opacity-50">
+                                        <div class="status-bar red"></div>
+                                        <span class="status-label">Mach. C</span>
+                                        <span class="status-value red d-block">REPAIR</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item">
+                                        <div class="status-bar gray"></div>
+                                        <span class="status-label">Mach. D</span>
+                                        <span class="status-value gray d-block">IDLE</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item">
+                                        <div class="status-bar teal"></div>
+                                        <span class="status-label">Mach. E</span>
+                                        <span class="status-value teal d-block">RUNNING</span>
+                                    </div>
+                                </div>
+                                <div class="col-4 col-lg-2">
+                                    <div class="status-grid-item">
+                                        <div class="status-bar teal"></div>
+                                        <span class="status-label">Mach. F</span>
+                                        <span class="status-value teal d-block">RUNNING</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 5: CREATE MACHINE ALLOCATION ==================== -->
+    <section id="CreateMachine" class="page" style="display: none;">
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="metric-card">
+                    <div class="icon-box bg-teal"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Available</p>
+                        <p class="fw-bold fs-2 mb-0" id="kpi_available">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card">
+                    <div class="icon-box bg-dark"><i class="bi bi-gear"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Running</p>
+                        <p class="fw-bold fs-2 mb-0" id="kpi_running">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card">
+                    <div class="icon-box bg-red"><i class="bi bi-tools"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Maintenance</p>
+                        <p class="fw-bold fs-2 mb-0" id="kpi_maintenance">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="metric-card border-left-teal">
+                    <div class="icon-box bg-gray"><i class="bi bi-calendar3"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Today's Allocations</p>
+                        <p class="fw-bold fs-2 mb-0" id="kpi_today">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-13">
+                <div class="form-card">
+                    <div class="card-header">
+                        <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-plus-circle text-secondary"></i>
+                            Machine Assignment Form
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="assignmentForm" onsubmit="handleMachineSubmit(event)">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Production Plan</label>
+                                    <select class="form-select-custom" id="production_plan" onchange="loadPlanDetails(this.value)">
+                                        <option value="">Select Plan</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div class="info-box-dashed">
+                                        <div class="row g-2">
+                                            <div class="col-3">
+                                                <p class="text-uppercase small text-muted mb-0" style="font-size: 10px;">Order No</p>
+                                                <p class="fw-bold mb-0" id="display_order">-</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <p class="text-uppercase small text-muted mb-0" style="font-size: 10px;">Customer</p>
+                                                <p class="fw-bold mb-0" id="display_customer">-</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <p class="text-uppercase small text-muted mb-0" style="font-size: 10px;">Fabric</p>
+                                                <p class="fw-bold mb-0" id="display_fabric">-</p>
+                                            </div>
+                                            <div class="col-3">
+                                                <p class="text-uppercase small text-muted mb-0" style="font-size: 10px;">Qty Required</p>
+                                                <p class="fw-bold text-secondary mb-0" id="display_qty">-</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Select Machine</label>
+                                    <select class="form-select-custom" id="machine" onchange="updateSummary()" disabled>
+                                        <option value="">Select Machine</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Machine Operator</label>
+                                    <select class="form-select-custom" id="operator" onchange="updateSummary()" disabled>
+                                        <option value="">Select Operator</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Shift</label>
+                                    <select class="form-select-custom" id="shift" onchange="updateSummary()">
+                                        <option value="Morning">Morning</option>
+                                        <option value="Afternoon">Afternoon</option>
+                                        <option value="Night">Night</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Machine Status</label>
+                                    <select class="form-select-custom" id="status" onchange="updateSummary()">
+                                        <option value="Assigned" selected>Assigned</option>
+                                        <option value="Running">Running</option>
+                                        <option value="Maintenance">Maintenance</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Start Date</label>
+                                    <input type="date" class="form-control-custom" id="start_date" onchange="updateSummary()">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Expected End Date</label>
+                                    <input type="date" class="form-control-custom" id="end_date" onchange="updateSummary()">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label-custom">Remarks</label>
+                                    <textarea class="form-control-custom" id="remarks" rows="3" placeholder="Enter special instructions or notes..." onchange="updateSummary()" oninput="updateSummary()"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-3 mt-4 pt-3 border-top">
+                                <button type="submit" class="btn-assign">Assign Machine</button>
+                                <button type="button" class="btn-cancel-form" onclick="resetForm()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 6: ADD MACHINE ==================== -->
+    <section class="page" id="page12" style="display: none;">
+        <section class="page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h1 class="page-title">Machine</h1>
+                    <p class="page-subtitle">Manage Machine information and relationships</p>
+                </div>
+                <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
+
+                    <div class="position-relative flex-grow-1 flex-md-grow-0" style="max-width: 260px;">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" id="searchFabric" class="form-control rounded-pill ps-5" placeholder="Search Machine" style="background: #f2f4f6; border: none; padding: 8px 16px 8px 40px;">
+                    </div>
+
+                    <button class="btn btn-dark rounded-pill px-4 py-2 d-flex align-items-center gap-2 flex-shrink-0" onclick="showpage('AddMachine')">
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="d-none d-sm-inline">Add Machine</span>
+                        <span class="d-sm-none">Add</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <div class="table-responsive-scroll">
+
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Fabric Name</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="machineTablebody"></tbody>
+                </table>
+
+            </div>
+            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"></div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 7: ADD MACHINE FORM ==================== -->
+    <section class="page" id="AddMachine" style="display: none;">
+        <nav class="d-flex align-items-center gap-2 text-muted small mb-2">
+            <a href="#" class="text-decoration-none text-muted hover-secondary">Admin</a>
+            <i class="bi bi-chevron-right small"></i>
+            <a href="#" class="text-decoration-none text-muted hover-secondary">Machine</a>
+            <i class="bi bi-chevron-right small"></i>
+            <span class="fw-semibold text-dark">Add New Machine</span>
+        </nav>
+
+        <div class="mb-4">
+            <h2 class="fw-bold fs-2 text-dark">Save Machine</h2>
+            <p class="text-muted">Establish a new commercial relationship within the KnitFlow ecosystem.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <div class="form-card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-plus text-secondary"></i>
+                            <h5 class="fw-bold mb-0">General Information</h5>
+                        </div>
+                        <span class="px-3 py-1 bg-secondary bg-opacity-10 text-secondary rounded-pill small fw-bold">Auto-generated ID: COL001</span>
+                    </div>
+
+                    <form class="card-body" id="MachineForm" method="post" action="../py/Addmachine/save_addmachine.py">
+                        <input type="hidden" name="user_id" id="user_id_input">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Machine Name</label>
+                                <input type="text" class="form-control-custom" placeholder="machine Name" name="machine_name" id="machinename" required minlength="3" maxlength="20">
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-3 pt-3">
+                            <button type="submit" class="btn-save"><i class="bi bi-check-lg"></i> Save Machine</button>
+                            <button type="button" class="btn-cancel">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 8: SUPERVISOR ==================== -->
+    <section class="page" id="page13" style="display: none;">
+        <section class="page-header mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div>
+                    <h1 class="page-title">Supervisor</h1>
+                    <p class="page-subtitle">Manage Supervisor information and relationships</p>
+                </div>
+                <div class="d-flex align-items-center gap-3 w-100 w-md-auto">
+                    <div class="position-relative flex-grow-1 flex-md-grow-0" style="max-width: 260px;">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" id="searchSupervisor" class="form-control rounded-pill ps-5" placeholder="Search Supervisor" style="background: #f2f4f6; border: none; padding: 8px 16px 8px 40px;">
+                    </div>
+                    <button class="btn btn-dark rounded-pill px-4 py-2 d-flex align-items-center gap-2 flex-shrink-0" onclick="showpage('AddSupervisor')">
+                        <i class="bi bi-plus-lg"></i>
+                        <span class="d-none d-sm-inline">Add Supervisor</span>
+                        <span class="d-sm-none">Add</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div class="table-wrapper">
+            <div class="table-responsive-scroll">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Fabric Name</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="SupervisorTablebody"></tbody>
+                </table>
+            </div>
+            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"></div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 9: ADD SUPERVISOR FORM ==================== -->
+    <section class="page" id="AddSupervisor" style="display: none;">
+        <nav class="d-flex align-items-center gap-2 text-muted small mb-2">
+            <a href="#" class="text-decoration-none text-muted hover-secondary">Admin</a>
+            <i class="bi bi-chevron-right small"></i>
+            <a href="#" class="text-decoration-none text-muted hover-secondary">Supervisor</a>
+            <i class="bi bi-chevron-right small"></i>
+            <span class="fw-semibold text-dark">Add New Supervisor</span>
+        </nav>
+
+        <div class="mb-4">
+            <h2 class="fw-bold fs-2 text-dark">Save Supervisor</h2>
+            <p class="text-muted">Establish a new commercial relationship within the KnitFlow ecosystem.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <div class="form-card">
+                    <div class="card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-plus text-secondary"></i>
+                            <h5 class="fw-bold mb-0">General Information</h5>
+                        </div>
+                        <span class="px-3 py-1 bg-secondary bg-opacity-10 text-secondary rounded-pill small fw-bold">Auto-generated ID: COL001</span>
+                    </div>
+
+                    <form class="card-body" id="SupervisorForm" method="post" action="../py/Supervisor/save_Supervisor.py">
+                        <input type="hidden" name="user_id" id="user_id_input1">
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Supervisor Name</label>
+                                <input type="text" class="form-control-custom" placeholder="Fabric Name" name="Supervisor_name" id="SupervisorName" required minlength="3" maxlength="20">
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-3 pt-3">
+                            <button type="submit" class="btn-save"><i class="bi bi-check-lg"></i> Save Supervisor</button>
+                            <button type="button" class="btn-cancel">Cancel</button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 10: LOGOUT MODAL ==================== -->
+    <section id="logout" class="page" style="display: none;">
+        <div class="bg-placeholder">
+            <div class="row g-3 h-100">
+                <div class="col-8"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+            </div>
+        </div>
+
+        <div class="overlay"></div>
+
+        <div class="logout-modal" id="logoutModal">
+            <div class="text-center">
+                <div class="icon-container"><i class="bi bi-box-arrow-right"></i></div>
+                <h2 class="modal-title">Logout</h2>
+                <p class="modal-message">Are you sure you want to logout from the system? You will be redirected to the Login Screen.</p>
+
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn-logout" id="btnLogout"><span>Yes, Logout</span></button>
+                    <button class="btn-cancel" id="btnCancel">No, Stay Logged In</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+   <!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel"><i class="bi bi-shield-lock me-2"></i>Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email ID</label>
+                        <input type="email" class="form-control" id="pwd_email" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="pwd_new" required placeholder="Enter new password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="pwd_confirm" required placeholder="Confirm new password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================== -->
+<!-- SCRIPTS & INLINE ROUTING                                                  -->
+<!-- ========================================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/production.js"></script>
+<script src="../js/common.js"></script>
+
+
+<script>
+    function showpage(pageId) {
+        // 1. Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.style.display = "none";
+        });
+
+        // 2. Remove 'active' class from all sidebar navigation items
+        document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 3. Show the selected page
+        const page = document.getElementById(pageId);
+        if (!page) return;
+
+        if (pageId === "logout") {
+            page.style.display = "flex";
+        } else {
+            page.style.display = "block";
+        }
+
+        // 4. Update the active CSS class in the sidebar
+        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+        if (activeNavItem) {
+            activeNavItem.classList.add('active');
+        }
+
+        // 5. Save current page in URL hash and localStorage
+        if (pageId !== "logout") {
+            window.location.hash = pageId;
+            localStorage.setItem("activePage", pageId);
+        }
+    }
+
+    // Function to restore active page on Page Refresh or URL direct access
+    function restoreActivePage() {
+        // Priority 1: Check if there's a hash in the URL (e.g., #page7)
+        let hashPage = window.location.hash.replace("#", "");
+
+        // Priority 2: Check localStorage if no URL hash exists
+        if (!hashPage) {
+            hashPage = localStorage.getItem("activePage");
+        }
+
+        // Priority 3: Fallback to default "Dashboard"
+        if (!hashPage || !document.getElementById(hashPage)) {
+            hashPage = "Dashboard";
+        }
+
+        showpage(hashPage);
+    }
+
+    function getActiveUserId() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const userId =
+            urlParams.get("user_id") ||
+            urlParams.get("admin_id") ||
+            urlParams.get("id") ||
+            localStorage.getItem("user_id") ||
+            localStorage.getItem("admin_id") ||
+            sessionStorage.getItem("user_id") ||
+            sessionStorage.getItem("admin_id");
+
+        if (userId && userId.trim() !== "" && userId !== "null" && userId !== "undefined") {
+            return userId.trim();
+        }
+        return null;
+    }
+
+    // Handle user session validation
+    const currentUserId = getActiveUserId();
+
+    if (!currentUserId || currentUserId.trim() === "") {
+        alert("Session invalid or User ID missing. Please log in again.");
+        window.location.href = "/techvoltInstituteProject/pages/login.html";
+    } else {
+        localStorage.setItem('user_id', currentUserId);
+        sessionStorage.setItem('user_id', currentUserId);
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Populate form hidden input fields with user_id
+            const userField = document.getElementById('user_id_input');
+            const userField1 = document.getElementById('user_id_input1');
+            const userField2 = document.getElementById('user_id_input2');
+
+            if (userField) userField.value = currentUserId;
+            if (userField1) userField1.value = currentUserId;
+            if (userField2) userField2.value = currentUserId;
+
+            // Restore the active view page on refresh
+            restoreActivePage();
+
+            // Set minimum date for End Date input field
+            const today = new Date().toISOString().split('T')[0];
+            const endDateInput = document.getElementById("endDate");
+            if (endDateInput) {
+                endDateInput.setAttribute("min", today);
+            }
+        });
+    }
+
+    // Listen for browser hash changes (Back/Forward arrows)
+    window.addEventListener("hashchange", function () {
+        restoreActivePage();
+    });
+</script>
+<script src="../js/user_profile_password_update.js"></script>
+</body>
+</html>

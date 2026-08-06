@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="../js/router.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <title>Marketing Executive Dashboard - Slate & Teal ERP</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../css/marketing.css">
+    <link rel="stylesheet" href="../css/admin_dashboard.css">
+</head>
+<body id="Marketing">
+
+<!-- ========================================================================== -->
+<!-- GLOBAL SIDEBAR NAVIGATION                                                 -->
+<!-- ========================================================================== -->
+<aside class="sidebar" id="sidebar">
+    <div class="px-4 mb-4">
+        <h1 class="brand-title">Slate &amp; Teal ERP</h1>
+        <p class="brand-subtitle">Marketing Executive</p>
+    </div>
+
+    <nav class="flex-grow-1">
+        <div onclick="showpage('page1')" class="nav-item active">
+            <i class="bi bi-grid-fill"></i>
+            <span>Dashboard</span>
+        </div>
+
+        <div onclick="showpage('Enquiry')" class="nav-item">
+            <i class="bi bi-chat-dots"></i>
+            <span>Customer Enquiries</span>
+        </div>
+
+        <div onclick="showpage('page3')" class="nav-item">
+            <i class="bi bi-cart-fill"></i>
+            <span>Orders</span>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="nav-item logout" onclick="showpage('logout')">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Logout</span>
+        </div>
+    </div>
+</aside>
+
+<!-- ========================================================================== -->
+<!-- GLOBAL HEADER                                                             -->
+<!-- ========================================================================== -->
+<header class="header">
+    <div class="d-flex align-items-center gap-3">
+        <button class="sidebar-toggle" id="sidebarToggle">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="search-box d-none d-md-flex">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Search customers or enquiries...">
+        </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+
+
+        <button class="btn btn-link text-muted p-0 text-decoration-none">
+            <i class="bi bi-gear fs-5"></i>
+        </button>
+
+       <div class="d-flex align-items-center gap-3 ps-3 border-start">
+    <div class="user-details text-end">
+        <p class="fw-semibold mb-0 small" id="header-user-name">Loading...</p>
+        <p class="text-muted small mb-0" id="header-user-role" style="font-size: 12px;">Loading...</p>
+    </div>
+
+    <!-- Dropdown Trigger Wrapper -->
+    <div class="dropdown">
+        <img class="user-avatar dropdown-toggle" id="header-user-avatar"
+             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJPJKf9zB2OGh1LbAKFCorboRbXM0DaEVKXIOKWfLAiCIEzZ43jXwUtc2C1rFuRfUw_usMGdraAJ1UddmT3uqR9NuRZchsWnwwP6x0ks6axW46HHqsIb4bKggw2XYTSVaUDzSpbAxqYyLqaDYYrl4ZtpTv1qw0SEBrrcLXuELAtNCUci6JxdQkPpRvp_AbJBeyPJ2l9ZAyMqGgzgGu_19nO7udK7aCqQX2RshfP4Ag57haajX1BmNrWWwg-bve-HxC18HflOSdiOk"
+             alt="User Avatar"
+             data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">
+
+        <!-- Dropdown Menu -->
+        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="header-user-avatar">
+            <li class="px-3 py-2 border-bottom">
+                <span class="d-block text-muted small">Logged in as:</span>
+                <strong id="header-dropdown-userid" class="text-primary">EMP000</strong>
+            </li>
+            <li>
+                <label class="dropdown-item mb-0" style="cursor: pointer;">
+                    <i class="bi bi-camera me-2"></i> Add Profile Picture
+                    <!-- NEW (FIXED) -->
+                    <input type="file" id="profilePicInput" accept="image/*" style="display: none;">
+                </label>
+            </li>
+            <li>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    <i class="bi bi-key me-2"></i> Change Password
+                </a>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+<!--                <a class="dropdown-item text-danger" href="/techvoltInstituteProject/pages/login.html" onclick="localStorage.clear(); sessionStorage.clear();">-->
+<!--                    <i class="bi bi-box-arrow-right me-2"></i> Logout-->
+<!--                </a>-->
+            </li>
+        </ul>
+    </div>
+</div>
+
+    </div>
+</header>
+
+<!-- ========================================================================== -->
+<!-- MAIN SCREEN VIEW CONTAINER                                                 -->
+<!-- ========================================================================== -->
+<main id="executive" class="main-content">
+
+    <!-- ==================== SCREEN 1: DASHBOARD OVERVIEW ==================== -->
+    <section id="page1" class="p-4 p-md-5 page">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold text-dark fs-2">Welcome Marketing Executive</h2>
+                <p class="text-muted">Here is your manufacturing performance overview.</p>
+            </div>
+            <span class="badge bg-light text-dark border px-3 py-2">
+                Today's Enquiries: <strong id="dashTodayCount" class="text-primary">0</strong>
+            </span>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card fade-in">
+                    <div class="icon-box bg-primary"><i class="bi bi-people"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Total Customers</p>
+                        <p class="fw-bold fs-3 mb-0" id="dashTotalCustomers">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card fade-in" data-delay="100">
+                    <div class="icon-box bg-secondary"><i class="bi bi-envelope"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">New Enquiries</p>
+                        <p class="fw-bold fs-3 text-secondary mb-0" id="dashNewEnquiries">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card fade-in" data-delay="200">
+                    <div class="icon-box bg-tertiary"><i class="bi bi-file-text"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Quotations Sent</p>
+                        <p class="fw-bold fs-3 mb-0" id="dashQuotationsSent">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card fade-in" data-delay="300">
+                    <div class="icon-box bg-teal"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <p class="text-muted small mb-0">Confirmed Orders</p>
+                        <p class="fw-bold fs-3 mb-0" id="dashConfirmedOrders">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Enquiries Section -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-13">
+                <div class="bg-white p-4 rounded-3 border shadow-sm fade-in" data-delay="400">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold text-dark mb-0">Recent Enquiries</h5>
+                    </div>
+                    <div id="recentEnquiriesList">
+                        <p class="text-muted small">Loading recent enquiries...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 3: ORDERS ==================== -->
+    <section class="page" id="page3" style="display: none;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="page-title">Orders</h2>
+                <p class="page-subtitle">Manage and monitor customer orders</p>
+            </div>
+            <div>
+                <button class="btn btn-secondary px-4 py-2 rounded-3 d-flex align-items-center gap-2" onclick="showpage('CreateOrder')">
+                    <i class="bi bi-plus-lg"></i>
+                    Create Order
+                </button>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-dark-light"><i class="bi bi-bag"></i></div>
+                        <span class="trend-label text-secondary">+12% vs LW</span>
+                    </div>
+                    <p class="text-muted small fw-medium mb-0">Total Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiTotalOrders">1,284</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-blue"><i class="bi bi-arrow-repeat"></i></div>
+                        <span class="trend-label text-primary">Active</span>
+                    </div>
+                    <p class="text-muted small fw-medium mb-0">Running Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiRunningOrders">45</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
+                        <span class="trend-label text-success">Completed</span>
+                    </div>
+                    <p class="text-muted small fw-medium mb-0">Completed Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiCompletedOrders">1,202</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-box bg-red"><i class="bi bi-hourglass"></i></div>
+                        <span class="trend-label text-danger">Action Required</span>
+                    </div>
+                    <p class="text-muted small fw-medium mb-0">Pending Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiPendingOrders">37</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container mb-4">
+            <div class="px-4 py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <h5 class="fw-bold mb-0">Recent Orders</h5>
+                <div class="d-flex align-items-center gap-2 w-100 w-md-auto">
+                    <div class="position-relative flex-grow-1" style="max-width: 260px;">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        <input type="text" id="searchOrder" class="form-control rounded-3 ps-5" placeholder="Search Orders" style="background: #f2f4f6; border: 1px solid #c6c6cd; padding: 6px 12px 6px 40px; font-size: 14px;">
+                    </div>
+                    <button class="btn btn-light border p-2 rounded-3"><i class="bi bi-funnel"></i></button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>Order No</th>
+                            <th>Customer</th>
+                            <th>Quantity</th>
+                            <th>Delivery Date</th>
+                            <th>Created By</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+            <div class="px-4 py-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2"></div>
+        </div>
+
+        <!-- Customer Details Modal -->
+        <div class="modal fade" id="detailsModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow rounded-4">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title"><i class="bi bi-person-circle"></i> Customer Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Customer Name</small>
+                                    <h6 class="fw-bold mb-0" id="modalCustomerName">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Email</small>
+                                    <h6 class="fw-bold mb-0" id="modalEmail">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Phone / Company</small>
+                                    <h6 class="fw-bold mb-0" id="modalPhone">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Status</small><br>
+                                    <span class="badge" id="modalStatusBadge">--</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Fabric / GSM</small>
+                                    <h6 class="fw-bold mb-0" id="modalFabric">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Color</small>
+                                    <h6 class="fw-bold mb-0" id="modalColor">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Total Price</small>
+                                    <h6 class="fw-bold mb-0 text-success" id="modalPrice">--</h6>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card border-0 bg-light p-2">
+                                    <small class="text-muted">Description/Remarks</small>
+                                    <p class="mb-0 mt-1" id="modalRemarks">--</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 4: CREATE ORDER ==================== -->
+    <section id="CreateOrder" class="page" style="display: none;">
+        <div class="toast-custom" id="createorderToast">
+            <div class="toast-body">
+                <div class="toast-icon"><i class="bi bi-check-circle-fill"></i></div>
+                <div>
+                    <p class="fw-bold mb-0 small">Order Created Successfully</p>
+                    <p class="text-muted small mb-0">Order Number: <span class="fw-bold text-secondary">ORD001</span> | Customer: <span class="fw-bold">ABC Garments</span></p>
+                </div>
+                <button class="btn btn-link text-muted p-0 text-decoration-none ms-2" onclick="hideorderToast();"><i class="bi bi-x"></i></button>
+            </div>
+        </div>
+
+        <div class="breadcrumb-custom">
+            <span>Orders</span>
+            <span class="separator"><i class="bi bi-chevron-right"></i></span>
+            <span class="current">Create Order</span>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div>
+                <h2 class="fw-bold fs-1 text-dark">Create Order</h2>
+                <p class="text-muted">Setup a new production run for fabric manufacturing.</p>
+            </div>
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+                <button class="btn btn-outline-secondary px-4 py-2 rounded-3">Cancel</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-3 d-flex align-items-center gap-2" form="orderForm" type="submit">
+                    <i class="bi bi-save"></i> Save Order
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-13">
+                <form action="../py/orders/save_order.py" method="post" id="orderForm">
+                    <input type="hidden" name="customer_id" id="customerId">
+<!--                    TO PASS USER ID-->
+                    <input type="hidden" name="user_id" id="user_id_input">
+
+                    <div class="form-card">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Customer</label>
+                                <select class="form-control-custom" id="customerSelect" name="customer" required></select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Customer Contact</label>
+                                <input type="text" class="form-control-custom" id="customerContact" value="" name="contact" required minlength="10" maxlength="10" pattern="[6-9][0-9]{9}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">fabric type</label>
+                                <input type="text" class="form-control-custom" id="fabric_type" name="fabric_type" required minlength="10" maxlength="10" pattern="[6-9][0-9]{9}" readonly>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Fabric GSM</label>
+                                <div class="position-relative">
+                                    <input type="number" class="form-control-custom with-icon" value="0" name="gsm" required min="1" step="1" readonly>
+                                    <span class="input-suffix">g/m²</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Color</label>
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control-custom" value="Blue" id="colorInput" name="color" required minlength="3" maxlength="30" pattern="[A-Za-z ]+" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Order Quantity</label>
+                                <div class="position-relative">
+                                    <input type="number" class="form-control-custom with-icon fw-bold text-secondary" id="quantity1" value="0" name="quantity" required min="1" step="0.01" readonly>
+                                    <span class="input-suffix">Kg</span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Price Per Kg</label>
+                                <div class="position-relative">
+                                    <span class="input-icon"><i class="bi bi-currency-rupee"></i></span>
+                                    <input type="number" class="form-control-custom with-icon" id="price" value="0" oninput="calculateTotal()" name="price" required min="1" step="0.01" readonly>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Payment Percentage</label>
+                                <div class="position-relative">
+                                    <input type="number" class="form-control-custom with-icon fw-bold text-secondary" id="percentage" value="0" name="percentage" required min="1" step="0.01" readonly>
+                                    <span class="input-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="total-box">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center">
+                                        <div>
+                                            <div class="total-label">Total Estimated Amount</div>
+                                            <div class="total-amount" id="totalAmounts">₹0</div>
+                                        </div>
+                                        <div class="total-note">*Calculated based on Qty x Price</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Required Delivery Date</label>
+                                <input type="date" class="form-control-custom border border-secondary" value="" name="delivery_date" id="delivery_date" required>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="form-label-custom">Money Transition</label>
+                                <div class="radio-group-custom">
+                                    <label class="radio-item"><input type="radio" name="money" value="UPI"><span>UPI</span></label>
+                                    <label class="radio-item"><input type="radio" name="money" value="Cash"><span>Cash</span></label>
+                                    <label class="radio-item"><input type="radio" name="money" value="Card" checked><span class="label-high">Card</span></label>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label-custom">Special Remarks</label>
+                                <textarea class="form-control-custom" rows="3" placeholder="Enter any specific requirements for production or dyeing..." name="remarks" maxlength="500"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 5: CUSTOMER ENQUIRIES ==================== -->
+    <section id="Enquiry" class="page" style="display: none;">
+        <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <nav class="breadcrumb-custom">
+                    <a href="#">Dashboard</a>
+                    <span><i class="bi bi-chevron-right"></i></span>
+                    <span class="current">Enquiries</span>
+                </nav>
+                <h2 class="page-title">Customer Enquiries</h2>
+            </div>
+            <div class="action-bar">
+                <div class="d-flex align-items-center gap-2 border rounded-3 px-3 py-2 bg-light">
+                    <i class="bi bi-funnel text-muted"></i>
+                    <select class="filter-select">
+                        <option>Status: All Enquiries</option>
+                        <option>Status: Pending</option>
+                        <option>Status: Follow-up</option>
+                        <option>Status: Converted</option>
+                    </select>
+                </div>
+                <button class="btn-new-enquiry" onclick="showpage('CreateEnquiry')">
+                    <i class="bi bi-plus-lg"></i>
+                    New Enquiry
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="icon-box bg-primary-light"><i class="bi bi-file-text"></i></div>
+                        <span class="trend-up">+12% vs LY</span>
+                    </div>
+                    <p class="text-muted small">Total Enquiries</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="totalEnquiries">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="icon-box bg-teal"><i class="bi bi-clock"></i></div>
+                        <span class="text-muted small">Current Batch</span>
+                    </div>
+                    <p class="text-muted small">Pending Enquiries</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="pendingEnquiries">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="icon-box bg-tertiary"><i class="bi bi-arrow-right"></i></div>
+                        <span class="trend-label text-danger">Action Needed</span>
+                    </div>
+                    <p class="text-muted small">Follow-up Required</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="followupRequired">0</h3>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="kpi-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
+                        <span class="trend-up">61.5% Rate</span>
+                    </div>
+                    <p class="text-muted small">Converted Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0" id="convertedOrders">0</h3>
+                </div>
+            </div>
+        </div>
+
+           <!-- ===== FILTER BAR ===== -->
+        <div class="filter-bar mb-4">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" placeholder="Search User" id="searchEnquiry">
+            </div>
+
+            <button class="btn-refresh" id="enquiryRefresh">
+                <i class="bi bi-arrow-repeat fs-5"></i>
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-xl-13">
+                <div class="d-flex flex-column gap-3">
+                    <div class="table-container">
+                        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-light">
+                            <h5 class="fw-bold mb-0">Recent Enquiries</h5>
+                            <a href="#" class="text-secondary fw-semibold text-decoration-none small">View All</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Enquiry No</th>
+                                        <th>Customer</th>
+                                        <th>Fabric Type</th>
+                                        <th>Quantity</th>
+                                        <th>Enquiry date</th>
+                                        <th>Created By</th>
+                                        <th class="text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="enquiryTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 6: CREATE ENQUIRY ==================== -->
+    <section id="CreateEnquiry" class="page" style="display: none;">
+        <div class="toast-custom" id="successenquiryToast" style="position: fixed; bottom: 32px; right: 32px; z-index: 1060; background: #191c1e; color: #f7f9fb; padding: 16px 24px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 16px; transform: translateY(96px); transition: transform 0.3s ease;">
+            <div style="width: 32px; height: 32px; background: #006a61; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-check-lg" style="color: #ffffff; font-size: 18px;"></i>
+            </div>
+            <div>
+                <p class="fw-bold small mb-0">Enquiry Saved Successfully</p>
+                <p class="small opacity-75 mb-0">ENQ001 has been created.</p>
+            </div>
+            <button onclick="hideToast()" style="background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; padding: 4px;">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="content-scroll">
+            <div class="row g-4">
+                <div class="col-lg-13">
+                    <div class="form-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
+                                <i class="bi bi-plus-circle text-secondary"></i>
+                                Create Customer Enquiry
+                            </h5>
+                            <span class="px-3 py-1 bg-teal bg-opacity-10 text-secondary rounded-pill small fw-bold">ENQ001</span>
+                        </div>
+
+                        <form id="enquiryForm" onsubmit="saveEnquiry(event)" method="POST" novalidate>
+<!--                            to store admin id-->
+                            <input type="hidden" name="admin_id" id="session_admin_id">
+
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-person-badge text-secondary"></i>
+                                <h5 class="fw-bold mb-0">Personal Details</h5>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Customer Name</label>
+                                    <input type="text" class="form-control-custom" name="customer_name" placeholder="Enter Name" required minlength="3" maxlength="50" oninput="this.value = this.value.replace(/[0-9]/g, '');">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Company Name</label>
+                                    <input type="text" class="form-control-custom" name="company_name" placeholder="Company Name" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="gst_number" class="form-label-custom">GST Number</label>
+                                    <input type="text" id="gst_number" class="form-control-custom text-uppercase" name="gst_number" placeholder="33ABCDE1234F1Z5" required minlength="15" maxlength="15" pattern="[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}" title="GST must be exactly 15 characters (e.g. 33ABCDE1234F1Z5)">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Phone</label>
+                                    <input type="text" class="form-control-custom" name="phone_number" placeholder="10-digit mobile" required maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');" pattern="[6-9][0-9]{9}" title="Phone must be exactly 10 digits and start with 6, 7, 8, or 9">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Email Address</label>
+                                    <input type="email" class="form-control-custom" name="email" placeholder="abc@gmail.com" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Fabric GSM</label>
+                                    <input type="number" class="form-control-custom" name="fabric_gsm" placeholder="180" required min="1" max="500">
+                                </div>
+
+                                <div id="dynamicDropdowns" class="row g-3"></div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label-custom">Required Quantity (Kg)</label>
+                                    <input type="number" class="form-control-custom" name="quantity" placeholder="5000" required min="5">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label-custom">Source</label>
+                                    <select class="form-select-custom" name="source" required>
+                                        <option selected>Phone</option>
+                                        <option>Email</option>
+                                        <option>Walk-in</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label-custom">Remarks</label>
+                                    <textarea class="form-control-custom" name="remarks" rows="2" required placeholder="Enter remarks..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="border-top pt-4 mt-4 mb-3">
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-geo-alt text-secondary"></i>
+                                    <h5 class="fw-bold mb-0">Address Details</h5>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label-custom">Address</label>
+                                        <input type="text" class="form-control-custom" name="address" required placeholder="Door No, Street Name...">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom">City</label>
+                                        <input type="text" class="form-control-custom" name="city" required oninput="this.value = this.value.replace(/[0-9]/g, '');">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom">State</label>
+                                        <input type="text" class="form-control-custom" name="state" required oninput="this.value = this.value.replace(/[0-9]/g, '');">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label-custom">Pincode</label>
+                                        <input type="text" class="form-control-custom" name="pincode" required maxlength="6" oninput="this.value = this.value.replace(/[^0-9]/g, '');" pattern="[0-9]{6}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 d-flex flex-wrap gap-3 mt-4">
+                                <button type="submit" class="btn-save-enquiry">Save Enquiry</button>
+                                <button type="reset" class="btn-cancel-enquiry">Clear</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== SCREEN 7: LOGOUT MODAL ==================== -->
+    <section id="logout" class="page" style="display: none;">
+        <div class="bg-placeholder">
+            <div class="row g-3 h-100">
+                <div class="col-8"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+                <div class="col-4"><div class="placeholder-card"></div></div>
+            </div>
+        </div>
+
+        <div class="overlay"></div>
+
+        <div class="logout-modal" id="logoutModal">
+            <div class="text-center">
+                <div class="icon-container">
+                    <i class="bi bi-box-arrow-right"></i>
+                </div>
+
+                <h2 class="modal-title">Logout</h2>
+                <p class="modal-message">Are you sure you want to logout from the system? You will be redirected to the Login Screen.</p>
+
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn-logout" id="btnLogout">
+                        <span>Yes, Logout</span>
+                    </button>
+                    <button class="btn-cancel" id="btnCancel">
+                        No, Stay Logged In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel"><i class="bi bi-shield-lock me-2"></i>Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Email ID</label>
+                        <input type="email" class="form-control" id="pwd_email" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="pwd_new" required placeholder="Enter new password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="pwd_confirm" required placeholder="Confirm new password">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</main>
+
+<!-- ========================================================================== -->
+<!-- SCRIPTS & INLINE ROUTING                                                  -->
+<!-- ========================================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../js/common.js"></script>
+<script src="../js/user_profile_password_update.js"></script>
+<script src="../js/marketing.js"></script>
+
+<script>
+    function showpage(pageId) {
+        // 1. Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.style.display = "none";
+        });
+
+        // 2. Remove 'active' class from all sidebar navigation items
+        document.querySelectorAll('.sidebar .nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // 3. Show the selected page
+        const page = document.getElementById(pageId);
+        if (!page) return;
+
+        if (pageId === "logout") {
+            page.style.display = "flex";
+        } else {
+            page.style.display = "block";
+        }
+
+        // 4. Update the active CSS class in the sidebar
+        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+        if (activeNavItem) {
+            activeNavItem.classList.add('active');
+        }
+
+        // 5. Save current page in URL hash and localStorage
+        if (pageId !== "logout") {
+            window.location.hash = pageId;
+            localStorage.setItem("activePage", pageId);
+        }
+    }
+
+    // Function to restore active page on Page Refresh or URL direct access
+    function restoreActivePage() {
+        // Priority 1: Check if there's a hash in the URL (e.g., #page3)
+        let hashPage = window.location.hash.replace("#", "");
+
+        // Priority 2: Check localStorage if no URL hash exists
+        if (!hashPage) {
+            hashPage = localStorage.getItem("activePage");
+        }
+
+        // Priority 3: Fallback to default page1 (Dashboard)
+        if (!hashPage || !document.getElementById(hashPage)) {
+            hashPage = "page1";
+        }
+
+        showpage(hashPage);
+    }
+
+    function getActiveUserId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hiddenInput = document.getElementById("session_admin_id");
+
+        const userId =
+            (hiddenInput ? hiddenInput.value : "") ||
+            urlParams.get("user_id") ||
+            urlParams.get("admin_id") ||
+            urlParams.get("id") ||
+            localStorage.getItem("user_id") ||
+            localStorage.getItem("admin_id") ||
+            sessionStorage.getItem("user_id") ||
+            sessionStorage.getItem("admin_id");
+
+        if (userId && userId.trim() !== "" && userId !== "null" && userId !== "undefined") {
+            return userId.trim();
+        }
+        return null;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Restore active page state on refresh
+        restoreActivePage();
+
+        const currentUserId = getActiveUserId();
+        if (currentUserId) {
+            const hiddenField = document.getElementById('session_admin_id');
+            if (hiddenField) hiddenField.value = currentUserId;
+
+            localStorage.setItem('user_id', currentUserId);
+            sessionStorage.setItem('user_id', currentUserId);
+        }
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener("hashchange", function() {
+        restoreActivePage();
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUserId = urlParams.get('user_id') || urlParams.get('admin_id');
+
+    if (!currentUserId || currentUserId.trim() === "") {
+        alert("Session invalid or User ID missing. Please log in again.");
+        window.location.href = "/techvoltInstituteProject/pages/login.html";
+    } else {
+        const userField = document.getElementById('user_id_input');
+        if (userField) {
+            userField.value = currentUserId.trim();
+        }
+    }
+</script>
+
+</body>
+</html>

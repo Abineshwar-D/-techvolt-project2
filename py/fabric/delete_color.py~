@@ -1,0 +1,45 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgitb
+import cgi
+import pymysql
+
+cgitb.enable()
+
+print("Content-Type: text/html\n")
+
+# 1. Database Connection
+conn = pymysql.connect(
+    host="localhost",
+    user="root",
+    password="",
+    database="techvoltproject2"
+)
+
+cursor = conn.cursor()
+
+# 2. Get the form data
+form = cgi.FieldStorage()
+fabric_id = form.getvalue("fab_id")
+color_name = form.getvalue("color_name")
+
+if fabric_id and color_name:
+    try:
+        # 3. Delete the color from the database
+        cursor.execute("DELETE FROM fabric_colors WHERE fabric_id = %s AND color_name = %s", (fabric_id, color_name))
+        conn.commit()
+
+        # 4. Success Alert and Redirect back to dashboard
+        print(f"""
+        <script>
+            alert("Color deleted successfully!");
+            window.location.href = "/techvoltInstituteProject/pages/admin_dashboard.html";
+        </script>
+        """)
+    except Exception as e:
+        print(f"<h3>Error: {e}</h3>")
+else:
+    print("<h3>Error: ID or color name not received.</h3>")
+
+cursor.close()
+conn.close()

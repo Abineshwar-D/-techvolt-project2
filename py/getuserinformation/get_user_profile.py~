@@ -1,0 +1,142 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import pymysql
+import json
+import os
+import time
+
+cgitb.enable()
+print("Content-Type: application/json\r\n\r\n")
+
+form = cgi.FieldStorage()
+action = form.getvalue("action")
+user_id = form.getvalue("user_id")
+
+response = {"success": False, "message": "Invalid request or missing User ID"}
+
+
+def get_db_connection():
+    return pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2",
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+
+if user_id:
+    user_id = user_id.strip()
+    try:
+        con = get_db_connection()
+        cur = con.cursor()
+
+        # FETCH USER DETAILS
+        if action == "fetch":
+            cur.execute("SELECT employee_id, fullname, email, role, profile_pic FROM users WHERE employee_id=%s",
+                        (user_id,))
+            user_data = cur.fetchone()
+
+            if not user_data:
+                cur.execute(
+                    "SELECT employee_id, fullname, email, 'Admin' as role, profile_pic FROM admin WHERE employee_id=%s",
+                    (user_id,))
+                user_data = cur.fetchone()
+
+            if user_data:
+                if not user_data.get("email"):
+                    user_data["email"] = ""
+                response = {"success": True, "data": user_data}
+            else:
+                response = {"success": False, "message": f"User ID '{user_id}' not found"}
+
+        # UPLOAD PROFILE PICTURE
+        elif action == "upload_pic":
+            if "profile_pic" in form:
+                fileitem = form["profile_pic"]
+
+                # Retrieve filename safely
+                filename_orig = getattr(fileitem, 'filename', None)
+
+                if filename_orig:
+                    # Target physical folder: C:\xampp\htdocs\techvoltInstituteProject\uploads
+                    script_dir = os.path.dirname(os.path.abspath(__file__))
+                    project_root = os.path.dirname(script_dir)
+                    upload_dir = os.path.join(project_root, "uploads")
+
+                    # Ensure directory exists
+                    if not os.path.exists(upload_dir):
+                        os.makedirs(upload_dir, exist_ok=True)
+
+                    ext = os.path.splitext(os.path.basename(filename_orig))[1].lower()
+                    if not ext:
+                        ext = ".png"
+
+                    new_filename = f"avatar_{user_id}_{int(time.time())}{ext}"
+                    filepath = os.path.join(upload_dir, new_filename)
+
+                    # --- FAIL-SAFE FILE WRITING ---
+                    file_data = None
+
+                    # Method A: Try reading binary file stream
+                    if hasattr(fileitem, 'file') and fileitem.file:
+                        fileitem.file.seek(0)
+                        file_data = fileitem.file.read()
+
+                    # Method B: Fallback to .value
+                    if not file_data and hasattr(fileitem, 'value'):
+                        file_data = fileitem.value
+
+                    if file_data:
+                        # Write bytes to disk
+                        with open(filepath, "wb") as f:
+                            if isinstance(file_data, str):
+                                f.write(file_data.encode('latin1'))
+                            else:
+                                f.write(file_data)
+
+                        # Check if file was physically created
+                        if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                            web_path = f"/techvoltInstituteProject/uploads/{new_filename}"
+
+                            rows = cur.execute("UPDATE users SET profile_pic=%s WHERE employee_id=%s",
+                                               (web_path, user_id))
+                            if rows == 0:
+                                cur.execute("UPDATE admin SET profile_pic=%s WHERE employee_id=%s", (web_path, user_id))
+
+                            con.commit()
+
+                            response = {
+                                "success": True,
+                                "message": "Profile picture updated successfully!",
+                                "image_url": web_path
+                            }
+                        else:
+                            response = {"success": False, "message": f"File created but empty at path: {filepath}"}
+                    else:
+                        response = {"success": False, "message": "Could not read binary data from uploaded file."}
+                else:
+                    response = {"success": False, "message": "No file chosen or filename missing."}
+            else:
+                response = {"success": False, "message": "Form field 'profile_pic' missing."}
+
+        # CHANGE PASSWORD
+        elif action == "change_password":
+            new_password = form.getvalue("new_password")
+            if new_password:
+                rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                if rows == 0:
+                    cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
+
+                con.commit()
+                response = {"success": True, "message": "Password updated successfully!"}
+            else:
+                response = {"success": False, "message": "New password is required"}
+
+        con.close()
+    except Exception as e:
+        response = {"success": False, "message": f"Python Script Error: {str(e)}"}
+
+print(json.dumps(response))

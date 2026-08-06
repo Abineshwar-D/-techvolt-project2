@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChatHistory">
+    <accountData>
+      <list>
+        <AccountData>
+          <accountId value="VXNlcjo5MTM0MjI=" />
+          <chats>
+            <list>
+              <chat>
+                <internalId value="3f480009-bb87-4a26-8761-20bae8e87f81" />
+                <llm>
+                  <llm>
+                    <model value="anthropic/claude-3-5-sonnet-20240620" />
+                    <provider value="Anthropic" />
+                    <tags>
+                      <list>
+                        <option value="gateway" />
+                        <option value="accuracy" />
+                        <option value="recommended" />
+                        <option value="free" />
+                      </list>
+                    </tags>
+                    <title value="Claude 3.5 Sonnet" />
+                    <usage>
+                      <list>
+                        <option value="chat" />
+                        <option value="edit" />
+                      </list>
+                    </usage>
+                  </llm>
+                </llm>
+                <messages>
+                  <list>
+                    <message>
+                      <speaker value="HUMAN" />
+                      <text value="@...\py\orders\get_customer_dropdown.py @...\techvoltInstituteProject\pages\Marketing.html &#10;@...\py\orders\get_orders.py &#10;In the **Orders** screen form, when the user clicks the **Select Customer** dropdown, the customer names are fetched from the `customers_enquiry` table.&#10;&#10;However, customers who have already been saved in the `orders` table should not be displayed in this dropdown. Only customers who are not yet stored in the `orders` table should be shown.&#10;&#10;Please update the code to apply this condition.&#10;" />
+                    </message>
+                    <message>
+                      <speaker value="ASSISTANT" />
+                      <text value="&lt;html&gt;&lt;b&gt;&amp;#9888; Error performing this action&lt;/b&gt;&lt;br&gt;&lt;br&gt;Please retry sending your message. If you tried to run a command, try it again.&lt;br&gt;If the issue persists, please &lt;a href=&quot;https://github.com/sourcegraph/jetbrains/issues/new?template=bug_report.yml&amp;labels=bug&amp;projects=sourcegraph/381&amp;title=bug%3A+Request+to+https%3A%2F%2Fsourcegraph.com%2F.api%2Fcompletions%2Fstream%3Fapi-version%3D1%26client-name%3Djetbrains%26client-version%3D6.0.34+failed+w...&amp;about=PyCharm+2022.3.3+%28Community+Edition%29%0ABuild+%23PC-223.8836.43%2C+built+on+March+10%2C+2023%0ARuntime+version%3A+17.0.6%2B1-b653.34+amd64%0AVM%3A+OpenJDK+64-Bit+Server+VM+by+JetBrains+s.r.o.%0AWindows+11+10.0%0AGC%3A+G1+Young+Generation%2C+G1+Old+Generation%0AMemory%3A+980M%0ACores%3A+8%0ANon-Bundled+Plugins%3A%0A++++com.sourcegraph.jetbrains+%286.0.34%29%0A&amp;logs=Stacktrace%3A%0A%60%60%60text%0ARequest+to+https%3A%2F%2Fsourcegraph.com%2F.api%2Fcompletions%2Fstream%3Fapi-version%3D1%26client-name%3Djetbrains%26client-version%3D6.0.34+failed+with+401+Unauthorized%3A+%7B%22message%22%3A%22status+401%2C+reason+completions+are+not+enabled%22%2C%22type%22%3A%22completions_disabled%22%7D%0A%0A%60%60%60&quot;&gt;create a support ticket&lt;/a&gt;.&lt;br&gt;&lt;br&gt;&lt;sub&gt;Error: Request to https://sourcegraph.com/.api/completions/stream?api-version=1&amp;client-name=jetbrains&amp;client-version=6.0.34 failed with 401 Unauthorized: {&quot;message&quot;:&quot;status 401, reason completions are not enabled&quot;,&quot;type&quot;:&quot;completions_disabled&quot;}&#10;&lt;/sub&gt;&lt;/html&gt;" />
+                    </message>
+                  </list>
+                </messages>
+                <updatedAt value="2026-07-22T13:02:31.0282683" />
+              </chat>
+            </list>
+          </chats>
+          <defaultLlm>
+            <llm>
+              <model value="anthropic/claude-3-5-sonnet-20240620" />
+              <provider value="Anthropic" />
+              <tags>
+                <list>
+                  <option value="gateway" />
+                  <option value="accuracy" />
+                  <option value="recommended" />
+                  <option value="free" />
+                </list>
+              </tags>
+              <title value="Claude 3.5 Sonnet" />
+              <usage>
+                <list>
+                  <option value="chat" />
+                  <option value="edit" />
+                </list>
+              </usage>
+            </llm>
+          </defaultLlm>
+        </AccountData>
+      </list>
+    </accountData>
+  </component>
+</project>

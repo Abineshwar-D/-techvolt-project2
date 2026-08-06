@@ -1,0 +1,1842 @@
+    * {
+            font-family: 'Inter', sans-serif;
+        }
+
+       #productionexecutive body {
+            background: #f7f9fb;
+            min-height: 100vh;
+        }
+
+        /* ========== SIDEBAR ========== */
+       #productionexecutive .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: #ffffff;
+            border-right: 1px solid #c6c6cd;
+            z-index: 1050;
+            padding: 16px 0;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+       #productionexecutive .sidebar .brand-title {
+            font-weight: 900;
+            font-size: 18px;
+            color: #000000;
+        }
+
+       #productionexecutive .sidebar .brand-subtitle {
+            font-size: 14px;
+            color: #45464d;
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+       #productionexecutive .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 0 8px;
+            border-radius: 8px;
+            color: #45464d;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+       #productionexecutive .nav-item:hover {
+            background: #e6e8ea;
+        }
+
+       #productionexecutive .nav-item.active {
+            background: #86f2e4;
+            color: #006f66;
+            font-weight: 700;
+        }
+
+       #productionexecutive .nav-item i {
+            font-size: 20px;
+        }
+
+       #productionexecutive .nav-item span {
+            font-size: 14px;
+        }
+
+       #productionexecutive .nav-item.logout {
+            color: #ba1a1a;
+        }
+
+       #productionexecutive .nav-item.logout:hover {
+            background: rgba(186, 26, 26, 0.1);
+        }
+
+       #productionexecutive .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid rgba(198, 198, 205, 0.3);
+        }
+
+        /* ========== HEADER ========== */
+       #productionexecutive .header {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            background: #eceef0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
+       #productionexecutive .header .search-box {
+            position: relative;
+        }
+
+       #productionexecutive .header .search-box input {
+            background: #eceef0;
+            border: none;
+            border-radius: 50px;
+            padding: 8px 16px 8px 40px;
+            width: 260px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+       #productionexecutive .header .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.2);
+        }
+
+       #productionexecutive .header .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #45464d;
+            font-size: 14px;
+        }
+
+       #productionexecutive .header .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(198, 198, 205, 0.3);
+        }
+
+        /* ========== MAIN CONTENT ========== */
+    #production.main-content {
+            margin-left: 260px;
+            min-height: calc(100vh - 64px);
+            padding: 24px;
+        }
+
+        /* ========== KPI CARDS ========== */
+      #Dashboard  .kpi-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid rgba(198, 198, 205, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: default;
+        }
+
+       #Dashboard  .kpi-card:hover {
+            border-color: #006a61;
+        }
+
+       #Dashboard  .kpi-card .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: rgba(19, 27, 46, 0.1);
+            color: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+       #Dashboard  .kpi-card:hover .icon-box {
+            background: #006a61;
+            color: #ffffff;
+        }
+
+       #Dashboard  .kpi-card .icon-box i {
+            font-size: 22px;
+        }
+
+        /* ========== PRODUCTION PERFORMANCE ========== */
+       #Dashboard  .performance-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(198, 198, 205, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 24px;
+            height: 100%;
+        }
+
+       #Dashboard  .circular-progress {
+            position: relative;
+            width: 160px;
+            height: 160px;
+        }
+
+       #Dashboard  .circular-progress svg {
+            transform: rotate(-90deg);
+        }
+
+       #Dashboard  .circular-progress .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+       #Dashboard  .circular-progress .center-text .value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #000000;
+        }
+
+       #Dashboard  .circular-progress .center-text .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #45464d;
+        }
+
+       #Dashboard  .metric-item {
+            padding-left: 16px;
+            border-left: 4px solid #bec6e0;
+        }
+
+       #Dashboard  .metric-item.produced {
+            border-left-color: #006a61;
+        }
+
+       #Dashboard  .metric-item.pending {
+            border-left-color: rgba(186, 26, 26, 0.3);
+        }
+
+        /* ========== PRODUCTION ANALYTICS ========== */
+       #Dashboard  .analytics-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(198, 198, 205, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            padding: 24px;
+            height: 100%;
+        }
+
+       #Dashboard  .progress-analytics {
+            height: 16px;
+            border-radius: 50px;
+            background: #e6e8ea;
+            overflow: hidden;
+        }
+
+       #Dashboard  .progress-analytics .progress-fill {
+            height: 100%;
+            border-radius: 50px;
+        }
+
+       #Dashboard  .progress-analytics .progress-fill.bg-secondary {
+            background: #006a61;
+        }
+
+       #Dashboard  .progress-analytics .progress-fill.bg-dark {
+            background: #000000;
+        }
+
+       #Dashboard  .progress-analytics .progress-fill.bg-tertiary {
+            background: #0b1c30;
+        }
+
+       #Dashboard  .btn-toggle {
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+       #Dashboard  .btn-toggle.active {
+            background: #006a61;
+            color: #ffffff;
+        }
+
+       #Dashboard  .btn-toggle.inactive {
+            background: #e6e8ea;
+            color: #191c1e;
+        }
+
+       #Dashboard  .btn-toggle.inactive:hover {
+            background: #d8dadc;
+        }
+
+        /* ========== MACHINE STATUS ========== */
+       #Dashboard  .machine-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f2f4f6;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+        }
+
+       #Dashboard  .machine-item:last-child {
+            margin-bottom: 0;
+        }
+
+       #Dashboard  .machine-item:hover {
+            border-color: rgba(198, 198, 205, 0.3);
+        }
+
+       #Dashboard  .machine-item .machine-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e3e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+       #Dashboard  .machine-item .machine-icon i {
+            color: #006a61;
+            font-size: 18px;
+        }
+
+      #Dashboard   .machine-status {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+       #Dashboard  .machine-status.running {
+            background: #d4edda;
+            color: #155724;
+        }
+
+       #Dashboard  .machine-status.maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+       #Dashboard  .machine-status .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+       #Dashboard  .machine-status .status-dot.running {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+       #Dashboard  .machine-status .status-dot.maintenance {
+            background: #ffc107;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ========== MOBILE TOGGLE ========== */
+       #productionexecutive .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #191c1e;
+            padding: 4px 8px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 991px) {
+           #productionexecutive .sidebar {
+                transform: translateX(-100%);
+            }
+
+           #productionexecutive .sidebar.open {
+                transform: translateX(0);
+            }
+
+           #productionexecutive .header {
+                margin-left: 0;
+                width: 100%;
+                padding: 0 16px;
+            }
+
+           #productionexecutive .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+           #productionexecutive .sidebar-toggle {
+                display: block;
+            }
+
+           #productionexecutive .header .search-box input {
+                width: 160px;
+            }
+        }
+
+        @media (max-width: 767px) {
+           #productionexecutive .header .search-box {
+                display: none;
+            }
+
+          #productionexecutive  .circular-progress {
+                width: 120px;
+                height: 120px;
+            }
+
+          #Dashboard  .circular-progress .center-text .value {
+                font-size: 22px;
+            }
+        }
+
+        /* ======================== MACHINE =================== */
+
+                /* ========== PAGE HEADER ========== */
+       #Machine .page-header .page-title {
+            font-weight: 700;
+            font-size: 28px;
+            color: #000000;
+            letter-spacing: -0.5px;
+        }
+
+        #Machine .page-header .page-subtitle {
+            font-size: 16px;
+            color: #45464d;
+        }
+
+        #Machine .page-header .view-toggle {
+            display: flex;
+            background: #e6e8ea;
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        #Machine .page-header .view-toggle .view-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            color: #45464d;
+        }
+
+        #Machine .page-header .view-toggle .view-btn.active {
+            background: #ffffff;
+            color: #191c1e;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        #Machine .page-header .view-toggle .view-btn:hover:not(.active) {
+            color: #191c1e;
+        }
+
+       #Machine  .btn-assign-machine {
+            padding: 10px 24px;
+            background: #006a61;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 106, 97, 0.2);
+        }
+
+       #Machine  .btn-assign-machine:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        /* ========== KPI CARDS ========== */
+       #Machine  .kpi-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+       #Machine  .kpi-card .icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e6e8ea;
+        }
+
+        #Machine .kpi-card .icon-box i {
+            font-size: 22px;
+        }
+
+        #Machine .kpi-card.border-left-teal {
+            border-left: 4px solid #006a61;
+        }
+
+        #Machine .kpi-card.border-left-red {
+            border-left: 4px solid #ba1a1a;
+        }
+
+        /* ========== FILTER BAR ========== */
+        #Machine .filter-bar {
+            background: #eceef0;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        #Machine .filter-bar .filter-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #45464d;
+        }
+
+        #Machine .filter-bar .filter-chip {
+            padding: 4px 16px;
+            background: #ffffff;
+            border: 1px solid #c6c6cd;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #Machine .filter-bar .filter-chip:hover {
+            background: #86f2e4;
+            color: #006f66;
+        }
+
+        /* ========== TABLE ========== */
+        #Machine .table-container {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        #Machine .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #Machine .table-custom thead {
+            background: #eceef0;
+            border-bottom: 1px solid #c6c6cd;
+        }
+
+        #Machine .table-custom thead th {
+            padding: 16px 24px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #45464d;
+            text-align: left;
+        }
+
+       #Machine  .table-custom thead th.text-right {
+            text-align: right;
+        }
+
+       #Machine  .table-custom tbody tr {
+            border-bottom: 1px solid #c6c6cd;
+            transition: background 0.2s;
+        }
+
+       #Machine  .table-custom tbody tr:hover {
+            background: rgba(236, 238, 240, 0.5);
+        }
+
+       #Machine  .table-custom tbody td {
+            padding: 16px 24px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+       #Machine  .table-custom tbody td.text-right {
+            text-align: right;
+        }
+
+        #Machine .table-custom .machine-name {
+            font-weight: 700;
+            color: #000000;
+        }
+
+        #Machine .table-custom .operator-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        #Machine .table-custom .operator-avatar.bg-teal {
+            background: #86f2e4;
+            color: #006f66;
+        }
+
+        #Machine .table-custom .operator-avatar.bg-dark {
+            background: #131b2e;
+            color: #7c839b;
+        }
+
+        #Machine .table-custom .operator-avatar.bg-tertiary {
+            background: #0b1c30;
+            color: #75859d;
+        }
+
+        #Machine .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        #Machine .status-badge.running {
+            background: #86f2e4;
+            color: #006f66;
+        }
+
+       #Machine  .status-badge.maintenance {
+            background: #ffdad6;
+            color: #93000a;
+        }
+
+       #Machine  .status-badge.idle {
+            background: #e6e8ea;
+            color: #45464d;
+        }
+
+       #Machine  .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        #Machine .status-dot.running {
+            background: #006a61;
+        }
+
+        #Machine .status-dot.maintenance {
+            background: #ba1a1a;
+        }
+
+        #Machine .status-dot.idle {
+            background: #76777d;
+        }
+
+       #Machine  .table-action-btn {
+            padding: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            transition: all 0.2s;
+            color: #45464d;
+            cursor: pointer;
+        }
+
+        #Machine .table-action-btn:hover {
+            background: #e6e8ea;
+        }
+
+        /* ========== STATUS OVERVIEW ========== */
+        #Machine .status-grid-item {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            text-align: center;
+        }
+
+        #Machine .status-grid-item .status-bar {
+            width: 100%;
+            height: 4px;
+            border-radius: 50px;
+            margin-bottom: 8px;
+        }
+
+        #Machine .status-grid-item .status-bar.teal {
+            background: #006a61;
+        }
+
+        #Machine .status-grid-item .status-bar.red {
+            background: #ba1a1a;
+        }
+
+        #Machine .status-grid-item .status-bar.gray {
+            background: #76777d;
+        }
+
+       #Machine  .status-grid-item .status-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: #45464d;
+        }
+
+       #Machine  .status-grid-item .status-value {
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        #Machine .status-grid-item .status-value.teal {
+            color: #006a61;
+        }
+
+        #Machine .status-grid-item .status-value.red {
+            color: #ba1a1a;
+        }
+
+        #Machine .status-grid-item .status-value.gray {
+            color: #45464d;
+        }
+
+        #Machine .status-grid-item.opacity-50 {
+            opacity: 0.5;
+        }
+
+        /* ========== DETAILS SIDEBAR ========== */
+        #Machine .details-sidebar {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.05);
+            overflow: hidden;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 160px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #Machine .details-sidebar .sidebar-header {
+            padding: 24px;
+            background: #131b2e;
+            color: #7c839b;
+        }
+
+        #Machine .details-sidebar .sidebar-header .machine-title {
+            font-weight: 900;
+            font-size: 24px;
+            color: #ffffff;
+        }
+
+        #Machine .details-sidebar .sidebar-header .machine-subtitle {
+            font-size: 14px;
+            color: rgba(124, 131, 155, 0.8);
+        }
+
+        #Machine .details-sidebar .sidebar-body {
+            padding: 24px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+       #Machine  .details-sidebar .sidebar-body .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #c6c6cd;
+        }
+
+       #Machine  .details-sidebar .sidebar-body .detail-item .label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #45464d;
+        }
+
+       #Machine  .details-sidebar .sidebar-body .detail-item .value {
+            font-weight: 700;
+            color: #191c1e;
+        }
+
+       #Machine  .details-sidebar .sidebar-body .detail-item .value.highlight {
+            color: #006a61;
+        }
+
+        #Machine .details-sidebar .telemetry-chart {
+            background: #eceef0;
+            padding: 16px;
+            border-radius: 8px;
+            height: 96px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        #Machine .details-sidebar .telemetry-chart .bar {
+            flex: 1;
+            background: #006a61;
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+            min-height: 10px;
+        }
+
+        #Machine .details-sidebar .sidebar-footer {
+            padding: 16px 24px;
+            background: #eceef0;
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid #c6c6cd;
+        }
+
+        #Machine .btn-pause {
+            flex: 1;
+            padding: 8px 16px;
+            border: 1px solid #006a61;
+            background: transparent;
+            color: #006a61;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        #Machine .btn-pause:hover {
+            background: rgba(0, 106, 97, 0.05);
+        }
+
+       #Machine  .btn-reassign {
+            flex: 1;
+            padding: 8px 16px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        #Machine .btn-reassign:hover {
+            opacity: 0.9;
+        }
+
+        /* ============ MACHINE > CREATE MACHINE =========== */
+
+        /* ========== METRIC CARDS ========== */
+      #CreateMachine  .metric-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+         #CreateMachine .metric-card .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+         #CreateMachine .metric-card .icon-box.bg-teal {
+            background: #86f2e4;
+            color: #006f66;
+        }
+
+         #CreateMachine .metric-card .icon-box.bg-dark {
+            background: #131b2e;
+            color: #7c839b;
+        }
+
+         #CreateMachine .metric-card .icon-box.bg-red {
+            background: #ffdad6;
+            color: #93000a;
+        }
+
+         #CreateMachine .metric-card .icon-box.bg-gray {
+            background: #eceef0;
+            color: #191c1e;
+        }
+
+         #CreateMachine .metric-card .icon-box i {
+            font-size: 22px;
+        }
+
+        #CreateMachine  .metric-card.border-left-teal {
+            border-left: 4px solid #006a61;
+        }
+
+        /* ========== FORM CARD ========== */
+         #CreateMachine .form-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+            height: 100%;
+        }
+
+         #CreateMachine .form-card .card-header {
+            padding: 16px 24px;
+            background: #f2f4f6;
+            border-bottom: 1px solid #c6c6cd;
+        }
+
+         #CreateMachine .form-card .card-body {
+            padding: 32px;
+        }
+
+         #CreateMachine .form-label-custom {
+            font-size: 12px;
+            color: #45464d;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+         #CreateMachine .form-control-custom {
+            width: 100%;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #c6c6cd;
+            background: #f2f4f6;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #191c1e;
+        }
+
+         #CreateMachine .form-control-custom:focus {
+            outline: none;
+            border-color: #006a61;
+            box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.2);
+        }
+
+        #CreateMachine  .form-control-custom:disabled {
+            background: #eceef0;
+            color: #45464d;
+            cursor: not-allowed;
+        }
+
+         #CreateMachine .form-control-custom.readonly-highlight {
+            background: #eceef0;
+            color: #191c1e;
+            font-weight: 600;
+        }
+
+         #CreateMachine .form-select-custom {
+            width: 100%;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #c6c6cd;
+            background: #f2f4f6;
+            transition: all 0.2s;
+            font-size: 14px;
+            appearance: none;
+        }
+
+         #CreateMachine .form-select-custom:focus {
+            outline: none;
+            border-color: #006a61;
+            box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.2);
+        }
+
+        #CreateMachine  .form-control-custom[type="date"]::-webkit-calendar-picker-indicator {
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        #CreateMachine  .form-control-custom[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+        }
+
+         #CreateMachine .info-box-dashed {
+            padding: 16px;
+            background: #f7f9fb;
+            border: 1px dashed #c6c6cd;
+            border-radius: 8px;
+        }
+
+        #CreateMachine  .btn-assign {
+            flex: 1;
+            padding: 12px;
+            background: #006a61;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        #CreateMachine  .btn-assign:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        #CreateMachine  .btn-cancel-form {
+            padding: 12px 32px;
+            background: #e6e8ea;
+            color: #45464d;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        #CreateMachine  .btn-cancel-form:hover {
+            background: #d8dadc;
+            transform: scale(0.98);
+        }
+
+        /* ========== SUMMARY PANEL ========== */
+         #CreateMachine .summary-panel {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+         #CreateMachine .summary-panel .panel-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #c6c6cd;
+        }
+
+        #CreateMachine  .summary-panel .panel-body {
+            padding: 24px;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        #CreateMachine  .summary-panel .bg-decoration {
+            position: absolute;
+            right: -48px;
+            bottom: -48px;
+            font-size: 200px;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        #CreateMachine  .summary-panel .preview-badge {
+            padding: 4px 12px;
+            background: #86f2e4;
+            color: #006f66;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        #CreateMachine  .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 0;
+        }
+
+        #CreateMachine  .summary-item .icon-box {
+            width: 40px;
+            height: 40px;
+            background: #eceef0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+         #CreateMachine .summary-item .icon-box i {
+            color: #006a61;
+            font-size: 20px;
+        }
+
+         #CreateMachine .summary-item .label {
+            font-size: 10px;
+            color: #45464d;
+        }
+
+        #CreateMachine  .summary-item .value {
+            font-weight: 600;
+            font-size: 14px;
+            color: #191c1e;
+        }
+
+         #CreateMachine .summary-image {
+            width: 100%;
+            height: 128px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #c6c6cd;
+            margin-bottom: 8px;
+        }
+
+        /* ========== TABLE ========== */
+         #CreateMachine .table-container {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        #CreateMachine  .table-custom {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+         #CreateMachine .table-custom thead {
+            background: #eceef0;
+        }
+
+         #CreateMachine .table-custom thead th {
+            padding: 16px 24px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #45464d;
+            text-align: left;
+        }
+
+         #CreateMachine .table-custom thead th.text-right {
+            text-align: right;
+        }
+
+         #CreateMachine .table-custom tbody tr {
+            border-bottom: 1px solid #c6c6cd;
+            transition: background 0.2s;
+        }
+
+         #CreateMachine .table-custom tbody tr:hover {
+            background: rgba(236, 238, 240, 0.5);
+        }
+
+         #CreateMachine .table-custom tbody td {
+            padding: 16px 24px;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+         #CreateMachine .table-custom tbody td.text-right {
+            text-align: right;
+        }
+
+         #CreateMachine .table-custom .machine-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #CreateMachine  .table-custom .machine-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        #CreateMachine  .table-custom .machine-indicator .dot.teal {
+            background: #006a61;
+        }
+
+         #CreateMachine .table-custom .machine-indicator .dot.gray {
+            background: #76777d;
+        }
+
+        #CreateMachine  .table-custom .machine-indicator .dot.red {
+            background: #ba1a1a;
+        }
+
+         #CreateMachine .status-badge {
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+         #CreateMachine .status-badge.running {
+            background: #dae2fd;
+            color: #131b2e;
+        }
+
+        #CreateMachine  .status-badge.assigned {
+            background: #e6e8ea;
+            color: #45464d;
+        }
+
+        #CreateMachine  .status-badge.maintenance {
+            background: #ffdad6;
+            color: #93000a;
+        }
+
+        #CreateMachine  .table-action-btn {
+            padding: 8px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            transition: all 0.2s;
+            color: #45464d;
+            cursor: pointer;
+        }
+
+         #CreateMachine .table-action-btn:hover {
+            background: rgba(0, 106, 97, 0.1);
+            color: #006a61;
+        }
+
+        /* ========== PAGINATION ========== */
+        #CreateMachine  .pagination-custom .page-btn {
+            padding: 4px 12px;
+            border: 1px solid #c6c6cd;
+            border-radius: 6px;
+            background: transparent;
+            font-size: 12px;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        #CreateMachine  .pagination-custom .page-btn:hover:not(.active) {
+            background: #f2f4f6;
+        }
+
+         #CreateMachine .pagination-custom .page-btn.active {
+            background: #006a61;
+            color: #ffffff;
+            border-color: #006a61;
+        }
+
+               /* ========================== LOGOUT ================ */
+
+         /* ========== MAIN CONTENT ========== */
+     #logout {
+    position: relative;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+        /* ========== BACKGROUND PLACEHOLDER ========== */
+       #logout .bg-placeholder {
+            position: absolute;
+            inset: 0;
+            padding: 32px;
+            opacity: 0.4;
+            pointer-events: none;
+            user-select: none;
+        }
+
+       #logout .bg-placeholder .placeholder-card {
+            background: #eceef0;
+            border-radius: 12px;
+            border: 1px solid #c6c6cd;
+            height: 100%;
+        }
+
+        /* ========== OVERLAY ========== */
+       #logout .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(25, 28, 30, 0.08);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+
+        /* ========== LOGOUT MODAL ========== */
+       #logout .logout-modal {
+            position: relative;
+            z-index: 20;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            padding: 32px;
+            border: 1px solid #c6c6cd;
+            max-width: 400px;
+            width: 100%;
+            margin: 16px;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+       #logout .logout-modal.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+       #logout .logout-modal .icon-container {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffdad6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+      #logout  .logout-modal .icon-container i {
+            color: #ba1a1a;
+            font-size: 36px;
+        }
+
+        .logout-modal .modal-title {
+            font-weight: 700;
+            font-size: 24px;
+            color: #191c1e;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+       #logout .logout-modal .modal-message {
+            color: #45464d;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+       #logout .btn-logout {
+            width: 100%;
+            padding: 14px;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+       #logout .btn-logout:hover {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+       #logout .btn-logout:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+      #logout  .btn-cancel {
+            width: 100%;
+            padding: 14px;
+            background: #e6e8ea;
+            color: #191c1e;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+       #logout .btn-cancel:hover {
+            background: #d8dadc;
+            transform: scale(0.98);
+        }
+
+      #logout  .btn-logout .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /*========================================= Machine screen ================================================= */
+
+/* 1. Wrapper: Centered, medium width */
+#page12 .table-wrapper {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(198, 198, 205, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* 2. Scrollable table area */
+#page12 .table-responsive-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+/* 3. Custom Table Styling */
+#page12 .table-custom {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#page12 .table-custom th,
+#page12 .table-custom td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.2);
+}
+
+#page12 .table-custom th {
+    background: #f2f4f6;
+    color: #45464d;
+    font-weight: 700;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.3);
+}
+
+#page12 .table-custom tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* 4. Actions Column (small, right-aligned) */
+#page12 .table-custom th.text-end,
+#page12 .table-custom td.text-end {
+    text-align: end;
+    width: 140px;               /* slightly wider for 3 buttons */
+}
+
+#page12 .text-end {
+  text-align: right;
+}
+
+#page12 .action-buttons {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+#page12 .table-action-btn {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c6c6cd;
+  border-radius: 6px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+#page12 .table-action-btn i {
+  line-height: 1;
+  font-size: 16px;
+}
+
+#page12 .table-action-btn.view { color: #0d6efd; }
+#page12 .table-action-btn.edit { color: #198754; }
+#page12 .table-action-btn.delete { color: #dc3545; }
+
+/* 7. Pagination (keep your existing style) */
+#page12 .table-wrapper > .border-top {
+    border-top: 1px solid rgba(198, 198, 205, 0.2);
+}
+      /* ===== Machine > ADD Machine CSS (Updated for New HTML) ======= */
+
+/* 1. Container & Layout Wrapper */
+#AddMachine .row.g-4 {
+    margin: 0;
+    --bs-gutter-x: 1.5rem;
+}
+
+/* 2. Main Form Card (White Box) */
+#AddMachine .form-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(198, 198, 205, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    width: 100%;
+}
+
+/* 3. Card Header (Grey Top Bar) */
+#AddMachine .form-card .card-header {
+    padding: 24px;
+    background: #f2f4f6;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 4. Card Body (Where Form Is) */
+#AddMachine .form-card .card-body {
+    padding: 32px;
+}
+
+/* 5. Custom Labels (Bold, Small, Dark Grey) */
+#AddMachine .form-label-custom {
+    font-size: 12px;
+    font-weight: 700;
+    color: #45464d;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* 6. Custom Input Fields (Light Grey BG, Rounded) */
+#AddMachine .form-control-custom {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c6c6cd;
+    background: #f7f9fb;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #191c1e;
+}
+
+/* Focus State (Green Border & Glow) */
+#AddMachine .form-control-custom:focus {
+    outline: none;
+    border-color: #006a61;
+    box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.2);
+    background: #ffffff;
+}
+
+/* 7. Save Button (Green, Bold, Shadow) */
+#AddMachine .btn-save {
+    padding: 16px 40px;
+    background: #006a61;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0, 106, 97, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#AddMachine .btn-save:hover {
+    transform: translateY(-2px);
+    background: #005a52;
+}
+
+#AddMachine .btn-save:active {
+    transform: scale(0.95);
+}
+
+/* 8. Cancel Button (Transparent, Grey Border) */
+#AddMachine .btn-cancel {
+    padding: 16px 40px;
+    background: transparent;
+    color: #45464d;
+    border: 1px solid #c6c6cd;
+    border-radius: 8px;
+    font-weight: 700;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+#AddMachine .btn-cancel:hover {
+    background: #f2f4f6;
+    color: #191c1e;
+}
+
+/* 9. Utility Tweaks for Breadcrumbs & Headers */
+#AddMachine h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#AddMachine .text-muted {
+    color: #7c839b !important;
+}
+
+/* 10. Badge Styling for Auto-Generated ID */
+#AddMachine .bg-secondary.bg-opacity-10 {
+    background-color: rgba(100, 116, 139, 0.1) !important;
+}
+#AddMachine .text-secondary {
+    color: #7c839b !important;
+}
+
+        /*========================================= Supervisor screen ================================================= */
+
+/* 1. Wrapper: Centered, medium width */
+#page13 .table-wrapper {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(198, 198, 205, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* 2. Scrollable table area */
+#page13 .table-responsive-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+/* 3. Custom Table Styling */
+#page13 .table-custom {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#page13 .table-custom th,
+#page13 .table-custom td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.2);
+}
+
+#page13 .table-custom th {
+    background: #f2f4f6;
+    color: #45464d;
+    font-weight: 700;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.3);
+}
+
+#page13 .table-custom tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* 4. Actions Column (small, right-aligned) */
+#page13 .table-custom th.text-end,
+#page13 .table-custom td.text-end {
+    text-align: end;
+    width: 140px;               /* slightly wider for 3 buttons */
+}
+
+#page13 .text-end {
+  text-align: right;
+}
+
+#page13 .action-buttons {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+
+#page13 .table-action-btn {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #c6c6cd;
+  border-radius: 6px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+#page13 .table-action-btn i {
+  line-height: 1;
+  font-size: 16px;
+}
+
+#page13 .table-action-btn.view { color: #0d6efd; }
+#page13 .table-action-btn.edit { color: #198754; }
+#page13 .table-action-btn.delete { color: #dc3545; }
+
+/* 7. Pagination (keep your existing style) */
+#page13 .table-wrapper > .border-top {
+    border-top: 1px solid rgba(198, 198, 205, 0.2);
+}
+      /* ===== Supervisor > ADD Supervisor CSS (Updated for New HTML) ======= */
+
+/* 1. Container & Layout Wrapper */
+#AddSupervisor .row.g-4 {
+    margin: 0;
+    --bs-gutter-x: 1.5rem;
+}
+
+/* 2. Main Form Card (White Box) */
+#AddSupervisor .form-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid rgba(198, 198, 205, 0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    width: 100%;
+}
+
+/* 3. Card Header (Grey Top Bar) */
+#AddSupervisor .form-card .card-header {
+    padding: 24px;
+    background: #f2f4f6;
+    border-bottom: 1px solid rgba(198, 198, 205, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 4. Card Body (Where Form Is) */
+#AddSupervisor .form-card .card-body {
+    padding: 32px;
+}
+
+/* 5. Custom Labels (Bold, Small, Dark Grey) */
+#AddSupervisor .form-label-custom {
+    font-size: 12px;
+    font-weight: 700;
+    color: #45464d;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* 6. Custom Input Fields (Light Grey BG, Rounded) */
+#AddSupervisor .form-control-custom {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #c6c6cd;
+    background: #f7f9fb;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: #191c1e;
+}
+
+/* Focus State (Green Border & Glow) */
+#AddSupervisor .form-control-custom:focus {
+    outline: none;
+    border-color: #006a61;
+    box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.2);
+    background: #ffffff;
+}
+
+/* 7. Save Button (Green, Bold, Shadow) */
+#AddSupervisor .btn-save {
+    padding: 16px 40px;
+    background: #006a61;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    box-shadow: 0 4px 20px rgba(0, 106, 97, 0.2);
+    transition: all 0.2s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#AddSupervisor .btn-save:hover {
+    transform: translateY(-2px);
+    background: #005a52;
+}
+
+#AddSupervisor .btn-save:active {
+    transform: scale(0.95);
+}
+
+/* 8. Cancel Button (Transparent, Grey Border) */
+#AddSupervisor .btn-cancel {
+    padding: 16px 40px;
+    background: transparent;
+    color: #45464d;
+    border: 1px solid #c6c6cd;
+    border-radius: 8px;
+    font-weight: 700;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+#AddSupervisor .btn-cancel:hover {
+    background: #f2f4f6;
+    color: #191c1e;
+}
+
+/* 9. Utility Tweaks for Breadcrumbs & Headers */
+#AddSupervisor h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+#AddSupervisor .text-muted {
+    color: #7c839b !important;
+}
+
+/* 10. Badge Styling for Auto-Generated ID */
+#AddSupervisor .bg-secondary.bg-opacity-10 {
+    background-color: rgba(100, 116, 139, 0.1) !important;
+}
+#AddSupervisor .text-secondary {
+    color: #7c839b !important;
+}

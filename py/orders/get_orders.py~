@@ -39,15 +39,16 @@ try:
     completed_orders = cursor.fetchone()[0] or 0
 
     # Dynamic query for pending/high priority orders
-    cursor.execute("SELECT COUNT(*) FROM orders WHERE   delivery_date IS NULL")
+    cursor.execute("SELECT COUNT(*) FROM orders WHERE delivery_date IS NULL")
     pending_orders = cursor.fetchone()[0] or 0
 
-    # --- Order Table Query ---
+    # --- Order Table Query (Fetched created_by_name) ---
     cursor.execute("""
         SELECT 
             order_number, customer, contact, fabric_type, 
             gsm, color, quantity, total_amount, 
-            remarks, delivery_date, order_date
+            remarks, delivery_date, order_date,
+            COALESCE(created_by_name, 'N/A') AS created_by
         FROM orders 
         ORDER BY id DESC
     """)
@@ -55,7 +56,7 @@ try:
 
     table_rows_html = ""
     for row in rows:
-        order_no, cust, phone, fabric, gsm, color, qty, total, rem, del_date, ord_date = row
+        order_no, cust, phone, fabric, gsm, color, qty, total, rem, del_date, ord_date, created_by = row
 
         ord_date_str = safe_format_date(ord_date)
         del_date_str = safe_format_date(del_date)
@@ -77,6 +78,7 @@ try:
             </td>
             <td>{qty} Kg</td>
             <td>{del_date_str}</td>
+            <td>{created_by}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
                     <button type="button" class="action-btn view-details-btn" 
@@ -119,5 +121,5 @@ except Exception as e:
         "status": "error",
         "message": str(e),
         "kpis": {"total": 0, "running": 0, "completed": 0, "pending": 0},
-        "rows_html": f"<tr><td colspan='5' class='text-danger'>Error: {str(e)}</td></tr>"
+        "rows_html": f"<tr><td colspan='6' class='text-danger'>Error: {str(e)}</td></tr>"
     }))

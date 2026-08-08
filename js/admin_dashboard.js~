@@ -9,15 +9,15 @@
    ========================================================================== */
 
 // Mobile Sidebar Toggle
-document.getElementById('sidebarToggle')?.addEventListener('click', function() {
-    document.getElementById('sidebar')?.classList.toggle('open');
+document.getElementById('sidebarToggle').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.toggle('open');
 });
 
 // Close sidebar on outside click (mobile)
 document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('sidebar');
     const toggle = document.getElementById('sidebarToggle');
-    if (window.innerWidth < 992 && sidebar && toggle) {
+    if (window.innerWidth < 992) {
         if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
             sidebar.classList.remove('open');
         }
@@ -269,22 +269,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchFabric = document.getElementById('searchFabric');
     const fabricTableBody = document.getElementById('FabricTablebody');
 
-    if (!searchFabric || !fabricTableBody) return;
-
+    // Filter function
     function filterFabrics() {
+        // Get typing value and convert to lowercase
         const query = searchFabric.value.toLowerCase().trim();
+
+        // Get all rows in the table body
         const rows = fabricTableBody.getElementsByTagName('tr');
 
         Array.from(rows).forEach(row => {
+            // Get text from the first column (Fabric Name)
             const fabricName = row.children[0]?.textContent.toLowerCase() || '';
+
+            // Check if search matches fabric name
             if (fabricName.includes(query)) {
-                row.style.display = '';
+                row.style.display = ''; // Show row
             } else {
-                row.style.display = 'none';
+                row.style.display = 'none'; // Hide row
             }
         });
     }
 
+    // Trigger filter every time user types or backspaces
     searchFabric.addEventListener('input', filterFabrics);
 });
 
@@ -310,13 +316,13 @@ function getUserIdFromURL() {
     return urlParams.get('user_id') || '';
 }
 
-// 2. Load Table Data for Admin (Updated URL path to avoid 404)
+// 2. Load Table Data for Admin
 function loadCustomerTable() {
     const userId = getUserIdFromURL();
-    fetch(`../py/customer/get_customer_enquiries.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
         .then(res => res.text())
         .then(data => {
-            const tableBody = document.getElementById("customerTableBody") || document.getElementById("enquiryTableBody");
+            const tableBody = document.getElementById("customerTableBody");
             if (tableBody) {
                 tableBody.innerHTML = data;
             }
@@ -359,7 +365,7 @@ function submitAssignment() {
         return;
     }
 
-    fetch(`../py/customer/get_customer_enquiries.py?user_id=${encodeURIComponent(userId)}&action=assign&id=${enquiryId}&assigned_emp_id=${selectedEmpId}`)
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&action=assign&id=${enquiryId}&assigned_emp_id=${selectedEmpId}`)
         .then(response => response.text())
         .then(() => {
             const modalEl = document.getElementById('assignModal');
@@ -378,7 +384,7 @@ function toggleStatus(id, actionType) {
 
     if (!confirm(`Are you sure you want to ${actionText} this enquiry?`)) return;
 
-    fetch(`../py/customer/get_customer_enquiries.py?user_id=${encodeURIComponent(userId)}&action=${actionType}&id=${id}`)
+    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&action=${actionType}&id=${id}`)
         .then(response => response.text())
         .then(() => {
             loadCustomerTable();
@@ -404,6 +410,33 @@ window.addEventListener("focus", function () {
     loadCustomerTable();
 });
 
+//THIS FUNCTION IS USED TO FILTER CUSTOMER BY STATUS
+document.addEventListener("DOMContentLoaded", function () {
+    const statusFilter = document.getElementById("statusFilter");
+    const tableBody = document.getElementById("customerTableBody");
+
+    statusFilter.addEventListener("change", function () {
+        // Convert selected filter to lowercase for case-insensitive matching
+        const selectedStatus = this.value.trim().toLowerCase();
+        const rows = tableBody.getElementsByTagName("tr");
+
+        for (let row of rows) {
+            // Status is in the 4th column (index 3)
+            const statusCell = row.cells[3];
+
+            if (statusCell) {
+                const rowStatus = statusCell.textContent.trim().toLowerCase();
+
+                // Show row if "All Statuses" is selected OR if status matches
+                if (selectedStatus === "all" || rowStatus === selectedStatus) {
+                    row.style.display = ""; // Show row
+                } else {
+                    row.style.display = "none"; // Hide row
+                }
+            }
+        }
+    });
+});
 
 /* ==========================================================================
    06. ORDERS SCREEN
@@ -412,9 +445,11 @@ window.addEventListener("focus", function () {
 //THIS FUNCTION LOAD TABLE DATA
 function loadOrdersAndKPIs() {
     var ordersTableBody = document.getElementById("ordersTableBody");
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUserId = urlParams.get('user_id') || '';
 
     if (ordersTableBody) {
-        fetch("../py/orders/get_orders.py")
+        fetch(`../py/get_orders.py?user_id=${currentUserId}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" || data.kpis) {
@@ -451,31 +486,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchOrder = document.getElementById('searchOrder');
     const ordersTableBody = document.getElementById('ordersTableBody');
 
-    if (!searchOrder || !ordersTableBody) return;
-
     function filterOrders() {
         const query = searchOrder.value.toLowerCase().trim();
         const rows = ordersTableBody.getElementsByTagName('tr');
 
         Array.from(rows).forEach(row => {
+            // Get text from each column
             const orderNo = row.children[0]?.textContent.toLowerCase() || '';
             const customer = row.children[1]?.textContent.toLowerCase() || '';
             const quantity = row.children[2]?.textContent.toLowerCase() || '';
             const deliveryDate = row.children[3]?.textContent.toLowerCase() || '';
 
+            // Match query against ANY column (Order No, Customer, Quantity, or Date)
             const matches = orderNo.includes(query) ||
                             customer.includes(query) ||
                             quantity.includes(query) ||
                             deliveryDate.includes(query);
 
             if (matches) {
-                row.style.display = '';
+                row.style.display = ''; // Show row
             } else {
-                row.style.display = 'none';
+                row.style.display = 'none'; // Hide row
             }
         });
     }
 
+    // Trigger search on input
     searchOrder.addEventListener('input', filterOrders);
 });
 
@@ -484,6 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
    07. CREATE ORDER SCREEN
    ========================================================================== */
 
+// Show Toast
 function showorderToast() {
     const toast = document.getElementById('createorderToast');
     if (toast) toast.classList.add('show');
@@ -493,6 +530,7 @@ function showorderToast() {
     }, 5000);
 }
 
+// Hide Toast
 function hideorderToast() {
     const toast = document.getElementById('createorderToast');
     if (toast) toast.classList.remove('show');
@@ -503,59 +541,66 @@ function hideorderToast() {
    08. SUPPLIER SCREEN
    ========================================================================== */
 
-function loadSuppliersAndKPIs() {
-    var supplierTableBody = document.getElementById("supplierTableBody");
+    // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
+    function loadSuppliersAndKPIs() {
+        var supplierTableBody = document.getElementById("supplierTableBody");
 
-    if (supplierTableBody) {
-        fetch("../py/supplier/get_supplier.py?t=" + new Date().getTime())
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                console.error("Database Error:", data.error);
-                return;
-            }
+        if (supplierTableBody) {
+            // Adding ?t= prevents browser caching
+            fetch("../py/supplier/get_supplier.py?t=" + new Date().getTime())
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Database Error:", data.error);
+                    return;
+                }
 
-            const totalElem = document.getElementById("totalSuppliersCount");
-            const activeElem = document.getElementById("activeSuppliersCount");
-            const inactiveElem = document.getElementById("inactiveSuppliersCount");
+                // Update KPI Cards
+                const totalElem = document.getElementById("totalSuppliersCount");
+                const activeElem = document.getElementById("activeSuppliersCount");
+                const inactiveElem = document.getElementById("inactiveSuppliersCount");
 
-            if (totalElem) totalElem.innerText = data.total ?? 0;
-            if (activeElem) activeElem.innerText = data.active ?? 0;
-            if (inactiveElem) inactiveElem.innerText = data.inactive ?? 0;
+                if (totalElem) totalElem.innerText = data.total ?? 0;
+                if (activeElem) activeElem.innerText = data.active ?? 0;
+                if (inactiveElem) inactiveElem.innerText = data.inactive ?? 0;
 
-            supplierTableBody.innerHTML = data.table_html || '';
-        })
-        .catch(error => {
-            console.error("Error fetching supplier data:", error);
-            supplierTableBody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error connecting to server.</td></tr>";
-        });
+                // Update Table HTML
+                supplierTableBody.innerHTML = data.table_html || '';
+            })
+            .catch(error => {
+                console.error("Error fetching supplier data:", error);
+                supplierTableBody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error connecting to server.</td></tr>";
+            });
+        }
     }
-}
 
+// Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function () {
     loadSuppliersAndKPIs();
     setInterval(loadSuppliersAndKPIs, 5000);
 });
 
+// Auto-refresh when switching back to this window/screen
 window.addEventListener("focus", function () {
     loadSuppliersAndKPIs();
 });
 
 
+//THIS FUNCTION IS USED TO SEARCH SUPPLIER
 document.addEventListener('DOMContentLoaded', function () {
     const searchSupplier = document.getElementById('searchSupplier');
     const supplierStatus = document.getElementById('supplierStatus');
     const supplierRefresh = document.getElementById('supplierRefresh');
     const supplierTableBody = document.getElementById('supplierTableBody');
 
-    if (!searchSupplier || !supplierTableBody) return;
-
+    // Filter Function
     function filterSuppliers() {
         const query = searchSupplier.value.toLowerCase().trim();
-        const selectedStatus = supplierStatus?.value.toLowerCase().trim() || '';
+        const selectedStatus = supplierStatus.value.toLowerCase().trim();
         const rows = supplierTableBody.getElementsByTagName('tr');
 
         Array.from(rows).forEach(row => {
+            // Get text from columns
             const name = row.children[0]?.textContent.toLowerCase() || '';
             const contact = row.children[1]?.textContent.toLowerCase() || '';
             const phone = row.children[2]?.textContent.toLowerCase() || '';
@@ -563,14 +608,17 @@ document.addEventListener('DOMContentLoaded', function () {
             const address = row.children[4]?.textContent.toLowerCase() || '';
             const status = row.children[5]?.textContent.toLowerCase() || '';
 
+            // Check if search matches ANY text column
             const matchesSearch = name.includes(query) ||
                                   contact.includes(query) ||
                                   phone.includes(query) ||
                                   email.includes(query) ||
                                   address.includes(query);
 
+            // Check if status dropdown matches
             const matchesStatus = (selectedStatus === '') || status.includes(selectedStatus);
 
+            // Toggle visibility
             if (matchesSearch && matchesStatus) {
                 row.style.display = '';
             } else {
@@ -579,29 +627,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Event Listeners
     searchSupplier.addEventListener('input', filterSuppliers);
-    if (supplierStatus) supplierStatus.addEventListener('change', filterSuppliers);
+    supplierStatus.addEventListener('change', filterSuppliers);
 
-    if (supplierRefresh) {
-        supplierRefresh.addEventListener('click', function () {
-            searchSupplier.value = '';
-            if (supplierStatus) supplierStatus.value = '';
-            filterSuppliers();
-        });
-    }
+    // Refresh/Reset Button
+    supplierRefresh.addEventListener('click', function () {
+        searchSupplier.value = '';
+        supplierStatus.value = '';
+        filterSuppliers();
+    });
 });
-
 
 /* ==========================================================================
    09. ADD SUPPLIER SCREEN
    ========================================================================== */
 
 
+
 /* ==========================================================================
    10. PURCHASE ORDERS (PO) SCREEN
    ========================================================================== */
 
-document.getElementById("SearchPo")?.addEventListener("keyup", function () {
+//SEARCH PO
+document.getElementById("SearchPo").addEventListener("keyup", function () {
     let search = this.value.toLowerCase();
 
     document.querySelectorAll("#poTableBody tr").forEach(row => {
@@ -612,9 +661,13 @@ document.getElementById("SearchPo")?.addEventListener("keyup", function () {
 });
 
 
+
+// Master function to fetch both the Table and the KPIs
 function refreshAllData() {
     const tableBody = document.getElementById("poTableBody");
 
+    // 1. FETCH TABLE DATA (HTML)
+    // Removed the "children.length === 0" check so it can refresh anytime!
     fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
@@ -623,12 +676,19 @@ function refreshAllData() {
         .then(data => {
             if (data.trim() && tableBody) {
                 tableBody.innerHTML = data;
+            } else {
+                loadSampleData();
+            }
+            if (typeof initializeTableEvents === "function") {
+                initializeTableEvents();
             }
         })
         .catch(err => {
             console.error("Table fetch error:", err);
+            loadSampleData();
         });
 
+    // 2. FETCH KPI DATA (JSON)
     fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
@@ -641,6 +701,8 @@ function refreshAllData() {
 
                 if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
                 if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
+            } else {
+                console.error("Error fetching PO KPIs:", data.message);
             }
         })
         .catch(error => {
@@ -648,10 +710,12 @@ function refreshAllData() {
         });
 }
 
+// 1. Trigger when DOM page finishes loading
 document.addEventListener('DOMContentLoaded', function() {
     refreshAllData();
 });
 
+// 2. Trigger automatically whenever the user switches back to this browser tab!
 window.addEventListener("focus", function () {
     refreshAllData();
 });
@@ -769,10 +833,12 @@ document.addEventListener("DOMContentLoaded", function () {
    12. INVENTORY SCREEN
    ========================================================================== */
 
+// THIS FUNCTION LOADS MATERIAL TABLE DATA & KPIS
 function loadMaterialsAndKPIs() {
     var materialTableBody = document.getElementById("materialTableBody");
 
     if (materialTableBody) {
+        // Adding ?t= prevents browser caching
         fetch("../py/inventory/get_material.py?t=" + new Date().getTime())
         .then(response => response.json())
         .then(data => {
@@ -781,10 +847,12 @@ function loadMaterialsAndKPIs() {
                 return;
             }
 
+            // Update KPI Cards
             document.getElementById("totalMaterials").innerText = data.total_materials;
             document.getElementById("availableStock").innerText = data.available_stock;
             document.getElementById("poMatchedMaterials").innerText = data.po_matched_count;
 
+            // Update Table
             materialTableBody.innerHTML = data.table_html;
         })
         .catch(err => {
@@ -794,51 +862,55 @@ function loadMaterialsAndKPIs() {
     }
 }
 
+// Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function() {
     loadMaterialsAndKPIs();
     setInterval(loadMaterialsAndKPIs, 5000);
 });
 
+// Auto-refresh when switching back to this window/screen
 window.addEventListener("focus", function() {
     loadMaterialsAndKPIs();
 });
 
+//THIS FUNCTION IS USED TO SEARCH INVENTORY
 document.addEventListener('DOMContentLoaded', function () {
     const searchInventory = document.getElementById('searchInventory');
     const inventoryRefresh = document.getElementById('inventoryRefresh');
     const materialTableBody = document.getElementById('materialTableBody');
 
-    if (!searchInventory || !materialTableBody) return;
-
+    // Filter Function
     function filterInventory() {
         const query = searchInventory.value.toLowerCase().trim();
         const rows = materialTableBody.getElementsByTagName('tr');
 
         Array.from(rows).forEach(row => {
+            // Get text from columns (0 = Material Name, 1 = Stock, 2 = Date)
             const materialName = row.children[0]?.textContent.toLowerCase() || '';
             const availableStock = row.children[1]?.textContent.toLowerCase() || '';
             const deliveryDate = row.children[2]?.textContent.toLowerCase() || '';
 
+            // Check if search query matches ANY column
             const matchesSearch = materialName.includes(query) ||
                                   availableStock.includes(query) ||
                                   deliveryDate.includes(query);
 
             if (matchesSearch) {
-                row.style.display = '';
+                row.style.display = ''; // Show row
             } else {
-                row.style.display = 'none';
+                row.style.display = 'none'; // Hide row
             }
         });
     }
 
+    // Event Listener for live search as you type
     searchInventory.addEventListener('input', filterInventory);
 
-    if (inventoryRefresh) {
-        inventoryRefresh.addEventListener('click', function () {
-            searchInventory.value = '';
-            filterInventory();
-        });
-    }
+    // Refresh Button Listener (Clears search & displays all rows)
+    inventoryRefresh.addEventListener('click', function () {
+        searchInventory.value = '';
+        filterInventory();
+    });
 });
 
 
@@ -889,6 +961,7 @@ document.addEventListener("DOMContentLoaded", loadSupplierDropdown);
    14. PRODUCTION PLANNING SCREEN
    ========================================================================== */
 
+// Function to load production plans IN TABLE
 function loadProductionPlans() {
     fetch("../py/inventory/get_production_plan.py")
     .then(response => response.json())
@@ -918,15 +991,20 @@ function loadProductionPlans() {
     .catch(error => console.error("Error loading production plans:", error));
 }
 
+// 1. Initial load when DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
     loadProductionPlans();
+
+    // 2. Auto-refresh every 5 seconds
     setInterval(loadProductionPlans, 5000);
 });
 
+// 3. Instant refresh when switching back to this tab
 window.addEventListener("focus", function() {
     loadProductionPlans();
 });
 
+//THIS FUNCTION SEARCH PRODUCTION PLAN
 const searchPp = document.getElementById("SearchPp");
 if (searchPp) {
     searchPp.addEventListener("keyup", function () {
@@ -1016,9 +1094,13 @@ function handledeliverySubmit(e) {
    17. USER MANAGEMENT SCREEN
    ========================================================================== */
 
+
+// Variable to store the currently viewed employee ID
 let currentViewEmpId = null;
 
+// Function to load user data AND KPI Counts
 function loadUserData() {
+    // Add ?t= timestamp to prevent browser CGI caching
     fetch("../py/get_user.py?t=" + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
@@ -1041,10 +1123,13 @@ function loadUserData() {
         .catch(error => console.error("Error fetching user data:", error));
 }
 
+// Function to view user details
 function viewUser(empid) {
     if (!empid) return;
 
+    // Save current employee ID so it can auto-refresh on tab switch
     currentViewEmpId = empid;
+    console.log("Employee ID:", empid);
 
     fetch("../py/users/view_details.py?t=" + new Date().getTime(), {
         method: "POST",
@@ -1054,10 +1139,12 @@ function viewUser(empid) {
         body: "employee_id=" + encodeURIComponent(empid)
     })
     .then(response => {
+        console.log("Status:", response.status);
         if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
         return response.text();
     })
     .then(data => {
+        console.log("Python Response:", data);
         const detailsContainer = document.getElementById("userDetails");
         if (detailsContainer) {
             detailsContainer.innerHTML = data;
@@ -1068,18 +1155,22 @@ function viewUser(empid) {
     });
 }
 
+// 1. Initial load when DOM is ready
 document.addEventListener("DOMContentLoaded", function () {
     loadUserData();
 });
 
+// 2. Auto-refresh both User Table and User Details when switching back to the tab
 window.addEventListener("focus", function () {
     loadUserData();
 
+    // If a user detail modal/section is currently open, refresh its data too
     if (currentViewEmpId) {
         viewUser(currentViewEmpId);
     }
 });
 
+//THIS FUNCTION IS FOR EDITING USER DETAILS
 function editUser(employee_id){
     fetch("../py/users/get_edit_user.py",{
         method:"POST",
@@ -1100,6 +1191,7 @@ function editUser(employee_id){
     });
 }
 
+//THIS FUNCTION IS FOR INACTIVATING USER
 function inactive(employee_id){
     fetch("../py/users/user_inactive.py",{
         method:"POST",
@@ -1110,6 +1202,7 @@ function inactive(employee_id){
     })
     .then(response=>response.text())
     .then(data=>{
+        console.log(data);
         location.reload();
     })
     .catch(error=>{
@@ -1117,61 +1210,74 @@ function inactive(employee_id){
     });
 }
 
+//THIS FUNCTION IS USED FOR SEARCHING USER IN THE TABLE
 document.addEventListener('DOMContentLoaded', function () {
+    // 1. Get references to input elements and table body
     const searchInput = document.getElementById('searchUser');
     const roleFilter = document.getElementById('filterRole');
     const statusFilter = document.getElementById('filterStatus');
     const refreshBtn = document.getElementById('btnRefresh');
     const tableBody = document.getElementById('userTableBody');
 
-    if (!searchInput || !tableBody) return;
-
+    // 2. Main Filter Function
     function filterTable() {
         const searchTerm = searchInput.value.toLowerCase().trim();
-        const selectedRole = roleFilter?.value.toLowerCase().trim() || '';
-        const selectedStatus = statusFilter?.value.toLowerCase().trim() || '';
+        const selectedRole = roleFilter.value.toLowerCase().trim();
+        const selectedStatus = statusFilter.value.toLowerCase().trim();
 
+        // Get all rows currently inside <tbody>
         const rows = tableBody.getElementsByTagName('tr');
 
+        // Loop through every table row
         Array.from(rows).forEach(row => {
+            // Get cells (0 = Name, 1 = Username, 2 = Role, 3 = Status)
             const nameCell = row.children[0]?.textContent.toLowerCase() || '';
             const usernameCell = row.children[1]?.textContent.toLowerCase() || '';
             const roleCell = row.children[2]?.textContent.toLowerCase() || '';
             const statusCell = row.children[3]?.textContent.toLowerCase() || '';
 
+            // Check if search matches Name OR Username
             const matchesSearch = nameCell.includes(searchTerm) || usernameCell.includes(searchTerm);
+
+            // Check if Role dropdown matches (or if dropdown is default "")
             const matchesRole = (selectedRole === "") || roleCell.includes(selectedRole);
+
+            // Check if Status dropdown matches (or if dropdown is default "")
             const matchesStatus = (selectedStatus === "") || statusCell.includes(selectedStatus);
 
+            // Show row ONLY if all 3 filter criteria match
             if (matchesSearch && matchesRole && matchesStatus) {
-                row.style.display = '';
+                row.style.display = ''; // Visible
             } else {
-                row.style.display = 'none';
+                row.style.display = 'none'; // Hidden
             }
         });
     }
 
-    searchInput.addEventListener('input', filterTable);
-    if (roleFilter) roleFilter.addEventListener('change', filterTable);
-    if (statusFilter) statusFilter.addEventListener('change', filterTable);
+    // 3. Event Listeners for Live Filtering
+    searchInput.addEventListener('input', filterTable);  // Fires as you type
+    roleFilter.addEventListener('change', filterTable);  // Fires when Role selected
+    statusFilter.addEventListener('change', filterTable);// Fires when Status selected
 
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', function () {
-            searchInput.value = '';
-            if (roleFilter) roleFilter.value = '';
-            if (statusFilter) statusFilter.value = '';
-            filterTable();
-        });
-    }
+    // 4. Refresh Button Listener (Clears inputs and shows all rows)
+    refreshBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        roleFilter.value = '';
+        statusFilter.value = '';
+        filterTable(); // Re-run filter to restore all rows
+    });
 });
 
+// TOGGLE USER STATUS (BLOCK / UNBLOCK) FUNCTION
 function toggleUserStatus(empId, actionType) {
     const confirmText = actionType === 'block' ? 'deactivate' : 'activate';
     if (!confirm(`Are you sure you want to ${confirmText} this user?`)) return;
 
+    // Send action parameter to get_user.py
     fetch(`../py/get_user.py?emp_id=${empId}&action=${actionType}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
+            // Instantly refresh user table and KPI count numbers
             loadUserData();
         })
         .catch(error => console.error("Error updating user status:", error));
@@ -1205,6 +1311,7 @@ function hidecreateuserToast() {
     if (toast) toast.classList.remove('show');
 }
 
+// 18+ Date Picker Validation
 document.addEventListener("DOMContentLoaded", function() {
     const dobInput = document.getElementById('DOB');
 
@@ -1229,12 +1336,14 @@ const modal = document.getElementById('logoutModal');
 const btnLogout = document.getElementById('btnLogout');
 const btnCancel = document.getElementById('btnCancel');
 
+// Show modal smoothly when page/section loads
 window.addEventListener('load', function() {
     setTimeout(() => {
         if (modal) modal.classList.add('show');
     }, 100);
 });
 
+// "No, Stay Logged In" Action
 if (btnCancel) {
     btnCancel.addEventListener('click', function() {
         if (modal) {
@@ -1244,14 +1353,17 @@ if (btnCancel) {
         }
 
         setTimeout(() => {
+            // Option 1: Go back in browser history if came from a page
             if (window.history.length > 1) {
                 window.history.back();
             } else {
+                // Option 2: Fallback hash navigation to main dashboard section
                 const urlParams = new URLSearchParams(window.location.search);
                 const userId = urlParams.get('user_id') || '';
                 window.location.hash = '#page1';
             }
 
+            // Reset modal styles for future display
             if (modal) {
                 modal.style.transform = 'scale(1)';
                 modal.style.opacity = '1';
@@ -1260,22 +1372,29 @@ if (btnCancel) {
     });
 }
 
+// "Yes, Logout" Action
 if (btnLogout) {
     btnLogout.addEventListener('click', function() {
+        // Show loading spinner animation
         this.innerHTML = '<span class="spinner"><i class="bi bi-arrow-repeat spin"></i></span> Logging out...';
         this.disabled = true;
         this.style.opacity = '0.7';
 
+        // Add optional CSS animation class if icon needs spinning
         const icon = this.querySelector('i');
         if (icon) icon.style.animation = 'spin 1s linear infinite';
 
         setTimeout(() => {
+            // Smoothly fade out body
             document.body.style.opacity = '0';
             document.body.style.transition = 'opacity 0.5s ease-out';
 
             setTimeout(() => {
+                // Clear all session storage & local storage data
                 sessionStorage.clear();
                 localStorage.clear();
+
+                // Redirect to actual Login page
                 window.location.href = '/techvoltInstituteProject/pages/login.html';
             }, 500);
         }, 800);

@@ -596,8 +596,8 @@
             <select class="filter-select">
                 <option>All Statuses</option>
                 <option>New Enquiry</option>
-                <option>Approved</option>
-                <option>Rejected</option>
+                <option>Quoted</option>
+                <option>sample sent</option>
             </select>
         </div>
     </div>

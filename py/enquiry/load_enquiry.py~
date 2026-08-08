@@ -7,7 +7,6 @@ import pymysql
 
 cgitb.enable()
 
-# Return JSON header
 print("Content-Type: application/json\n")
 
 try:
@@ -21,39 +20,9 @@ try:
     cursor = conn.cursor()
 
     form = cgi.FieldStorage()
-    # --- NEW SAFE BLOCK: Handle status update if action parameter exists ---
-    action = str(form.getvalue("action") or "").strip()
-    if action == "update_status":
-        db_id = form.getvalue("id")
-        current_status = form.getvalue("current_status") or "0"
-
-        if db_id:
-            new_status = int(current_status) + 1
-            cursor.execute(
-                "UPDATE customers_enquiries SET sample_status = %s WHERE id = %s",
-                (new_status, db_id),
-            )
-            print(
-                json.dumps({
-                    "status": "success",
-                    "message": "Status updated successfully",
-                })
-            )
-        else:
-            print(
-                json.dumps({
-                    "status": "error",
-                    "message": "Record ID is missing",
-                })
-            )
-
-        conn.close()
-        exit()  # Stop execution here so normal load code doesn't run
-    # -----------------------------------------------------------------------
-
     current_user_id = str(form.getvalue("user_id") or "").strip()
 
-    # Determine role filter
+    # Determine role filter (Admin vs Marketing Employee)
     is_admin = False
     if current_user_id.upper().startswith("AMD") or current_user_id == "":
         is_admin = True
@@ -97,7 +66,7 @@ try:
     converted_orders = cursor.fetchone()[0] or 0
 
     # -------------------------------------------------------------
-    # 2. ENQUIRY TABLE QUERY (FIXED: Removed non-existent 'priority' column)
+    # 2. ENQUIRY TABLE QUERY
     # -------------------------------------------------------------
     if is_admin:
         cursor.execute("""
@@ -147,6 +116,8 @@ try:
             db_id,
         ) = row
 
+        display_enq_id = enquiry_id if enquiry_id else f"ENQ00{db_id}"
+
         # Button state logic
         if sample_status == 2:
             btn_text = "Quotation Sent"
@@ -168,17 +139,14 @@ try:
             created_at.strftime("%d-%m-%Y") if created_at else "N/A"
         )
 
-        # Action Button Logic (Admin gets Block/Assign, Marketing gets Trash/Delete)
         if is_admin:
-            action_button = f"""<button class="table-action-btn delete" onclick="toggleStatus({db_id}, 'block')" 
-            title="Block"><i class="bi bi-slash-circle"></i></button>"""
+            action_button = f"""<button class="table-action-btn delete" onclick="toggleStatus({db_id}, 'block')" title="Block"><i class="bi bi-slash-circle"></i></button>"""
         else:
-            action_button = f"""<button class="table-action-btn delete" onclick="deleteCustomer({db_id})" title
-            ="Delete"><i class="bi bi-trash"></i></button>"""
+            action_button = f"""<button class="table-action-btn delete" onclick="deleteCustomer({db_id})" title="Delete"><i class="bi bi-trash"></i></button>"""
 
         table_rows_html += f"""
-        <tr data-enquiry="{enquiry_id}">
-            <td><span class="enquiry-number">{enquiry_id if enquiry_id else f'ENQ00{db_id}'}</span></td>
+        <tr data-enquiry="{display_enq_id}">
+            <td><span class="enquiry-number">{display_enq_id}</span></td>
             <td>{customer}</td>
             <td>{fabric if fabric else 'N/A'}</td>
             <td>{qty if qty else 0} Kg</td>
@@ -190,6 +158,7 @@ try:
                     {action_button}
                     <button class="btn {btn_class} btn-sm action-sample-btn" 
                             data-id="{db_id}" 
+                            data-enquiry-id="{display_enq_id}"
                             data-current-status="{status_val}"
                             {disabled_attr}>
                         {btn_text}
@@ -201,18 +170,18 @@ try:
 
     conn.close()
 
-    # 3. SUCCESS RESPONSE
-    response_data = {
-        "status": "success",
-        "kpis": {
-            "total_enquiries": total_enquiries,
-            "pending_enquiries": pending_enquiries,
-            "followup_required": followup_required,
-            "converted_orders": converted_orders,
-        },
-        "rows_html": table_rows_html,
-    }
-    print(json.dumps(response_data))
+    print(
+        json.dumps({
+            "status": "success",
+            "kpis": {
+                "total_enquiries": total_enquiries,
+                "pending_enquiries": pending_enquiries,
+                "followup_required": followup_required,
+                "converted_orders": converted_orders,
+            },
+            "rows_html": table_rows_html,
+        })
+    )
 
 except Exception as e:
     print(

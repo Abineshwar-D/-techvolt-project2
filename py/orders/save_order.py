@@ -121,7 +121,14 @@ try:
     color = form.getvalue("color")
     quantity = float(form.getvalue("quantity") or 0)
     price = float(form.getvalue("price") or 0)
-    total_amount = quantity * price
+
+    base_amount = quantity * price
+
+    # Calculate 18% GST
+    gst_amount = base_amount * 0.18  # 18% GST
+
+    # Calculate Total Amount including GST
+    total_amount = base_amount + gst_amount
 
     # AUTO-SET ORDER DATE TO TODAY
     order_date = datetime.now().strftime("%Y-%m-%d")

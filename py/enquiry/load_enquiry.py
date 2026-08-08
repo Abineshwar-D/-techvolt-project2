@@ -1,8 +1,8 @@
 #!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
 import cgi
 import cgitb
+from datetime import date, datetime
 import json
-from datetime import datetime, date
 import pymysql
 
 cgitb.enable()
@@ -40,9 +40,12 @@ try:
         pending_enquiries = cursor.fetchone()[0] or 0
 
         cursor.execute(
-            "SELECT COUNT(*) FROM customers_enquiries WHERE sample_status = 2"
+            "SELECT COUNT(*) FROM customers_enquiries WHERE sample_status IN (2, 3)"
         )
         followup_required = cursor.fetchone()[0] or 0
+
+        cursor.execute("SELECT COUNT(*) FROM orders")
+        converted_orders = cursor.fetchone()[0] or 0
     else:
         cursor.execute(
             "SELECT COUNT(*) FROM customers_enquiries WHERE LOWER(TRIM(created_by_id)) = %s",
@@ -57,13 +60,16 @@ try:
         pending_enquiries = cursor.fetchone()[0] or 0
 
         cursor.execute(
-            "SELECT COUNT(*) FROM customers_enquiries WHERE sample_status = 2 AND LOWER(TRIM(created_by_id)) = %s",
+            "SELECT COUNT(*) FROM customers_enquiries WHERE sample_status IN (2, 3) AND LOWER(TRIM(created_by_id)) = %s",
             (current_user_id.lower(),),
         )
         followup_required = cursor.fetchone()[0] or 0
 
-    cursor.execute("SELECT COUNT(*) FROM orders")
-    converted_orders = cursor.fetchone()[0] or 0
+        cursor.execute(
+            "SELECT COUNT(*) FROM orders WHERE LOWER(TRIM(created_by_id)) = %s",
+            (current_user_id.lower(),),
+        )
+        converted_orders = cursor.fetchone()[0] or 0
 
     # -------------------------------------------------------------
     # 2. ENQUIRY TABLE QUERY
@@ -118,18 +124,31 @@ try:
 
         display_enq_id = enquiry_id if enquiry_id else f"ENQ00{db_id}"
 
-        # Button state logic
-        if sample_status == 2:
-            btn_text = "Quotation Sent"
-            btn_class = "btn-secondary"
-            status_val = "2"
-            disabled_attr = "disabled"
+        # --- STATUS COLUMN BADGE LOGIC ---
+        if sample_status == 0:
+            status_text = "New Enquiry"
+            status_badge = '<span class="badge bg-warning text-dark">New Enquiry</span>'
+            btn_text = "Send Sample"
+            btn_class = "btn-primary"
+            status_val = "0"
+            disabled_attr = ""
         elif sample_status == 1:
+            status_text = "Sample Sent"
+            status_badge = '<span class="badge bg-info text-dark">Sample Sent</span>'
             btn_text = "Send Quotation"
             btn_class = "btn-success"
             status_val = "1"
             disabled_attr = ""
+        elif sample_status == 2:
+            status_text = "Quoted"
+            status_badge = '<span class="badge bg-success">Quoted</span>'
+            btn_text = "Quotation Sent"
+            btn_class = "btn-secondary"
+            status_val = str(sample_status)
+            disabled_attr = "disabled"
         else:
+            status_text = "New Enquiry"
+            status_badge = '<span class="badge bg-secondary">New Enquiry</span>'
             btn_text = "Send Sample"
             btn_class = "btn-primary"
             status_val = "0"
@@ -144,13 +163,15 @@ try:
         else:
             action_button = f"""<button class="table-action-btn delete" onclick="deleteCustomer({db_id})" title="Delete"><i class="bi bi-trash"></i></button>"""
 
+        # Generates all 8 <td> columns matching <thead>
         table_rows_html += f"""
         <tr data-enquiry="{display_enq_id}">
             <td><span class="enquiry-number">{display_enq_id}</span></td>
             <td>{customer}</td>
             <td>{fabric if fabric else 'N/A'}</td>
             <td>{qty if qty else 0} Kg</td>
-            <td><span class="status-badge pending">{created_date}</span></td>
+            <td>{created_date}</td>
+            <td>{status_badge}</td>
             <td>{created_by}</td>
             <td class="text-right">
                 <div class="d-flex justify-content-end gap-1">
@@ -194,6 +215,6 @@ except Exception as e:
                 "followup_required": 0,
                 "converted_orders": 0,
             },
-            "rows_html": f"<tr><td colspan='7' class='text-danger'>Error: {str(e)}</td></tr>",
+            "rows_html": f"<tr><td colspan='8' class='text-danger'>Error: {str(e)}</td></tr>",
         })
     )

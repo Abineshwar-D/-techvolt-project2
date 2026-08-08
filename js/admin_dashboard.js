@@ -409,6 +409,35 @@ document.addEventListener("DOMContentLoaded", function () {
 window.addEventListener("focus", function () {
     loadCustomerTable();
 });
+
+//THIS FUNCTION IS USED TO FILTER CUSTOMER BY STATUS
+document.addEventListener("DOMContentLoaded", function () {
+    const statusFilter = document.getElementById("statusFilter");
+    const tableBody = document.getElementById("customerTableBody");
+
+    statusFilter.addEventListener("change", function () {
+        // Convert selected filter to lowercase for case-insensitive matching
+        const selectedStatus = this.value.trim().toLowerCase();
+        const rows = tableBody.getElementsByTagName("tr");
+
+        for (let row of rows) {
+            // Status is in the 4th column (index 3)
+            const statusCell = row.cells[3];
+
+            if (statusCell) {
+                const rowStatus = statusCell.textContent.trim().toLowerCase();
+
+                // Show row if "All Statuses" is selected OR if status matches
+                if (selectedStatus === "all" || rowStatus === selectedStatus) {
+                    row.style.display = ""; // Show row
+                } else {
+                    row.style.display = "none"; // Hide row
+                }
+            }
+        }
+    });
+});
+
 /* ==========================================================================
    06. ORDERS SCREEN
    ========================================================================== */
@@ -416,9 +445,11 @@ window.addEventListener("focus", function () {
 //THIS FUNCTION LOAD TABLE DATA
 function loadOrdersAndKPIs() {
     var ordersTableBody = document.getElementById("ordersTableBody");
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUserId = urlParams.get('user_id') || '';
 
     if (ordersTableBody) {
-        fetch("../py/orders/get_orders.py")
+        fetch(`../py/orders/get_orders.py?user_id=${currentUserId}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" || data.kpis) {

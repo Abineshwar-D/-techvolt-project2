@@ -25,7 +25,7 @@ fab_id = form.getvalue("fab_id")
 cursor.execute("""
     SELECT 
         f.name,
-        f.created_at,
+        fc.created_at,
         fc.color_name,
         fc.price,
         fc.id

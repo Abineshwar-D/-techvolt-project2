@@ -313,20 +313,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // THIS FUNCTION LOADS ORDER LIST
 function loadOrders() {
+    // Preserve current selection before reloading
+    const orderSelect = document.getElementById("orderSelect");
+    const currentSelection = orderSelect ? orderSelect.value : null;
+
     fetch("../py/production/get_order_list.py")
         .then(res => res.text())
         .then(data => {
-            const orderSelect = document.getElementById("orderSelect");
             if (orderSelect) {
                 orderSelect.innerHTML = data;
+
+                // Restore selection if it still exists in the newly loaded options
+                if (currentSelection) {
+                    orderSelect.value = currentSelection;
+                }
             }
         })
         .catch(error => console.error('Error loading orders:', error));
 }
 
 document.addEventListener("DOMContentLoaded", function() {
+    // Load orders immediately on page load
     loadOrders();
-    setInterval(loadOrders, 30000);
+
+    // Reload orders when user switches back to this window / tab
+    window.addEventListener("focus", function() {
+        loadOrders();
+    });
+
+    // Also reload when tab visibility changes back to "visible" (Modern Browser Standard)
+    document.addEventListener("visibilitychange", function() {
+        if (document.visibilityState === "visible") {
+            loadOrders();
+        }
+    });
 });
 
 // THIS FUNCTION LOADS ORDER DETAILS AFTER USER SELECTS AN ORDER
@@ -336,16 +356,25 @@ if (orderSelectElem) {
         const orderValue = this.value;
         if (!orderValue) return;
 
-        fetch("../py/production/get_order_details.py?order=" + orderValue)
+        fetch("../py/production/get_order_details.py?order=" + encodeURIComponent(orderValue))
             .then(res => res.json())
             .then(data => {
                 const customer = document.getElementById("customer");
                 const fabric = document.getElementById("fabric");
                 const orderQty = document.getElementById("orderQty");
+                const deliveryDateElem = document.getElementById("delivery_date"); // target element by ID
 
                 if (customer) customer.value = data.customer || "";
                 if (fabric) fabric.value = data.fabric || "";
                 if (orderQty) orderQty.value = (data.quantity || 0) + " Kg";
+
+                // Check if the orderDate element exists
+                if (deliveryDateElem) {
+                    // If element is empty or only has whitespace, populate with returned delivery_date
+                    if (!deliveryDateElem.value || deliveryDateElem.value.trim() === "") {
+                        deliveryDateElem.value = data.delivery_date || "";
+                    }
+                }
             })
             .catch(error => console.error('Error loading order details:', error));
     });
@@ -396,30 +425,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (planForm) {
         planForm.addEventListener("submit", function (e) {
-            // 1. PREVENT the browser from opening the raw JSON page
             e.preventDefault();
 
             const formData = new FormData(this);
 
-            // 2. Send form data in the background
             fetch(this.action, {
                 method: "POST",
                 body: formData
             })
-            .then(response => response.json())
+            .then(async response => {
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (err) {
+                    console.error("Server Raw Response:", text);
+                    throw new Error("Server returned non-JSON response");
+                }
+            })
             .then(data => {
                 if (data.status === "error") {
-                    // 3. SHOW REAL ALERT POPUP (User stays on the form page)
                     alert("Validation Errors:\n- " + data.errors.join("\n- "));
                 } else if (data.status === "success") {
-                    // 4. SHOW SUCCESS ALERT & REDIRECT
                     alert(data.message);
                     window.location.href = data.redirect_url;
                 }
             })
             .catch(error => {
                 console.error("Error submitting form:", error);
-                alert("An error occurred while saving the plan.");
+                alert("An error occurred while saving the plan. Check console for details.");
             });
         });
     }
@@ -457,33 +490,33 @@ setInterval(() => {
 }, 2000);
 
 function loadAllAllocations() {
-    console.log('🔄 Loading all allocations...');
+    console.log('Loading all allocations...');
     fetch('../py/machine/machine_allocation.py?action=get_all_allocations')
         .then(response => {
-            console.log('📡 Allocations Response status:', response.status);
+            console.log('Allocations Response status:', response.status);
             if (!response.ok) {
                 throw new Error('HTTP error! status: ' + response.status);
             }
             return response.json();
         })
         .then(data => {
-            console.log('📊 All Allocations Data:', data);
+            console.log('All Allocations Data:', data);
 
             const tbody = document.getElementById('allocations_table_body1');
             if (!tbody) {
-                console.warn('⚠️ Table body with id "allocations_table_body" not found!');
+                console.warn('Table body with id "allocations_table_body" not found!');
                 return;
             }
 
             if (data.error) {
-                console.error('❌ Error:', data.error);
+                console.error('Error:', data.error);
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">${data.error}</td></tr>`;
                 return;
             }
 
             if (!Array.isArray(data) || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No allocations found</td></tr>`;
-                console.log('ℹ️ No allocations found');
+                console.log('ℹNo allocations found');
                 return;
             }
 
@@ -550,12 +583,12 @@ function loadAllAllocations() {
                 `;
             });
             tbody.innerHTML = html;
-            console.log(`✅ Loaded ${data.length} allocations`);
+            console.log(`Loaded ${data.length} allocations`);
 
             attachRowClickHandlers();
         })
         .catch(error => {
-            console.error('❌ Error loading allocations:', error);
+            console.error('Error loading allocations:', error);
             const tbody = document.getElementById('allocations_table_body1');
             if (tbody) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error loading allocations</td></tr>`;

@@ -320,7 +320,6 @@
                                     <th>Machine</th>
                                     <th>Dates</th>
                                     <th>Created By</th>
-                                    <th>Status</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>

@@ -108,9 +108,9 @@
             </li>
             <li><hr class="dropdown-divider"></li>
             <li>
-                <a class="dropdown-item text-danger" href="/techvoltInstituteProject/pages/login.html" onclick="localStorage.clear(); sessionStorage.clear();">
-                    <i class="bi bi-box-arrow-right me-2"></i> Logout
-                </a>
+<!--                <a class="dropdown-item text-danger" href="/techvoltInstituteProject/pages/login.html" onclick="localStorage.clear(); sessionStorage.clear();">-->
+<!--                    <i class="bi bi-box-arrow-right me-2"></i> Logout-->
+<!--                </a>-->
             </li>
         </ul>
     </div>

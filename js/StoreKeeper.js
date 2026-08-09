@@ -123,44 +123,71 @@ document.querySelectorAll('.table-custom tbody tr').forEach(row => {
     });
 });
 
-fetch("../py/inventory/get_material.py")
-.then(response => response.json())
-.then(data => {
-    if (data.error) {
-        console.error("Database Error:", data.error);
-        return;
+// 1. Get user_id from the browser URL parameter (e.g. StoreKeeper.html?user_id=EMP004#page6)
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user_id') || '';
+
+// Function to load material table data and KPIs
+function loadMaterialsData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id') || '';
+
+    // Cache-busting parameter added to force fresh data from server
+    fetch(`../py/inventory/get_material.py?user_id=${encodeURIComponent(userId)}&_t=${new Date().getTime()}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.error("Database Error:", data.error);
+            return;
+        }
+
+        const totalMat = document.getElementById("totalMaterials");
+        const availStock = document.getElementById("availableStock");
+        const poMatched = document.getElementById("poMatchedMaterials");
+        const matTbody = document.getElementById("materialTableBody");
+
+        if (totalMat) totalMat.innerText = data.total_materials;
+        if (availStock) availStock.innerText = data.available_stock;
+        if (poMatched) poMatched.innerText = data.po_matched_count;
+        if (matTbody) matTbody.innerHTML = data.table_html;
+    })
+    .catch(error => console.error("Fetch Error:", error));
+}
+
+// 1. Initial load on page load
+document.addEventListener("DOMContentLoaded", loadMaterialsData);
+
+// 2. Auto-refresh when user switches back to this tab / window focuses
+window.addEventListener("focus", loadMaterialsData);
+
+document.addEventListener("visibilitychange", function() {
+    if (document.visibilityState === "visible") {
+        loadMaterialsData();
     }
-
-    const totalMat = document.getElementById("totalMaterials");
-    const availStock = document.getElementById("availableStock");
-    const poMatched = document.getElementById("poMatchedMaterials");
-    const matTbody = document.getElementById("materialTableBody");
-
-    if (totalMat) totalMat.innerText = data.total_materials;
-    if (availStock) availStock.innerText = data.available_stock;
-    if (poMatched) poMatched.innerText = data.po_matched_count;
-    if (matTbody) matTbody.innerHTML = data.table_html;
-})
-.catch(error => console.error("Fetch Error:", error));
+});
 
 const tbody = document.getElementById("materialTableBody");
 if (tbody) {
     tbody.addEventListener("click", function (e) {
+        if (e.target.closest(".action-btn")) return;
+
         const row = e.target.closest("tr");
         if (!row) return;
 
-        document.querySelectorAll("#materialTableBody tr")
-            .forEach(r => r.classList.remove("selected"));
-
+        document.querySelectorAll("#materialTableBody tr").forEach(r => r.classList.remove("selected"));
         row.classList.add("selected");
 
-        document.getElementById("detailMaterialName").textContent = row.cells[0].innerText.trim();
-        document.getElementById("detailStock").textContent = row.cells[1].innerText.trim();
-        document.getElementById("detailReorder").textContent = row.cells[2].innerText.trim();
-        document.getElementById("detailCost").textContent = row.cells[3].innerText.trim();
+        const elName = document.getElementById("detailMaterialName");
+        const elStock = document.getElementById("detailStock");
+        const elReorder = document.getElementById("detailReorder");
+        const elCost = document.getElementById("detailCost");
+
+        if (elName) elName.textContent = row.cells[0]?.innerText.trim();
+        if (elStock) elStock.textContent = row.cells[1]?.innerText.trim();
+        if (elReorder) elReorder.textContent = row.cells[2]?.innerText.trim();
+        if (elCost) elCost.textContent = row.cells[3]?.innerText.trim();
     });
 }
-
 //THIS FUNCTION IS FOR LIVE SEARCH
 document.addEventListener('DOMContentLoaded', function () {
     const searchInventory = document.getElementById('searchInventory');
@@ -242,6 +269,88 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+// THIS FUNCTION IS USED TO OPEN STOCK MODAL
+function openStockModal(btn) {
+    const code = btn.getAttribute("data-code");
+    const name = btn.getAttribute("data-name");
+    const stock = btn.getAttribute("data-stock");
+
+    document.getElementById("modalMaterialCode").value = code;
+    document.getElementById("modalMaterialName").innerText = name;
+    document.getElementById("modalOldStock").value = stock;
+    document.getElementById("modalNewStock").value = "";
+    document.getElementById("modalAlert").classList.add("d-none");
+
+    const modal = new bootstrap.Modal(document.getElementById("stockModal"));
+    modal.show();
+}
+
+//THIS FUNCTION IS USED TO UPDATE STOCK
+function submitStockUpdate() {
+    const code = document.getElementById("modalMaterialCode").value;
+    const process = document.getElementById("modalProcess").value;
+    const qty = document.getElementById("modalNewStock").value;
+    const alertBox = document.getElementById("modalAlert");
+
+    // Get user_id from browser URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id') || '';
+
+    if (!qty || parseFloat(qty) <= 0) {
+        if (alertBox) {
+            alertBox.innerText = "Please enter a valid positive quantity.";
+            alertBox.classList.remove("d-none");
+        }
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("material_code", code);
+    formData.append("process", process);
+    formData.append("quantity", qty);
+    formData.append("user_id", userId);
+
+    fetch("../py/inventory/update_material_stock.py", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            // 1. Hide the Bootstrap Modal
+            const modalEl = document.getElementById("stockModal");
+            if (modalEl) {
+                const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modalInstance.hide();
+            }
+
+            // 2. Remove backdrop backdrops if left over
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+
+            // 3. Force reload or redirect
+            if (data.redirect_url) {
+                window.location.replace(data.redirect_url);
+                window.location.reload(); // Force refresh data
+            } else {
+                window.location.reload();
+            }
+        } else {
+            if (alertBox) {
+                alertBox.innerText = data.message || "Failed to update stock.";
+                alertBox.classList.remove("d-none");
+            }
+        }
+    })
+    .catch(err => {
+        console.error("Update Stock Error:", err);
+        if (alertBox) {
+            alertBox.innerText = "Error connecting to server.";
+            alertBox.classList.remove("d-none");
+        }
+    });
+}
 /* ==========================================================================
    04. ADD MATERIAL SCREEN
    ========================================================================== */

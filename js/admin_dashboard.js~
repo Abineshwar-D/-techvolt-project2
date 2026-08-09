@@ -449,7 +449,7 @@ function loadOrdersAndKPIs() {
     const currentUserId = urlParams.get('user_id') || '';
 
     if (ordersTableBody) {
-        fetch(`../py/get_orders.py?user_id=${currentUserId}`)
+        fetch(`../py/orders/get_orders.py?user_id=${currentUserId}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" || data.kpis) {

@@ -590,18 +590,18 @@
                     <input type="text" id="searchCustomer" class="form-control rounded-pill ps-5" placeholder="Search Customer" style="background: #f2f4f6; border: none; padding: 8px 16px 8px 40px;">
                 </div>
 
-                <div class="filter-bar mb-2">
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <label class="text-muted small fw-medium">Filter by Status:</label>
-            <select class="filter-select">
-                <option>All Statuses</option>
-                <option>New Enquiry</option>
-                <option>Quoted</option>
-                <option>sample sent</option>
-            </select>
-        </div>
+               <div class="filter-bar mb-2">
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        <label class="text-muted small fw-medium">Filter by Status:</label>
+        <!-- Added id="statusFilter" here -->
+        <select class="filter-select" id="statusFilter">
+            <option value="all">All Statuses</option>
+            <option value="New Enquiry">New Enquiry</option>
+            <option value="Quoted">Quoted</option>
+            <option value="sample sent">sample sent</option>
+        </select>
     </div>
-
+</div>
         </div>
      </section>
 
@@ -1585,6 +1585,7 @@
                                     <th>Material Name</th>
                                     <th class="text-right">Available Stock</th>
                                     <th class="text-center">Delivery Date</th>
+                                    <th class="text-center">Status</th>
                                     <th class="text-center">  Created By</th>
                                     <th class="text-right">Actions</th>
                                 </tr>

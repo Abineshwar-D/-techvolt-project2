@@ -838,8 +838,12 @@ function loadMaterialsAndKPIs() {
     var materialTableBody = document.getElementById("materialTableBody");
 
     if (materialTableBody) {
-        // Adding ?t= prevents browser caching
-        fetch("../py/inventory/get_material.py?t=" + new Date().getTime())
+        // Extract user_id from browser URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id') || '';
+
+        // Pass user_id and cache-busting timestamp parameter in the fetch request
+        fetch(`../py/inventory/get_material.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -848,16 +852,20 @@ function loadMaterialsAndKPIs() {
             }
 
             // Update KPI Cards
-            document.getElementById("totalMaterials").innerText = data.total_materials;
-            document.getElementById("availableStock").innerText = data.available_stock;
-            document.getElementById("poMatchedMaterials").innerText = data.po_matched_count;
+            const totalMat = document.getElementById("totalMaterials");
+            const availStock = document.getElementById("availableStock");
+            const poMatched = document.getElementById("poMatchedMaterials");
+
+            if (totalMat) totalMat.innerText = data.total_materials;
+            if (availStock) availStock.innerText = data.available_stock;
+            if (poMatched) poMatched.innerText = data.po_matched_count;
 
             // Update Table
             materialTableBody.innerHTML = data.table_html;
         })
         .catch(err => {
             console.error("Error loading materials and KPIs:", err);
-            materialTableBody.innerHTML = "<tr><td colspan='4' class='text-danger text-center'>Error connecting to server.</td></tr>";
+            materialTableBody.innerHTML = "<tr><td colspan='6' class='text-danger text-center'>Error connecting to server.</td></tr>";
         });
     }
 }

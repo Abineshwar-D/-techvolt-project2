@@ -6,12 +6,14 @@ import pymysql
 cgitb.enable()
 print("Content-Type: text/html\n")
 
-# Extract user_id from query string (e.g., ?user_id=EMP001)
+# Extract user_id from URL query string (e.g. ?user_id=EMP001)
 form = cgi.FieldStorage()
 user_id = form.getvalue("user_id", "").strip()
 
+# Default empty option
 print('<option value="">-- Select Customer --</option>')
 
+# ONLY execute query if user_id is provided
 if user_id:
     try:
         db = pymysql.connect(
@@ -19,24 +21,35 @@ if user_id:
             user="root",
             password="",
             database="techvoltproject2",
+            cursorclass=pymysql.cursors.DictCursor,
         )
         cursor = db.cursor()
 
-        # Using LEFT JOIN avoids the SQL NULL bug in NOT IN
+        # Query checks:
+        # 1. created_by_id MUST EQUAL user_id
+        # 2. sample_status MUST BE 2
+        # 3. enquiry_id and customer_name MUST NOT already be in orders
         query = """
             SELECT ce.enquiry_id, ce.customer_name 
             FROM customers_enquiries ce
-            LEFT JOIN orders o ON (ce.enquiry_id = o.customer OR ce.customer_name = o.customer)
             WHERE ce.created_by_id = %s
-              AND ce.sample_status = 2
-              AND o.customer IS NULL
+              AND (ce.sample_status = 2 OR ce.sample_status = '2')
+              AND ce.enquiry_id NOT IN (
+                  SELECT o.customer FROM orders o WHERE o.customer IS NOT NULL AND o.customer != ''
+              )
+              AND ce.customer_name NOT IN (
+                  SELECT o.customer FROM orders o WHERE o.customer IS NOT NULL AND o.customer != ''
+              )
             ORDER BY ce.id DESC
         """
         cursor.execute(query, (user_id,))
         results = cursor.fetchall()
 
+        # Print options if matching records exist
         for row in results:
-            print(f'<option value="{row[0]}">{row[1]} ({row[0]})</option>')
+            enq_id = row["enquiry_id"]
+            cust_name = row["customer_name"]
+            print(f'<option value="{enq_id}">{cust_name} ({enq_id})</option>')
 
     except Exception as e:
         print(f"<option>Error: {str(e)}</option>")

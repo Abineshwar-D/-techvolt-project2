@@ -18,7 +18,7 @@ logged_in_user_id = form.getvalue("user_id") or form.getvalue("admin_id")
 # DYNAMIC REDIRECT URL GENERATION
 if logged_in_user_id and logged_in_user_id.strip():
     # Replace 'Production.html' with your target page name if different
-    redirect_url = f"/techvoltInstituteProject/pages/Production.html?user_id={logged_in_user_id.strip()}"
+    redirect_url = f"/techvoltInstituteProject/pages/Production.html?user_id={logged_in_user_id.strip()}#page13"
 else:
     redirect_url = "/techvoltInstituteProject/pages/login.html"
 

@@ -44,25 +44,39 @@ try:
     )
     cursor = conn.cursor()
 
-    # Step 1: Check if this user_id is registered in the ADMIN table
+    # Step 1: Check role and admin status from users or admin table
     is_admin = False
+    user_role = ""
+
     if user_id:
+        # Check admin table first
         cursor.execute(
             "SELECT COUNT(*) FROM admin WHERE employee_id = %s OR user_id = %s",
             (user_id, user_id),
         )
         if cursor.fetchone()[0] > 0:
             is_admin = True
+            user_role = "Admin"
 
-    # Step 2: Set strict condition based on dynamic user_id
-    if is_admin:
-        # Admin can view all orders across all employees
-        filter_clause = "1=1"
-        user_params = []
-    else:
-        # Regular user (e.g. EMP005, EMP002, etc.) can ONLY view orders where created_by_id = user_id
+        # If not admin, get user role from users table
+        if not is_admin:
+            cursor.execute(
+                "SELECT role FROM users WHERE employee_id = %s OR user_id = %s",
+                (user_id, user_id),
+            )
+            role_row = cursor.fetchone()
+            if role_row and role_row[0]:
+                user_role = str(role_row[0]).strip()
+
+    # Step 2: Order Table Filtering Condition
+    # Marketing role can ONLY view orders created by them.
+    # Admin and all other roles (Merchandising, Management, etc.) can view ALL orders.
+    if user_role.lower() == "marketing":
         filter_clause = "created_by_id = %s"
         user_params = [user_id if user_id else "NON_EXISTENT_USER"]
+    else:
+        filter_clause = "1=1"
+        user_params = []
 
     # --- KPI Queries ---
     cursor.execute(
@@ -129,6 +143,35 @@ try:
             initials = "".join(word[0] for word in cust_name.split()[:2]).upper()
             display_remarks = rem if rem else "No remarks provided."
 
+            # View Button (Always visible for all roles)
+            view_btn = f"""
+                <button type="button" class="action-btn view-details-btn" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#detailsModal"
+                        data-customer="{cust_name}"
+                        data-contact="{phone or ''}"
+                        data-order="{order_no}"
+                        data-fabric="{fabric or ''}"
+                        data-gsm="{gsm or ''}"
+                        data-color="{color or ''}"
+                        data-total="{total or ''}"
+                        data-remarks="{display_remarks}"
+                        >
+                    <i class="bi bi-eye"></i>
+                </button>
+            """
+
+            # Build Action Buttons depending on user role:
+            # Non-Marketing & Non-Admin roles see ONLY the View button.
+            if is_admin or user_role.lower() == "marketing":
+                action_buttons = f"""
+                    {view_btn}
+                    <button class="action-btn"><i class="bi bi-pencil"></i></button>
+                    <button class="action-btn"><i class="bi bi-geo-alt"></i></button>
+                """
+            else:
+                action_buttons = f"{view_btn}"
+
             table_rows_html += f"""
             <tr class="order-row">
                 <td>
@@ -146,22 +189,7 @@ try:
                 <td>{created_by}</td>
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
-                        <button type="button" class="action-btn view-details-btn" 
-                                data-bs-toggle="modal" 
-                                data-bs-target="#detailsModal"
-                                data-customer="{cust_name}"
-                                data-contact="{phone or ''}"
-                                data-order="{order_no}"
-                                data-fabric="{fabric or ''}"
-                                data-gsm="{gsm or ''}"
-                                data-color="{color or ''}"
-                                data-total="{total or ''}"
-                                data-remarks="{display_remarks}"
-                                >
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button class="action-btn"><i class="bi bi-pencil"></i></button>
-                        <button class="action-btn"><i class="bi bi-geo-alt"></i></button>
+                        {action_buttons}
                     </div>
                 </td>
             </tr>

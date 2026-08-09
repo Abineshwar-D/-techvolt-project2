@@ -716,6 +716,35 @@ window.addEventListener("focus", function () {
     fetchEnquiryData();
 });
 
+//THIS FUNCTION IS USED FOR FILTERING ENQUIRIES BY STATUS
+function filterEnquiriesByStatus() {
+    // 1. Get selected value from filter dropdown
+    const filterSelect = document.getElementById("statusFilter");
+    const selectedStatus = filterSelect.value.trim();
+
+    // 2. Get the enquiry table body and all its rows
+    const tableBody = document.getElementById("enquiryTableBody");
+    const rows = tableBody.getElementsByTagName("tr");
+
+    // 3. Loop through each row in the table
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+
+        // Skip empty or error message rows (which have only 1 cell spanning across)
+        if (row.cells.length < 6) continue;
+
+        // Extract text from the 6th column (Index 5 = Status)
+        const statusCellText = row.cells[5].textContent.trim();
+
+        // 4. Compare: If ALL is selected or Status matches cell text, show row; otherwise hide it
+        if (selectedStatus === "ALL" || statusCellText.includes(selectedStatus)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    }
+}
+
 /* ==========================================================================
    07. CREATE ENQUIRY SCREEN
    ========================================================================== */

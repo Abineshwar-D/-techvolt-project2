@@ -433,13 +433,19 @@ console.log(" Script loaded successfully");
 
 function loadOrderDropdown() {
     console.log("Attempting to fetch dropdown...");
-    fetch('../py/orders/get_customer_dropdown.py')
+
+    // Get user_id from the current browser URL (e.g. Marketing.html?user_id=EMP001#Enquiry)
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id') || '';
+
+    // Pass the userId parameter in the fetch request
+    fetch(`../py/orders/get_customer_dropdown.py?user_id=${encodeURIComponent(userId)}`)
         .then(res => res.text())
         .then(html => {
             const select = document.getElementById("customerSelect");
             if (select) {
                 select.innerHTML = html;
-                console.log("Dropdown HTML injected.");
+                console.log("Dropdown HTML injected successfully for user:", userId);
             } else {
                 console.error("CRITICAL: Cannot find element 'customerSelect'");
             }

@@ -12,12 +12,12 @@ form = cgi.FieldStorage()
 username = form.getvalue("username")
 password = form.getvalue("password")
 
-# Updated Mapping (Keys in lowercase for safe matching)
+# Match exact filenames from your screenshot
 ROLE_PAGES = {
     "marketing": "/techvoltInstituteProject/pages/Marketing.html",
     "merchandising": "/techvoltInstituteProject/pages/Merchandising.html",
     "production": "/techvoltInstituteProject/pages/Production.html",
-    "storekeeper": "/techvoltInstituteProject/pages/StoreKeeper .html"
+    "storekeeper": "/techvoltInstituteProject/pages/StoreKeeper.html"
 }
 
 
@@ -54,7 +54,7 @@ else:
 
         if user_data:
             role, status = user_data[0].strip(), user_data[1]
-            role_clean = role.lower()  # Converts e.g. "Marketing" to "marketing"
+            role_clean = role.lower()  # Converts "Marketing" to "marketing"
 
             if status and status.lower() == 'inactive':
                 send_alert("You are blocked by Admin.", go_back=True)

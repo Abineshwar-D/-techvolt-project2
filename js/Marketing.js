@@ -496,9 +496,6 @@ function fillOrderForm(enqId) {
             const fabric = document.getElementsByName("fabric_type")[0];
             if (fabric) fabric.value = p[1];
 
-            const gsm = document.getElementsByName("gsm")[0];
-            if (gsm) gsm.value = p[2];
-
             const odate = document.getElementsByName("order_date")[0];
             if (odate) odate.value = p[8];
 

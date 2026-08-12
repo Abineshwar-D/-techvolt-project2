@@ -56,7 +56,6 @@ try:
     # --- Robust Check if current user is Admin ---
     is_admin = False
     if user_id_param:
-        # 1. Check if user exists in the admin table directly
         cursor.execute(
             """
             SELECT COUNT(*) FROM admin 
@@ -67,7 +66,6 @@ try:
         if cursor.fetchone()[0] > 0:
             is_admin = True
         else:
-            # 2. Check if user exists in users table with role = 'Admin'
             cursor.execute(
                 """
                 SELECT COUNT(*) FROM users 
@@ -83,11 +81,11 @@ try:
     cursor.execute("SELECT COUNT(*) FROM materials")
     total_materials = cursor.fetchone()[0] or 0
 
-    # --- KPI 2: Total Available Stock (Sum of opening_stock) ---
+    # --- KPI 2: Total Available Stock ---
     cursor.execute("SELECT COALESCE(SUM(opening_stock), 0) FROM materials")
     total_stock = float(cursor.fetchone()[0])
 
-    # --- KPI 3: Count of Materials that exist in purchased_order table ---
+    # --- KPI 3: Matched Materials Count ---
     cursor.execute("""
         SELECT COUNT(DISTINCT m.material_id)
         FROM materials m
@@ -130,17 +128,29 @@ try:
         else:
             status_badge = '<span class="badge bg-success">Assigned</span>'
 
+        # Edit button configured with data attributes for opening the modal
+        edit_btn = f"""
+            <button class="action-btn edit-stock-btn" 
+                    title="Edit Stock" 
+                    data-code="{material_code}" 
+                    data-name="{material_name}" 
+                    data-stock="{stock:.2f}"
+                    onclick="openStockModal(this)">
+                <i class="bi bi-pencil"></i>
+            </button>
+        """
+
         # --- Action Buttons Logic based on Admin Check ---
         if is_admin:
-            action_buttons = """
+            action_buttons = f"""
                 <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
-                <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                {edit_btn}
                 <button class="action-btn" title="Block"><i class="bi bi-slash-circle"></i></button>
             """
         else:
-            action_buttons = """
+            action_buttons = f"""
                 <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
-                <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                {edit_btn}
                 <button class="action-btn" title="Delete"><i class="bi bi-trash"></i></button>
             """
 
@@ -186,7 +196,6 @@ try:
     cursor.close()
     conn.close()
 
-    # Build response JSON
     response_data = {
         "total_materials": total_materials,
         "available_stock": f"{total_stock:,.2f} Kg",

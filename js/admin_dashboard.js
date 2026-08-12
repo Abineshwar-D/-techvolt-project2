@@ -195,7 +195,7 @@ function loadFabricDetails(fab_id){
     });
 }
 
-//THIS FUNCTION EDITS THE FABRIC
+//THIS FUNCTION EDITS THE FABRIC COLOR
 function editFabric() {
     let colorId = document.getElementById("color_id").value.trim();
     let colorName = document.getElementById("color_name").value.trim();
@@ -377,20 +377,6 @@ function submitAssignment() {
         .catch(error => console.error("Error submitting assignment:", error));
 }
 
-// 5. Admin Block / Unblock Toggle Function
-function toggleStatus(id, actionType) {
-    const userId = getUserIdFromURL();
-    const actionText = actionType === 'block' ? 'block' : 'unblock';
-
-    if (!confirm(`Are you sure you want to ${actionText} this enquiry?`)) return;
-
-    fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&action=${actionType}&id=${id}`)
-        .then(response => response.text())
-        .then(() => {
-            loadCustomerTable();
-        })
-        .catch(error => console.error("Error toggling status:", error));
-}
 
 // 6. Search Filter
 document.getElementById("searchCustomer")?.addEventListener("keyup", function () {
@@ -437,6 +423,110 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+// FUNCTION 1: Open Modal and Load Data
+function editEnquiry(enquiry_id) {
+    document.getElementById("edit_enquiry_id").value = enquiry_id;
+
+    fetch("../py/customer/get_and_update_marketing.py", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `action=get_data&enquiry_id=${encodeURIComponent(enquiry_id)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            let selectDropdown = document.getElementById("edit_marketing_select");
+            selectDropdown.innerHTML = '<option value="">-- Select Marketing Executive --</option>';
+
+            data.marketing_users.forEach(user => {
+                let option = document.createElement("option");
+                option.value = user.employee_id;
+                option.textContent = `${user.fullname} (${user.employee_id})`;
+                selectDropdown.appendChild(option);
+            });
+
+            selectDropdown.value = data.created_by_id || "";
+        } else {
+            alert(data.message || "Failed to load marketing team.");
+        }
+    })
+    .catch(error => console.error("Error fetching data:", error));
+}
+
+
+// FUNCTION 2: Save Updated Marketing Assignment
+function submitMarketingUpdate(event) {
+    event.preventDefault();
+
+    let enquiry_id = document.getElementById("edit_enquiry_id").value;
+    let marketing_emp_id = document.getElementById("edit_marketing_select").value;
+
+    fetch("../py/customer/get_and_update_marketing.py", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `action=update_assignment&enquiry_id=${encodeURIComponent(enquiry_id)}&marketing_emp_id=${encodeURIComponent(marketing_emp_id)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(data.message);
+
+            // Hide Modal
+            let modaFlElement = document.getElementById("editMarketingModal");
+            let modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) modalInstance.hide();
+
+            // Refresh table or page
+            location.reload();
+        } else {
+            alert("Update Failed: " + data.message);
+        }
+    })
+    .catch(error => console.error("Error submitting update:", error));
+}
+
+//THIS FUNCTION IS FOR VIEWING CUSTOMER DETAILS
+function viewCustomer(id) {
+    // Show Modal
+    var viewModal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
+    viewModal.show();
+
+    // Toggle Loader/Data view
+    document.getElementById('modalLoading').style.display = 'block';
+    document.getElementById('modalDetails').style.display = 'none';
+
+    // Call the Python CGI script
+    fetch(`../py/customer/get_customer_details.py?id=${id}`)
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const d = res.data;
+                // Populate data inside modal
+                document.getElementById('v_customer_name').innerText = d.customer_name || 'N/A';
+                document.getElementById('v_company_name').innerText = d.company_name || 'N/A';
+                document.getElementById('v_phone_number').innerText = d.phone_number || 'N/A';
+                document.getElementById('v_fabric_type').innerText = d.fabric_type || 'N/A';
+                document.getElementById('v_color').innerText = d.color || 'N/A';
+                document.getElementById('v_price').innerText = d.price ? `₹${d.price}` : 'N/A';
+                document.getElementById('v_quantity').innerText = d.quantity || 'N/A';
+                document.getElementById('v_city').innerText = d.city || 'N/A';
+                document.getElementById('v_state').innerText = d.state || 'N/A';
+                document.getElementById('v_created_at').innerText = d.created_at || 'N/A';
+                document.getElementById('v_created_by_name').innerText = d.created_by_name || 'N/A';
+
+                // Show data
+                document.getElementById('modalLoading').style.display = 'none';
+                document.getElementById('modalDetails').style.display = 'block';
+            } else {
+                alert('Error fetching customer details: ' + res.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to connect to the server.');
+        });
+}
 
 /* ==========================================================================
    06. ORDERS SCREEN

@@ -6,14 +6,18 @@ import json
 import pymysql
 
 cgitb.enable()
+
+# Print header first
 print("Content-Type: application/json\n")
 
+# 1. READ URL PARAMETERS (From GET request sent by router.js)
 form = cgi.FieldStorage()
 user_id = form.getvalue("user_id")
-current_page = form.getvalue("page")  # Sent from auth.js (e.g. "Marketing.html")
+current_page = form.getvalue("page")  # e.g., "admin_dashboard.html"
 
-# Match exact filenames from your screenshot
+# 2. MATCH EXACT FILENAMES
 ROLE_PAGES = {
+    "admin": "admin_dashboard.html",
     "merchandising": "Merchandising.html",
     "marketing": "Marketing.html",
     "production": "Production.html",
@@ -22,8 +26,9 @@ ROLE_PAGES = {
 
 response = {"status": "error", "message": "Access Denied"}
 
+# 3. CHECK IF PARAMETERS ARE RECEIVED
 if not user_id or not current_page:
-    response["message"] = "Missing user_id or page parameter."
+    response["message"] = f"Missing parameters: user_id='{user_id}', page='{current_page}'"
     print(json.dumps(response))
     exit()
 
@@ -36,7 +41,7 @@ try:
     )
     cur = con.cursor()
 
-    # 1. STEP 1: Check 'admin' table first
+    # 4. STEP 1: Check 'admin' table first
     cur.execute("SELECT role FROM admin WHERE employee_id=%s", (user_id,))
     admin_data = cur.fetchone()
 
@@ -48,7 +53,7 @@ try:
             "role": admin_role.strip()
         }
     else:
-        # 2. STEP 2: Check 'users' table
+        # 5. STEP 2: Check 'users' table
         cur.execute("SELECT role, status FROM users WHERE employee_id=%s", (user_id,))
         user_data = cur.fetchone()
 
@@ -59,7 +64,6 @@ try:
             if db_status and db_status.lower() == 'inactive':
                 response["message"] = "Your account is blocked by Admin."
             else:
-                # FIX: Convert db_role to lowercase (.lower()) so "Marketing" matches "marketing"
                 db_role_clean = db_role.lower()
                 expected_page = ROLE_PAGES.get(db_role_clean)
 
@@ -71,10 +75,9 @@ try:
                         "role": db_role
                     }
                 else:
-                    response["message"] = f"Access Blocked: Your assigned role ({db_role}) does not have permission " \
-                                          f"for this page."
+                    response["message"] = f"Access Blocked: Your assigned role ({db_role}) does not have permission for this page."
         else:
-            response["message"] = "Invalid User ID or user does not exist."
+            response["message"] = f"Invalid User ID '{user_id}' or user does not exist."
 
 except Exception as e:
     response = {"status": "error", "message": f"Database Error: {str(e)}"}
@@ -83,4 +86,5 @@ finally:
     if 'con' in locals():
         con.close()
 
+# Return JSON response back to router.js
 print(json.dumps(response))

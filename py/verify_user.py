@@ -13,7 +13,18 @@ print("Content-Type: application/json\n")
 # 1. READ URL PARAMETERS (From GET request sent by router.js)
 form = cgi.FieldStorage()
 user_id = form.getvalue("user_id")
-current_page = form.getvalue("page")  # e.g., "admin_dashboard.html"
+current_page = form.getvalue("page")  # e.g., "admin_dashboard.html" or "landing.html"
+
+# ===== BYPASS USER_ID CHECK FOR LANDING PAGE =====
+if current_page and "landing.html" in current_page.lower():
+    response = {
+        "status": "success",
+        "message": "Public access granted for Landing Page",
+        "role": "public"
+    }
+    print(json.dumps(response))
+    exit()
+# =================================================
 
 # 2. MATCH EXACT FILENAMES
 ROLE_PAGES = {

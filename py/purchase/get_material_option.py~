@@ -9,7 +9,7 @@ print("Content-Type: application/json\n")
 form = cgi.FieldStorage()
 material_name = form.getvalue("material_name", "").strip()
 
-stock = 0.0
+stock = 0
 
 if material_name:
     try:
@@ -21,30 +21,22 @@ if material_name:
         )
         cursor = conn.cursor()
 
-        # Step 1: Look for the material in the materials table
+        # Matches material name inside DB
         cursor.execute("""
             SELECT opening_stock 
             FROM materials 
-            WHERE LOWER(TRIM(material_name)) = LOWER(%s)
-               OR LOWER(TRIM(material_name)) LIKE LOWER(%s)
+            WHERE LOWER(material_name) LIKE LOWER(%s) AND status = 'Active'
             LIMIT 1
-        """, (material_name, f"%{material_name}%"))
+        """, (f"%{material_name}%",))
 
         row = cursor.fetchone()
 
-        # Step 2: If found in materials table, use its opening_stock
         if row and row[0] is not None:
             stock = float(row[0])
-        else:
-            # Fallback: Material was listed under Supplier, but not created in Materials table yet.
-            # Stock defaults to 0.
-            stock = 0.0
 
         cursor.close()
         conn.close()
     except Exception as e:
-        # If any database error occurs, fallback to 0
-        stock = 0.0
+        stock = 0
 
-# Always return JSON with stock (either actual stock or 0)
-print(json.dumps({"stock": stock, "material": material_name}))
+print(json.dumps({"stock": stock}))

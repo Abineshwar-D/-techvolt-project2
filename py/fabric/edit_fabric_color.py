@@ -27,7 +27,7 @@ try:
     # 3. Validation Check
     if color_id and color_name and price_name:
         cursor.execute(
-            "UPDATE fabric_colors SET color_name = %s, price = %s WHERE id = %s",
+            "UPDATE fabric_colors SET color_name = %s, price = %s, created_at = NOW() WHERE id = %s",
             (color_name, price_name, color_id)
         )
         conn.commit()

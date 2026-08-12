@@ -65,6 +65,7 @@ if logged_in_user_id:
     except Exception as e:
         redirect_url = "/techvoltInstituteProject/pages/login.html"
 
+
 # ==================== VALIDATION ====================
 
 def validate():

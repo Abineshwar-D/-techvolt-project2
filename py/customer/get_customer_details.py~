@@ -1,0 +1,58 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import json
+import pymysql
+
+cgitb.enable()
+
+print("Content-Type: application/json\n")
+
+try:
+    form = cgi.FieldStorage()
+    target_id = form.getvalue("id")
+
+    if not target_id:
+        print(json.dumps({"status": "error", "message": "No ID provided"}))
+        exit()
+
+    conn = pymysql.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="techvoltproject2",
+        cursorclass=pymysql.cursors.DictCursor,
+    )
+
+    cursor = conn.cursor()
+
+    # Normal SQL Query
+    query = """
+        SELECT 
+            customer_name, company_name, phone_number, fabric_type, 
+            color, price, quantity, city, state, created_at, created_by_name 
+        FROM customers_enquiries 
+        WHERE id = %s
+    """
+    cursor.execute(query, (target_id,))
+    record = cursor.fetchone()
+
+    if record:
+        # Format created_at to ONLY show YYYY-MM-DD
+        if record.get("created_at"):
+            record["created_at"] = record["created_at"].strftime(
+                "%Y-%m-%d"
+            )  # <--- ONLY DATE
+
+        print(json.dumps({"status": "success", "data": record}))
+    else:
+        print(json.dumps({"status": "error", "message": "Record not found"}))
+
+except Exception as e:
+    print(json.dumps({"status": "error", "message": str(e)}))
+
+finally:
+    if "conn" in locals():
+        cursor.close()
+        conn.close()

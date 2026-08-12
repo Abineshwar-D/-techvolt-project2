@@ -53,15 +53,6 @@ function loadUserProfileHeader() {
 
 // 3. Automatically execute when page loads
 document.addEventListener("DOMContentLoaded", function () {
-    // Check if current page is the public landing page
-    const currentPage = window.location.pathname.split("/").pop().toLowerCase();
-    const isLandingPage = currentPage === "landing.html" || currentPage === "";
-
-    if (isLandingPage) {
-        // Skip session validation for public landing page
-        return;
-    }
-
     // Validate session
     const userId = getActiveUserId();
     if (!userId) {

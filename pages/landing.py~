@@ -1,4 +1,100 @@
-<!DOCTYPE html>
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+import cgi
+import cgitb
+
+import pymysql
+
+# Enable browser error logging for debugging
+cgitb.enable()
+
+# 1. Print required HTTP content header
+print("Content-Type: text/html; charset=utf-8\n")
+
+# Process form data early BEFORE rendering markup to handle redirect/post processing gracefully
+emp = cgi.FieldStorage()
+submit = emp.getvalue('submit')
+
+success_alert = ""
+error_alert = ""
+
+if submit is not None:
+    customer_name = emp.getvalue('customer_name', '')
+    company_name = emp.getvalue('company_name', '')
+    gst_number = emp.getvalue('gst_number', '')
+    phone_number = emp.getvalue('phone_number', '')
+    email = emp.getvalue('email', '')
+    quantity = emp.getvalue('quantity', 0)
+    source = emp.getvalue('source', 'Phone')
+    remarks = emp.getvalue('remarks', '')
+    address = emp.getvalue('address', '')
+    city = emp.getvalue('city', '')
+    state = emp.getvalue('state', '')
+    pincode = emp.getvalue('pincode', '')
+
+    # Default values
+    fabric_type = "Cotton"
+    color = "Default"
+    price = 0.00
+    sample_status = 2
+
+    # CREATED BY IS NULL FOR DIRECT CUSTOMERS
+    created_by_id = None
+    created_by_name = None
+
+    try:
+        # Open DB connection
+        con = pymysql.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="techvoltproject2"  # Ensure database name matches
+        )
+        cur = con.cursor()
+
+        # Safely fetch max numeric ID part to avoid collisions like ENQ003 duplicating
+        cur.execute("SELECT id FROM customers_enquiries ORDER BY id DESC LIMIT 1")
+        row = cur.fetchone()
+        next_id = (row[0] + 1) if row and row[0] else 1
+        enquiry_id = f"ENQ{next_id:03d}"
+
+        # Insert Query
+        query = """INSERT INTO customers_enquiries 
+                   (enquiry_id, customer_name, company_name, gst_number, phone_number, email, 
+                    fabric_type, color, price, quantity, source, remarks, address, city, 
+                    state, pincode, created_at, sample_status, created_by_id, created_by_name) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s, %s)"""
+
+        values = (
+            enquiry_id, customer_name, company_name, gst_number, phone_number, email,
+            fabric_type, color, price, quantity, source, remarks, address, city,
+            state, pincode, sample_status, created_by_id, created_by_name
+        )
+
+        cur.execute(query, values)
+        con.commit()
+        con.close()
+
+        # Success Script Injection with PRG Redirect
+        success_alert = """
+        <script>
+            alert("Enquiry saved successfully!");
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
+            window.location.href = window.location.pathname;
+        </script>
+        """
+
+    except Exception as e:
+        error_message = str(e).replace('"', '\\"').replace('\n', ' ')
+        error_alert = f"""
+        <script>
+            alert("Error saving enquiry: {error_message}");
+        </script>
+        """
+
+# 2. Output complete HTML
+print(f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,20 +112,17 @@
 
     <style>
         /* Reset */
-        * {
+        * {{
             font-family: 'Inter', sans-serif;
-        }
+        }}
 
-        body {
+        body {{
             background: #f7f9fb;
             color: #191c1e;
-        }
-        html {
-  scroll-behavior: smooth;
-}
+        }}
 
         /* ========== HEADER ========== */
-        .header {
+        .header {{
             position: fixed;
             top: 0;
             width: 100%;
@@ -41,42 +134,46 @@
             display: flex;
             align-items: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+        }}
 
-        .header.hidden {
+        .header.hidden {{
             transform: translateY(-100%);
-        }
+        }}
 
-        .header.scrolled {
+        .header.scrolled {{
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        }}
 
-        .header .brand-logo {
+        .header .brand-logo {{
             height: 32px;
             width: auto;
-        }
+        }}
 
-        .header .brand-name {
+        .header .brand-name {{
             font-weight: 600;
             font-size: 20px;
             color: #000000;
             letter-spacing: -0.5px;
-        }
+        }}
 
-        .nav-link-custom {
+        .nav-link-custom {{
             font-size: 14px;
             font-weight: 600;
             color: #45464d;
             text-decoration: none;
             transition: color 0.2s;
             padding: 8px 0;
-        }
+        }}
 
-        .nav-link-custom:hover, .nav-link-custom.active {
+        .nav-link-custom:hover {{
             color: #006a61;
-        }
+        }}
 
-        .btn-sign-in {
+        .nav-link-custom.active {{
+            color: #006a61;
+        }}
+
+        .btn-sign-in {{
             font-size: 14px;
             font-weight: 600;
             color: #45464d;
@@ -84,13 +181,13 @@
             border: none;
             padding: 8px 16px;
             transition: color 0.2s;
-        }
+        }}
 
-        .btn-sign-in:hover {
+        .btn-sign-in:hover {{
             color: #000000;
-        }
+        }}
 
-        .btn-demo {
+        .btn-demo {{
             padding: 10px 24px;
             background: #006a61;
             color: #ffffff;
@@ -100,48 +197,48 @@
             font-weight: 600;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(0, 106, 97, 0.2);
-        }
+        }}
 
-        .btn-demo:hover {
+        .btn-demo:hover {{
             opacity: 0.9;
             transform: scale(0.98);
-        }
+        }}
 
         /* ========== HERO ========== */
-        .hero-section {
+        .hero-section {{
             min-height: 85vh;
             display: flex;
             align-items: center;
             position: relative;
             overflow: hidden;
             padding-top: 64px;
-        }
+        }}
 
-        .hero-section .hero-bg {
+        .hero-section .hero-bg {{
             position: absolute;
             inset: 0;
             z-index: 0;
-        }
+        }}
 
-        .hero-section .hero-bg .bg-image {
+        .hero-section .hero-bg .bg-image {{
             width: 100%;
             height: 100%;
             background-size: cover;
             background-position: center;
-        }
+        }}
 
-        .hero-section .hero-bg .bg-overlay {
+        .hero-section .hero-bg .bg-overlay {{
             position: absolute;
             inset: 0;
             background: linear-gradient(to right, #f7f9fb, rgba(247, 249, 251, 0.9), transparent);
-        }
+        }}
 
-        .hero-section .hero-content {
+        .hero-section .hero-content {{
             position: relative;
             z-index: 1;
-        }
+        }}
 
-        .hero-badge {
+        .hero-badge {{
             display: inline-flex;
             align-items: center;
             gap: 8px;
@@ -151,26 +248,26 @@
             border-radius: 50px;
             font-size: 12px;
             font-weight: 700;
-        }
+        }}
 
-        .hero-title {
+        .hero-title {{
             font-weight: 800;
             font-size: 48px;
             color: #000000;
             line-height: 1.1;
-        }
+        }}
 
-        .hero-title .highlight {
+        .hero-title .highlight {{
             color: #006a61;
-        }
+        }}
 
-        .hero-subtitle {
+        .hero-subtitle {{
             font-size: 18px;
             color: #45464d;
             line-height: 1.6;
-        }
+        }}
 
-        .btn-request-demo {
+        .btn-request-demo {{
             padding: 16px 32px;
             background: #000000;
             color: #ffffff;
@@ -183,14 +280,14 @@
             gap: 8px;
             transition: all 0.2s;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
+        }}
 
-        .btn-request-demo:hover {
+        .btn-request-demo:hover {{
             opacity: 0.9;
             transform: scale(0.98);
-        }
+        }}
 
-        .btn-watch-tour {
+        .btn-watch-tour {{
             padding: 16px 32px;
             background: #ffffff;
             color: #191c1e;
@@ -202,42 +299,108 @@
             align-items: center;
             gap: 8px;
             transition: all 0.2s;
-        }
+        }}
 
-        .btn-watch-tour:hover {
+        .btn-watch-tour:hover {{
             background: #f2f4f6;
             transform: scale(0.98);
-        }
+        }}
+
+        /* ========== FORM CUSTOM STYLES ========== */
+        .enquiry-card {{
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid rgba(198, 198, 205, 0.4);
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }}
+
+        .form-label-custom {{
+            font-size: 13px;
+            font-weight: 600;
+            color: #45464d;
+            margin-bottom: 6px;
+            display: block;
+        }}
+
+        .form-control-custom, .form-select-custom {{
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #c6c6cd;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #191c1e;
+            background-color: #f7f9fb;
+            transition: all 0.2s ease;
+        }}
+
+        .form-control-custom:focus, .form-select-custom:focus {{
+            outline: none;
+            border-color: #006a61;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.15);
+        }}
+
+        .btn-save-enquiry {{
+            padding: 12px 32px;
+            background: #006a61;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }}
+
+        .btn-save-enquiry:hover {{
+            opacity: 0.9;
+            transform: scale(0.98);
+        }}
+
+        .btn-cancel-enquiry {{
+            padding: 12px 32px;
+            background: #f2f4f6;
+            color: #45464d;
+            border: 1px solid #c6c6cd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }}
+
+        .btn-cancel-enquiry:hover {{
+            background: #e2e4e6;
+        }}
 
         /* ========== SOCIAL PROOF ========== */
-        .social-proof .brand-item {
+        .social-proof .brand-item {{
             font-style: italic;
             font-weight: 600;
             font-size: 20px;
             opacity: 0.6;
             transition: all 0.7s;
-        }
+        }}
 
-        .social-proof:hover .brand-item {
+        .social-proof:hover .brand-item {{
             opacity: 1;
-        }
+        }}
 
         /* ========== FEATURES ========== */
-        .feature-card {
+        .feature-card {{
             padding: 32px;
             background: #f2f4f6;
             border-radius: 12px;
             border: 1px solid rgba(118, 119, 125, 0.2);
             transition: all 0.3s;
             height: 100%;
-        }
+        }}
 
-        .feature-card:hover {
+        .feature-card:hover {{
             box-shadow: 0 8px 40px rgba(0,0,0,0.06);
             transform: translateY(-4px);
-        }
+        }}
 
-        .feature-card .icon-box {
+        .feature-card .icon-box {{
             width: 56px;
             height: 56px;
             background: #9defe3;
@@ -248,156 +411,84 @@
             justify-content: center;
             margin-bottom: 16px;
             transition: transform 0.3s;
-        }
+        }}
 
-        .feature-card:hover .icon-box {
+        .feature-card:hover .icon-box {{
             transform: scale(1.1);
-        }
+        }}
 
-        .feature-card .icon-box i {
+        .feature-card .icon-box i {{
             font-size: 28px;
-        }
+        }}
 
         /* ========== VALUE PROPOSITION ========== */
-        .value-section {
+        .value-section {{
             background: #000000;
             color: #ffffff;
             padding: 80px 0;
-        }
+        }}
 
-        .value-section .value-title {
+        .value-section .value-title {{
             font-weight: 800;
             font-size: 48px;
             color: #ffffff;
-        }
+        }}
 
-        .value-section .value-subtitle {
+        .value-section .value-subtitle {{
             font-size: 18px;
             color: rgba(255,255,255,0.7);
-        }
+        }}
 
-        .value-card {
+        .value-card {{
             padding: 24px;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             transition: background 0.2s;
             height: 100%;
-        }
+        }}
 
-        .value-card:hover {
+        .value-card:hover {{
             background: rgba(255,255,255,0.05);
-        }
+        }}
 
-        .value-card i {
+        .value-card i {{
             color: #006a61;
             font-size: 28px;
             margin-bottom: 8px;
-        }
+        }}
 
-        .value-card h4 {
+        .value-card h4 {{
             font-weight: 600;
             font-size: 20px;
             color: #ffffff;
-        }
+        }}
 
-        .value-card p {
+        .value-card p {{
             font-size: 14px;
             color: rgba(255,255,255,0.6);
-        }
-
-        /* ========== ENQUIRY FORM CLEAN CONTAINER ========== */
-        .form-card {
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid rgba(198, 198, 205, 0.4);
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .form-label-custom {
-            font-size: 13px;
-            font-weight: 600;
-            color: #45464d;
-            margin-bottom: 6px;
-            display: block;
-        }
-
-        .form-control-custom,
-        .form-select-custom {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid #c6c6cd;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #191c1e;
-            background-color: #f7f9fb;
-            transition: all 0.2s ease;
-        }
-
-        .form-control-custom:focus,
-        .form-select-custom:focus {
-            outline: none;
-            border-color: #006a61;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(0, 106, 97, 0.15);
-        }
-
-        .form-control-custom.text-uppercase {
-            text-transform: uppercase;
-        }
-
-        .btn-save-enquiry {
-            padding: 12px 32px;
-            background: #006a61;
-            color: #ffffff;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-save-enquiry:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        .btn-cancel-enquiry {
-            padding: 12px 32px;
-            background: #f2f4f6;
-            color: #45464d;
-            border: 1px solid #c6c6cd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .btn-cancel-enquiry:hover {
-            background: #e2e4e6;
-        }
+        }}
 
         /* ========== TESTIMONIAL ========== */
-        .testimonial-section {
+        .testimonial-section {{
             background: #f2f4f6;
             padding: 80px 0;
-        }
+        }}
 
-        .testimonial-section .quote-icon {
+        .testimonial-section .quote-icon {{
             color: #006a61;
             font-size: 48px;
             margin-bottom: 24px;
-        }
+        }}
 
-        .testimonial-section blockquote {
+        .testimonial-section blockquote {{
             font-weight: 800;
             font-size: 32px;
             color: #000000;
             font-style: italic;
             line-height: 1.3;
-        }
+        }}
 
-        .testimonial-section .avatar {
+        .testimonial-section .avatar {{
             width: 64px;
             height: 64px;
             border-radius: 50%;
@@ -405,22 +496,22 @@
             padding: 4px;
             object-fit: cover;
             margin-bottom: 8px;
-        }
+        }}
 
         /* ========== CTA ========== */
-        .cta-section {
+        .cta-section {{
             padding: 96px 0;
             position: relative;
             overflow: hidden;
-        }
+        }}
 
-        .cta-section .cta-bg {
+        .cta-section .cta-bg {{
             position: absolute;
             inset: 0;
             background: rgba(134, 242, 228, 0.2);
-        }
+        }}
 
-        .btn-talk-expert {
+        .btn-talk-expert {{
             padding: 20px 48px;
             background: #ffffff;
             color: #000000;
@@ -429,72 +520,75 @@
             font-size: 24px;
             font-weight: 600;
             transition: all 0.2s;
-        }
+        }}
 
-        .btn-talk-expert:hover {
+        .btn-talk-expert:hover {{
             background: #f2f4f6;
             transform: scale(0.98);
-        }
+        }}
 
         /* ========== FOOTER ========== */
-        .footer {
+        .footer {{
             background: #ffffff;
             border-top: 1px solid rgba(198, 198, 205, 0.3);
             padding: 80px 0 32px;
-        }
+        }}
 
-        .footer .footer-brand {
+        .footer .footer-brand {{
             font-weight: 600;
             font-size: 20px;
             color: #000000;
-        }
+        }}
 
-        .footer .footer-text {
+        .footer .footer-text {{
             font-size: 14px;
             color: rgba(69, 70, 77, 0.8);
-        }
+        }}
 
-        .footer .footer-heading {
+        .footer .footer-heading {{
             font-size: 14px;
             font-weight: 600;
             color: #000000;
             margin-bottom: 16px;
-        }
+        }}
 
-        .footer .footer-link {
+        .footer .footer-link {{
             font-size: 14px;
             color: rgba(69, 70, 77, 0.8);
             text-decoration: none;
             transition: color 0.2s;
             display: block;
             padding: 4px 0;
-        }
+        }}
 
-        .footer .footer-link:hover {
+        .footer .footer-link:hover {{
             color: #006a61;
-        }
+        }}
 
-        .footer .social-link {
+        .footer .social-link {{
             color: rgba(69, 70, 77, 0.6);
             transition: color 0.2s;
             font-size: 22px;
-        }
+        }}
 
-        .footer .social-link:hover {
+        .footer .social-link:hover {{
             color: #006a61;
-        }
+        }}
 
-        .footer .iso-badge {
+        .footer .iso-badge {{
             font-size: 12px;
             font-weight: 500;
             color: rgba(69, 70, 77, 0.4);
             display: flex;
             align-items: center;
             gap: 4px;
-        }
+        }}
     </style>
 </head>
 <body>
+
+{success_alert}
+{error_alert}
 
 <!-- ==================== HEADER ==================== -->
 <header class="header" id="header">
@@ -512,9 +606,7 @@
 
         <div class="d-flex align-items-center gap-3">
             <button class="btn-sign-in d-none d-md-block" onclick="location.href='../pages/login.html'">Sign In</button>
-            <a href="#enquiryForm">
-                 <button class="btn-demo">Book a Demo</button>
-            </a>
+            <button class="btn-demo">Book a Demo</button>
         </div>
     </nav>
 </header>
@@ -540,10 +632,10 @@
                     The only enterprise ERP built exclusively for the modern knitting industry. From material procurement to global delivery.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-<!--                    <button class="btn-request-demo">-->
-<!--                        Request Demo-->
-<!--                        <i class="bi bi-arrow-right"></i>-->
-<!--                    </button>-->
+                    <button class="btn-request-demo">
+                        Request Demo
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
                     <button class="btn-watch-tour">
                         <i class="bi bi-play-circle"></i>
                         Watch Product Tour
@@ -610,77 +702,19 @@
     </div>
 </section>
 
-<!-- ==================== VALUE PROPOSITION ==================== -->
-<section class="value-section">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <h2 class="value-title mb-4">Why KnitFlow?</h2>
-                <p class="value-subtitle mb-5">Generic ERPs fail when they hit the complex logic of knitting machinery. We built our kernel from the factory floor up.</p>
-
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="value-card">
-                            <i class="bi bi-speedometer2"></i>
-                            <h4>Efficiency</h4>
-                            <p>Reduce setup downtime by 24% through AI sequencing.</p>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="value-card">
-                            <i class="bi bi-bullseye"></i>
-                            <h4>Precision</h4>
-                            <p>Batch-level traceability for 100% compliance accountability.</p>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="value-card">
-                            <i class="bi bi-graph-up-arrow"></i>
-                            <h4>Scalability</h4>
-                            <p>Cloud-native infrastructure that grows with your loom count.</p>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="value-card">
-                            <i class="bi bi-arrow-repeat"></i>
-                            <h4>Integration</h4>
-                            <p>Native API hooks for major knitting machine protocols.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6">
-                <div class="position-relative">
-                    <div class="position-absolute top-50 start-50 translate-middle" style="width: 400px; height: 400px; background: rgba(0, 106, 97, 0.1); border-radius: 50%; filter: blur(120px);"></div>
-                    <img class="position-relative rounded-4 shadow-lg border" style="z-index: 1; width: 100%;" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6uIFMV3y53n-OopJ7QKP4hItiIRzHxxj0wuqu3Rfr0Zf00SVj_qnyFIIzl_yzxDWmUJSvtyAPdhYCFhwjb6tE9UurEFt93C8IFXBiBnv5zRfOE7EIyBK-YZFxEA7--bc7gGCmliA2d5_wyUtmGcUw5JFIyQFnepkfUZIWKy8kdFtPVNYyIqm0xQDeIFRZDDMoLBWjAO553nYDtN7wD_R-B86xlQo7Jl9u5kzl0RjxcO9Z-F2JDZO2imXgnqDTtrBtntOgJwmSM3o" alt="Dashboard">
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ==================== ENQUIRY FORM SECTION (CLEAN UI FIXED) ==================== -->
+<!-- ==================== ENQUIRY FORM SECTION ==================== -->
 <section class="py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold fs-1">Command &amp; Control</h2>
-            <p class="text-muted fs-5" style="max-width: 600px; margin: 0 auto;">One central nervous system for your entire manufacturing ecosystem.</p>
+            <h2 class="fw-bold fs-1">Submit Order Enquiry</h2>
+            <p class="text-muted fs-5" style="max-width: 600px; margin: 0 auto;">Enter your requirements below to immediately trigger intelligence pipeline scheduling.</p>
         </div>
 
-        <div class="form-card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="fw-bold mb-0 d-flex align-items-center gap-2">
-                    <i class="bi bi-plus-circle text-secondary"></i>
-                    Create Customer Enquiry
-                </h5>
-                <span class="px-3 py-1 bg-teal bg-opacity-10 text-secondary rounded-pill small fw-bold">ENQ001</span>
-            </div>
-
-            <form id="enquiryForm" onsubmit="saveEnquiry(event)" method="POST" novalidate>
+        <div class="enquiry-card">
+            <form id="enquiryForm" method="POST" novalidate>
 
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="bi bi-person-badge text-secondary"></i>
+                    <i class="bi bi-person-badge text-secondary fs-5"></i>
                     <h5 class="fw-bold mb-0">Personal Details</h5>
                 </div>
 
@@ -709,24 +743,33 @@
                         <label class="form-label-custom">Email Address</label>
                         <input type="email" class="form-control-custom" name="email" placeholder="abc@gmail.com" required>
                     </div>
+                    
+                            <div class="col-md-6">
+                                <label class="form-label-custom">fabric type</label>
+                                <input type="text" class="form-control-custom" id="fabric_type" name="fabric_type" required minlength="10" maxlength="10" pattern="[6-9][0-9]{9}" readonly>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label-custom">Color</label>
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control-custom" value="Blue" id="colorInput" name="color" required minlength="3" maxlength="30" pattern="[A-Za-z ]+" readonly>
+                                </div>
+                            </div>
+
+                    <div id="dynamicDropdowns" class="row g-3"></div>
 
                     <div class="col-md-6">
+                        <label class="form-label-custom">Required Quantity (Kg)</label>
+                        <input type="number" class="form-control-custom" name="quantity" placeholder="5000" required min="5">
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label-custom">Source</label>
                         <select class="form-select-custom" name="source" required>
                             <option selected>Phone</option>
                             <option>Email</option>
                             <option>Walk-in</option>
                         </select>
-                    </div>
-
-                    <!-- Clean full-width container for dynamic inputs -->
-                    <div class="col-12">
-                        <div id="dynamicDropdowns" class="row g-3"></div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label-custom">Required Quantity (Kg)</label>
-                        <input type="number" class="form-control-custom" name="quantity" placeholder="5000" required min="5">
                     </div>
 
                     <div class="col-12">
@@ -737,7 +780,7 @@
 
                 <div class="border-top pt-4 mt-4 mb-3">
                     <div class="d-flex align-items-center gap-2 mb-3">
-                        <i class="bi bi-geo-alt text-secondary"></i>
+                        <i class="bi bi-geo-alt text-secondary fs-5"></i>
                         <h5 class="fw-bold mb-0">Address Details</h5>
                     </div>
                     <div class="row g-3">
@@ -761,7 +804,7 @@
                 </div>
 
                 <div class="col-12 d-flex flex-wrap gap-3 mt-4">
-                    <button type="submit" class="btn-save-enquiry">Save Enquiry</button>
+                    <button type="submit" name="submit" value="save" class="btn-save-enquiry">Save Enquiry</button>
                     <button type="reset" class="btn-cancel-enquiry">Clear</button>
                 </div>
             </form>
@@ -845,7 +888,7 @@
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-5 pt-4 border-top">
+        <div class="d-flex flex-column flex-md-row justify-between align-items-center mt-5 pt-4 border-top">
             <p class="footer-text mb-0">© 2024 KnitFlow ERP. Precision Engineering for Textile Manufacturing.</p>
             <div class="iso-badge">
                 <i class="bi bi-shield-check"></i>
@@ -859,179 +902,28 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-   // Header scroll behavior
-let lastScroll = 0;
-const header = document.getElementById("header");
-window.addEventListener("scroll", () => {
-    const currentScroll = window.pageYOffset;
-    if (currentScroll <= 0) {
-        header.classList.remove("scrolled");
-        return;
-    }
-    if (currentScroll > lastScroll && !header.classList.contains("hidden")) {
-        header.classList.add("hidden");
-    } else if (currentScroll < lastScroll && header.classList.contains("hidden")) {
-        header.classList.remove("hidden");
-    }
-    lastScroll = currentScroll;
-});
-
-function saveEnquiry(event) {
-    if (event) event.preventDefault();
-}
-
-// THIS FUNCTION LOADS DYNAMIC COLOR DROPDOWNS
-function fetchColors(selectElement) {
-    const colorSelect = document.getElementById('color1');
-    const fabricNameInput = document.getElementById('fabric_type_name');
-
-    if (!colorSelect || !fabricNameInput) return;
-
-    colorSelect.innerHTML = '<option value="">Select Color</option>';
-    fabricNameInput.value = '';
-
-    const selectedOption = selectElement.options[selectElement.selectedIndex];
-    const fabricId = selectElement.value;
-    const fabricName = selectedOption.getAttribute('data-name');
-
-    if (!fabricId) return;
-
-    fabricNameInput.value = fabricName;
-
-    fetch(`../py/enquiry/enquiry_form.py?fabric_id=${fabricId}`)
-        .then(response => response.json())
-        .then(colors => {
-            colors.forEach(color => {
-                const option = document.createElement('option');
-                option.value = color;
-                option.textContent = color;
-                colorSelect.appendChild(option);
-            });
-        })
-        .catch(error => console.error('Error fetching colors:', error));
-}
-
-// THIS FUNCTION LOADS DYNAMIC FABRIC DROPDOWNS
-function loadFabricType() {
-    const container = document.getElementById("dynamicDropdowns");
-    if (!container) return;
-
-    // Adding ?t= prevents browser caching
-    fetch("../py/enquiry/enquiry_form.py?t=" + new Date().getTime())
-        .then(response => response.text())
-        .then(data => {
-            container.innerHTML = data;
-        })
-        .catch(error => console.error('Error loading fabric type:', error));
-}
-
-// Auto-refresh when switching back to this window/screen
-window.addEventListener("focus", function () {
-    loadFabricType();
-});
-
-// >>> FIX: CALL THE FUNCTION IMMEDIATELY ON INITIAL PAGE LOAD <<<
-document.addEventListener("DOMContentLoaded", function () {
-    loadFabricType();
-});
-
-// THIS FUNCTION SAVES ENQUIRY FORM
-function saveEnquiry(event) {
-    if (event) event.preventDefault();
-
-    const form = document.getElementById("enquiryForm");
-    if (!form) return;
-
-    const requiredInputs = form.querySelectorAll("[required]");
-    for (let input of requiredInputs) {
-        if (!input.value || !input.value.trim()) {
-            const parentDiv = input.closest('div');
-            const labelElem = parentDiv ? parentDiv.querySelector('label') : null;
-            const labelText = labelElem ? labelElem.innerText.trim() : (input.placeholder || input.name || "Field");
-
-            input.focus();
-            alert(`Please fill out the required field: ${labelText}`);
+    // Header scroll behavior
+    let lastScroll = 0;
+    const header = document.getElementById("header");
+    window.addEventListener("scroll", () => {{
+        const currentScroll = window.pageYOffset;
+        if (currentScroll <= 0) {{
+            header.classList.remove("scrolled");
             return;
-        }
-    }
+        }}
+        if (currentScroll > lastScroll && !header.classList.contains("hidden")) {{
+            header.classList.add("hidden");
+        }} else if (currentScroll < lastScroll && header.classList.contains("hidden")) {{
+            header.classList.remove("hidden");
+        }}
+        lastScroll = currentScroll;
+    }});
 
-    if (!form.checkValidity()) {
-        const invalidInput = form.querySelector(":invalid");
-        if (invalidInput) {
-            invalidInput.focus();
-            const parentDiv = invalidInput.closest('div');
-            const labelElem = parentDiv ? parentDiv.querySelector('label') : null;
-            const labelText = labelElem ? labelElem.innerText.trim() : invalidInput.name;
-
-            alert(invalidInput.title || `Invalid value in field: ${labelText}`);
-            return;
-        }
-    }
-
-    const currentPage = window.location.pathname.split('/').pop() || "landing.html";
-    const isLandingPage = currentPage.toLowerCase() === "landing.html";
-
-    const hiddenField = document.getElementById("session_admin_id");
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = (hiddenField ? hiddenField.value : "") || urlParams.get("user_id") || urlParams.get("admin_id");
-
-    // ONLY REQUIRE USER ID IF NOT ON LANDING.HTML
-    if (!isLandingPage) {
-        if (!userId || !userId.trim()) {
-            alert("Session Error: User ID was not found in form or URL.\nPlease log in again.");
-            window.location.href = "/techvoltInstituteProject/pages/login.html";
-            return;
-        }
-    }
-
-    const cleanUserId = userId ? userId.trim() : "";
-
-    let formData = new FormData(form);
-    if (cleanUserId) {
-        formData.set("admin_id", cleanUserId);
-        formData.set("user_id", cleanUserId);
-    }
-    formData.set("current_page", currentPage);
-
-    fetch("../py/enquiry/save_enquiry.py", {
-        method: "POST",
-        body: formData
-    })
-    .then(async res => {
-        const text = await res.text();
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            console.error("Non-JSON Server Output:", text);
-            throw new Error("Python Server Crash / Invalid JSON output:\n\n" + text.slice(0, 300));
-        }
-    })
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            form.reset();
-
-            if (hiddenField && cleanUserId) hiddenField.value = cleanUserId;
-
-            if (data.redirect) {
-                window.location.href = data.redirect;
-            } else {
-                if (isLandingPage) {
-                    window.location.href = "landing.html";
-                } else {
-                    window.location.href = `${currentPage}?user_id=${encodeURIComponent(cleanUserId)}`;
-                }
-            }
-        } else {
-            alert("Validation Error from Server:\n\n" + data.message);
-        }
-    })
-    .catch(error => {
-        console.error("Fetch Exception:", error);
-        alert(error.message || "Server Error or invalid response from backend.");
-    });
-}
+    function saveEnquiry(event) {{
+        console.log("Saving enquiry...");
+    }}
 </script>
 
 </body>
 </html>
+""")

@@ -1,7 +1,7 @@
 #!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
 import cgi
-import cgitb
 import pymysql
+import cgitb
 
 cgitb.enable()
 print("Content-Type: text/plain\n")  # Sending simple text
@@ -28,7 +28,7 @@ try:
     row = cursor.fetchone()
 
     if row:
-        # --- CALCULATIONS & FORMATTING ---
+        # --- CALCULATIONS ---
         color_p = float(row['price']) if row.get('price') else 0.0
         unit_price = round(color_p, 2)
 
@@ -41,31 +41,31 @@ try:
         if hasattr(d_date, 'strftime'):
             d_date = d_date.strftime('%Y-%m-%d')
 
-        # --- CORRECTED PIPE STRING ALIGNMENT ---
-        # p[0]  = phone_number
-        # p[1]  = fabric_type
-        # p[2]  = gsm (placeholder if not in DB)
+        # --- BUILD PIPE STRING ---
+        # JS expects:
+        # p[0]  = contact
+        # p[1]  = fabric
+        # p[2]  = gsm
         # p[3]  = color
-        # p[4]  = quantity
-        # p[5]  = unit_price
-        # p[6]  = percentage (50)
-        # p[7]  = extra placeholder (0)
+        # p[4]  = qty
+        # p[5]  = price
+        # p[6]  = percentage
+        # p[7]  = (Unused placeholder / extra field)
         # p[8]  = order_date
         # p[9]  = delivery_date
-        # p[10] = enquiry_id
+        # p[10] = customerId (enquiry_id)
 
         data_string = (
-            f"{row.get('phone_number', '')}|"   # p[0]
-            f"{row.get('fabric_type', '')}|"   # p[1]
-            f"0|"                              # p[2] (GSM Placeholder)
-            f"{row.get('color', '')}|"         # p[3]
-            f"{qty}|"                           # p[4]
-            f"{unit_price}|"                    # p[5]
-            f"50|"                              # p[6]
-            f"0|"                               # p[7]
-            f"{o_date}|"                        # p[8]
-            f"{d_date}|"                        # p[9]
-            f"{row.get('enquiry_id', '')}"      # p[10]
+            f"{row.get('phone_number', '')}|"  # p[0]
+            f"{row.get('fabric_type', '')}|"  # p[1]
+            f"{row.get('color', '')}|"  # p[3]
+            f"{qty}|"  # p[4]
+            f"{unit_price}|"  # p[5]
+            f"50|"  # p[6]
+            f"0|"  # p[7] (Placeholder for index alignment)
+            f"{o_date}|"  # p[8]
+            f"{d_date}|"  # p[9]
+            f"{row.get('enquiry_id', '')}"  # p[10]
         )
         print(data_string)
     else:

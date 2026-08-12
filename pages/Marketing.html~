@@ -200,52 +200,6 @@
         </div>
     </section>
 
-    <!-- ==================== SCREEN 2: CUSTOMERS ==================== -->
- <!--    <section class="page" id="page2" style="display: none;">-->
-<!--        <section class="page-header mb-4">-->
-<!--            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">-->
-<!--                <div>-->
-<!--                    <h1 class="page-title">Customers</h1>-->
-<!--                    <p class="page-subtitle">Manage customer information and relationships</p>-->
-<!--                </div>-->
-<!--                <div class="d-flex align-items-center gap-3 w-100 w-md-auto">-->
-<!--                    <div class="position-relative flex-grow-1 flex-md-grow-0" style="max-width: 260px;">-->
-<!--                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>-->
-<!--                        <input type="text" id="searchCustomer" class="form-control rounded-pill ps-5" placeholder="Search Customer" style="background: #f2f4f6; border: none; padding: 8px 16px 8px 40px;">-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </section>-->
-
-<!--        <div class="table-container">-->
-<!--            <div class="table-responsive">-->
-<!--                <table class="table-custom">-->
-<!--                    <thead>-->
-<!--                        <tr>-->
-<!--                            <th>Customer Name</th>-->
-<!--                            <th>Company Name</th>-->
-<!--                            <th>Phone Number</th>-->
-<!--                            <th>Status</th>-->
-<!--                            <th class="text-end">Actions</th>-->
-<!--                        </tr>-->
-<!--                    </thead>-->
-<!--                    <tbody id="customerTableBody"></tbody>-->
-<!--                </table>-->
-<!--            </div>-->
-
-<!--            <div class="p-3 border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">-->
-<!--                <p class="text-muted small mb-0">Showing 1 to 3 of 45 customers</p>-->
-<!--                <div class="pagination-custom d-flex align-items-center gap-1">-->
-<!--                    <button class="page-btn" disabled><i class="bi bi-chevron-left"></i></button>-->
-<!--                    <button class="page-btn active">1</button>-->
-<!--                    <button class="page-btn">2</button>-->
-<!--                    <button class="page-btn">3</button>-->
-<!--                    <button class="page-btn"><i class="bi bi-chevron-right"></i></button>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </section>-->
-
     <!-- ==================== SCREEN 3: ORDERS ==================== -->
     <section class="page" id="page3" style="display: none;">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
@@ -716,11 +670,6 @@
                                 <div class="col-md-6">
                                     <label class="form-label-custom">Email Address</label>
                                     <input type="email" class="form-control-custom" name="email" placeholder="abc@gmail.com" required>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label-custom">Fabric GSM</label>
-                                    <input type="number" class="form-control-custom" name="fabric_gsm" placeholder="180" required min="1" max="500">
                                 </div>
 
                                 <div id="dynamicDropdowns" class="row g-3"></div>

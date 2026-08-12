@@ -126,7 +126,7 @@ try:
                 '<span class="badge bg-warning text-dark">Pending</span>'
             )
         else:
-            status_badge = '<span class="badge bg-success">Assigned</span>'
+            status_badge = '<span class="badge bg-success">Stored</span>'
 
         # Edit button configured with data attributes for opening the modal
         edit_btn = f"""

@@ -241,26 +241,26 @@ function refreshAllData() {
     const tableBody = document.getElementById("poTableBody");
 
     // 1. FETCH TABLE DATA (HTML)
-    // Removed the "children.length === 0" check so it can refresh anytime!
-    fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-            return response.text();
-        })
-        .then(data => {
-            if (data.trim() && tableBody) {
-                tableBody.innerHTML = data;
-            } else {
-                loadSampleData();
-            }
-            if (typeof initializeTableEvents === "function") {
-                initializeTableEvents();
-            }
-        })
-        .catch(err => {
-            console.error("Table fetch error:", err);
-            loadSampleData();
-        });
+fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        return response.text();
+    })
+    .then(data => {
+        if (data.trim() && tableBody) {
+            tableBody.innerHTML = data;
+        } else if (tableBody) {
+            //  Show a clean message if no data exists instead of crashing
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
+        }
+
+        if (typeof initializeTableEvents === "function") {
+            initializeTableEvents();
+        }
+    })
+    .catch(err => {
+        console.error("Table fetch error:", err);
+    });
 
     // 2. FETCH KPI DATA (JSON)
     fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
@@ -354,26 +354,29 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(err => console.error("Error loading suppliers:", err));
 
     supplierSelect.addEventListener("change", function () {
-        const supplierCode = this.value;
+    const supplierCode = this.value;
 
-        materialSelect.innerHTML = '<option value="">Select Material</option>';
-        availableStockInput.value = "0";
+    materialSelect.innerHTML = '<option value="">Select Material</option>';
+    availableStockInput.value = "0";
 
-        if (!supplierCode) return;
+    if (!supplierCode) return;
 
-        fetch(`../py/purchase/get_supplier_material.py?supplier_code=${encodeURIComponent(supplierCode)}`)
-            .then(response => response.json())
-            .then(materials => {
-                if (Array.isArray(materials) && materials.length > 0) {
-                    materials.forEach(mat => {
-                        materialSelect.innerHTML += `<option value="${mat}">${mat}</option>`;
-                    });
-                } else {
-                    materialSelect.innerHTML = '<option value="">No Materials Found</option>';
-                }
-            })
-            .catch(err => console.error("Error loading materials:", err));
-    });
+    fetch(`../py/purchase/get_supplier_material.py?supplier_code=${encodeURIComponent(supplierCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            // Safely get materials array whether sent as data or data.materials
+            const materials = Array.isArray(data) ? data : (data.materials || []);
+
+            if (materials.length > 0) {
+                materials.forEach(mat => {
+                    materialSelect.innerHTML += `<option value="${mat}">${mat}</option>`;
+                });
+            } else {
+                materialSelect.innerHTML = '<option value="">No Materials Found</option>';
+            }
+        })
+        .catch(err => console.error("Error loading materials:", err));
+});
 
     materialSelect.addEventListener("change", function () {
         const materialName = this.value;
@@ -618,41 +621,67 @@ const modal = document.getElementById('logoutModal');
 const btnLogout = document.getElementById('btnLogout');
 const btnCancel = document.getElementById('btnCancel');
 
+// Show modal smoothly when page/section loads
 window.addEventListener('load', function() {
     setTimeout(() => {
         if (modal) modal.classList.add('show');
     }, 100);
 });
 
+// "No, Stay Logged In" Action
 if (btnCancel) {
     btnCancel.addEventListener('click', function() {
-        modal.style.transform = 'scale(0.95)';
-        modal.style.opacity = '0';
+        if (modal) {
+            modal.style.transform = 'scale(0.95)';
+            modal.style.opacity = '0';
+            modal.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+        }
+
         setTimeout(() => {
-            alert('Returning to Dashboard...');
-            modal.style.transform = 'scale(1)';
-            modal.style.opacity = '1';
+            // Option 1: Go back in browser history if came from a page
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                // Option 2: Fallback hash navigation to main dashboard section
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('user_id') || '';
+                window.location.hash = '#page1';
+            }
+
+            // Reset modal styles for future display
+            if (modal) {
+                modal.style.transform = 'scale(1)';
+                modal.style.opacity = '1';
+            }
         }, 300);
     });
 }
 
+// "Yes, Logout" Action
 if (btnLogout) {
     btnLogout.addEventListener('click', function() {
-        const originalHTML = this.innerHTML;
-        this.innerHTML = '<span class="spinner"><i class="bi bi-arrow-repeat"></i></span> Logging out...';
+        // Show loading spinner animation
+        this.innerHTML = '<span class="spinner"><i class="bi bi-arrow-repeat spin"></i></span> Logging out...';
         this.disabled = true;
         this.style.opacity = '0.7';
 
+        // Add optional CSS animation class if icon needs spinning
+        const icon = this.querySelector('i');
+        if (icon) icon.style.animation = 'spin 1s linear infinite';
+
         setTimeout(() => {
+            // Smoothly fade out body
             document.body.style.opacity = '0';
             document.body.style.transition = 'opacity 0.5s ease-out';
+
             setTimeout(() => {
-                alert('Redirecting to Login Screen...');
-                document.body.style.opacity = '1';
-                this.innerHTML = originalHTML;
-                this.disabled = false;
-                this.style.opacity = '1';
+                // Clear all session storage & local storage data
+                sessionStorage.clear();
+                localStorage.clear();
+
+                // Redirect to actual Login page
+                window.location.href = '/techvoltInstituteProject/pages/login.html';
             }, 500);
-        }, 1000);
+        }, 800);
     });
 }

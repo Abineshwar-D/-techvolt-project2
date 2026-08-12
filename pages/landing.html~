@@ -540,10 +540,10 @@
                     The only enterprise ERP built exclusively for the modern knitting industry. From material procurement to global delivery.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
-<!--                    <button class="btn-request-demo">-->
-<!--                        Request Demo-->
-<!--                        <i class="bi bi-arrow-right"></i>-->
-<!--                    </button>-->
+                    <button class="btn-request-demo">
+                        Request Demo
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
                     <button class="btn-watch-tour">
                         <i class="bi bi-play-circle"></i>
                         Watch Product Tour

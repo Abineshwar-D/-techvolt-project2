@@ -45,9 +45,9 @@ else:
 
         encoded_user_id = urllib.parse.quote(username)
 
-        # STEP 1: Check 'users' table
+        # STEP 1: Check 'users' table with CASE SENSITIVITY using BINARY
         cur.execute(
-            "SELECT role, status FROM users WHERE employee_id=%s AND password=%s",
+            "SELECT role, status FROM users WHERE BINARY employee_id=%s AND BINARY password=%s",
             (username, password)
         )
         user_data = cur.fetchone()
@@ -65,9 +65,9 @@ else:
                 send_alert(f"Role '{role}' not recognized. Contact Admin.", go_back=True)
 
         else:
-            # STEP 2: Check 'admin' table
+            # STEP 2: Check 'admin' table with CASE SENSITIVITY using BINARY
             cur.execute(
-                "SELECT role FROM admin WHERE employee_id=%s AND password=%s",
+                "SELECT role FROM admin WHERE BINARY employee_id=%s AND BINARY password=%s",
                 (username, password)
             )
             admin_data = cur.fetchone()

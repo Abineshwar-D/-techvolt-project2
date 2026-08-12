@@ -143,21 +143,7 @@ try:
         else:
             created_by_display = created_by
 
-        # Role-based Action Buttons
-        if is_admin:
-            if sample_status == 0:
-                toggle_action = f"""
-                <button class="action-btn text-success" onclick="toggleStatus({db_id}, 'unblock')" title="Unblock">
-                    <i class="bi bi-check-circle"></i>
-                </button>
-                """
-            else:
-                toggle_action = f"""
-                <button class="action-btn text-danger" onclick="toggleStatus({db_id}, 'block')" title="Block">
-                    <i class="bi bi-slash-circle"></i>
-                </button>
-                """
-        else:
+        if not is_admin:
             toggle_action = f"""
             <button class="action-btn delete" onclick="deleteCustomer({db_id})" title="Delete">
                 <i class="bi bi-trash"></i>
@@ -173,9 +159,15 @@ try:
             <td class="customer-info">{created_by_display}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
-                    <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                    {toggle_action}
+                    <button class="action-btn" title="View" onclick="viewCustomer({db_id})"><i class="bi bi-eye"></i></button>
+                    <button 
+    class="action-btn"
+    value="{row[5]}" 
+    data-bs-toggle="modal"
+    data-bs-target="#editMarketingModal"
+    onclick="editEnquiry(this.value)">
+    <i class="bi bi-pencil"></i>
+</button>
                 </div>
             </td>
         </tr>

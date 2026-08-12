@@ -241,26 +241,26 @@ function refreshAllData() {
     const tableBody = document.getElementById("poTableBody");
 
     // 1. FETCH TABLE DATA (HTML)
-    // Removed the "children.length === 0" check so it can refresh anytime!
-    fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-            return response.text();
-        })
-        .then(data => {
-            if (data.trim() && tableBody) {
-                tableBody.innerHTML = data;
-            } else {
-                loadSampleData();
-            }
-            if (typeof initializeTableEvents === "function") {
-                initializeTableEvents();
-            }
-        })
-        .catch(err => {
-            console.error("Table fetch error:", err);
-            loadSampleData();
-        });
+fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        return response.text();
+    })
+    .then(data => {
+        if (data.trim() && tableBody) {
+            tableBody.innerHTML = data;
+        } else if (tableBody) {
+            //  Show a clean message if no data exists instead of crashing
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
+        }
+
+        if (typeof initializeTableEvents === "function") {
+            initializeTableEvents();
+        }
+    })
+    .catch(err => {
+        console.error("Table fetch error:", err);
+    });
 
     // 2. FETCH KPI DATA (JSON)
     fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
@@ -354,49 +354,55 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(err => console.error("Error loading suppliers:", err));
 
     supplierSelect.addEventListener("change", function () {
-        const supplierCode = this.value;
+    const supplierCode = this.value;
 
-        materialSelect.innerHTML = '<option value="">Select Material</option>';
-        availableStockInput.value = "0";
+    materialSelect.innerHTML = '<option value="">Select Material</option>';
+    availableStockInput.value = "0";
 
-        if (!supplierCode) return;
+    if (!supplierCode) return;
 
-        fetch(`../py/purchase/get_supplier_material.py?supplier_code=${encodeURIComponent(supplierCode)}`)
-            .then(response => response.json())
-            .then(materials => {
-                if (Array.isArray(materials) && materials.length > 0) {
-                    materials.forEach(mat => {
-                        materialSelect.innerHTML += `<option value="${mat}">${mat}</option>`;
-                    });
-                } else {
-                    materialSelect.innerHTML = '<option value="">No Materials Found</option>';
-                }
-            })
-            .catch(err => console.error("Error loading materials:", err));
-    });
+    fetch(`../py/purchase/get_supplier_material.py?supplier_code=${encodeURIComponent(supplierCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            // Safely get materials array whether sent as data or data.materials
+            const materials = Array.isArray(data) ? data : (data.materials || []);
+
+            if (materials.length > 0) {
+                materials.forEach(mat => {
+                    materialSelect.innerHTML += `<option value="${mat}">${mat}</option>`;
+                });
+            } else {
+                materialSelect.innerHTML = '<option value="">No Materials Found</option>';
+            }
+        })
+        .catch(err => console.error("Error loading materials:", err));
+});
 
     materialSelect.addEventListener("change", function () {
-        const materialName = this.value;
+    const materialName = this.value;
 
-        if (!materialName) {
-            availableStockInput.value = "0";
-            return;
-        }
+    // Reset input if default blank option is selected
+    if (!materialName) {
+        availableStockInput.value = "0";
+        return;
+    }
 
-        fetch(`../py/purchase/get_material_option.py?material_name=${encodeURIComponent(materialName)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.stock !== undefined) {
-                    availableStockInput.value = data.stock;
-                } else {
-                    availableStockInput.value = "0";
-                }
-            })
-            .catch(err => {
-                console.error("Error checking material stock:", err);
+    fetch(`../py/purchase/get_material_option.py?material_name=${encodeURIComponent(materialName)}`)
+        .then(response => response.json())
+        .then(data => {
+            // If material is in 'materials' table -> fills with real stock value
+            // If material is ONLY in 'supplier' table -> fills with 0
+            if (data && data.stock !== undefined) {
+                availableStockInput.value = data.stock;
+            } else {
                 availableStockInput.value = "0";
-            });
-    });
+            }
+        })
+        .catch(err => {
+            console.error("Error checking material stock:", err);
+            availableStockInput.value = "0";
+        });
+});
 });
 
 const poForm = document.getElementById("poForm");

@@ -70,7 +70,6 @@ def validate():
         "customer": "Customer",
         "contact": "Contact",
         "fabric_type": "Fabric Type",
-        "gsm": "GSM",
         "color": "Color",
         "quantity": "Quantity",
         "price": "Price",
@@ -117,7 +116,6 @@ try:
     customer = form.getvalue("customer")
     contact = form.getvalue("contact")
     fabric_type = form.getvalue("fabric_type")
-    gsm = int(float(form.getvalue("gsm") or 0))
     color = form.getvalue("color")
     quantity = float(form.getvalue("quantity") or 0)
     price = float(form.getvalue("price") or 0)
@@ -179,12 +177,12 @@ try:
     # 3. SQL INSERT INCLUDING CREATED BY DETAILS
     sql = """
     INSERT INTO orders (
-        order_number, customer, contact, fabric_type, gsm, color, 
+        order_number, customer, contact, fabric_type, color, 
         quantity, price_per_kg, total_amount, order_date, 
         delivery_date, remarks, payment_percentage, money,
         created_by_id, created_by_name
     )
-    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
     values = (
@@ -192,7 +190,6 @@ try:
         customer,
         contact,
         fabric_type,
-        gsm,
         color,
         quantity,
         price,

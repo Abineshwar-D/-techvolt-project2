@@ -18,21 +18,22 @@ SENDER_PASSWORD = "pjlo yemf queh tfrl"
 
 
 def calculate_quotation(enq_data):
-    fabric_base_price = 20.0
+
     color_price = float(enq_data['price']) if enq_data['price'] else 0.0
-    gsm_value = float(enq_data['fabric_gsm']) if enq_data['fabric_gsm'] else 0.0
     quantity = float(enq_data['quantity']) if enq_data['quantity'] else 0.0
 
-    gsm_cost = gsm_value * 0.5
-    unit_price = fabric_base_price + color_price + gsm_cost
-    subtotal = unit_price * quantity
+    subtotal = color_price * quantity
+    gst_half = subtotal * 0.9
+    gst_secondhalf = subtotal * 0.9
     gst_amount = subtotal * 0.18
     total_amount = subtotal + gst_amount
 
     return {
-        "unit_price": unit_price,
+        "unit_price": color_price,
         "subtotal": subtotal,
         "gst": gst_amount,
+        "gst_half": gst_half,
+        "gst_secondhalf": gst_secondhalf,
         "total": total_amount
     }
 
@@ -102,6 +103,14 @@ try:
                 <tr>
                     <td style="padding: 5px 0; color: #7f8c8d;">Subtotal:</td>
                     <td style="padding: 5px 0; width: 120px;"><strong>₹{prices['subtotal']:.2f}</strong></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; color: #7f8c8d;">GST (9%):</td>
+                    <td style="padding: 5px 0;"><strong>₹{prices['gst_half']:.2f}</strong></td>
+                </tr>
+                <tr>
+                    <td style="padding: 5px 0; color: #7f8c8d;">GST (9%):</td>
+                    <td style="padding: 5px 0;"><strong>₹{prices['gst_half']:.2f}</strong></td>
                 </tr>
                 <tr>
                     <td style="padding: 5px 0; color: #7f8c8d;">GST (18%):</td>

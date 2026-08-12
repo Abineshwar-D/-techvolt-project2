@@ -1,7 +1,5 @@
 #!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
 
-import cgitb
-cgitb.enable()
 import cgi
 import json
 import pymysql
@@ -10,6 +8,8 @@ print("Content-Type: application/json\n")
 
 form = cgi.FieldStorage()
 supplier_code = form.getvalue("supplier_code", "")
+
+materials_list = []
 
 try:
     conn = pymysql.connect(
@@ -27,15 +27,16 @@ try:
     """, (supplier_code,))
     row = cursor.fetchone()
 
-    materials_list = []
     if row and row[0]:
-        # Handles single or comma-separated materials (e.g., "Cotton Yarn, Dye")
-        raw_materials = row[0].split(",")
-        materials_list = [m.strip() for m in raw_materials if m.strip()]
-
-    print(json.dumps(materials_list))
+        # Converts "sun run,bun" -> "sun run bun" -> ['sun', 'run', 'bun']
+        raw_materials = str(row[0]).replace(",", " ")
+        materials_list = raw_materials.split()
 
     cursor.close()
     conn.close()
+
+    # Wrap in {"materials": [...]} dict so JavaScript can access data.materials
+    print(json.dumps({"materials": materials_list}))
+
 except Exception as e:
-    print(json.dumps({"error": str(e)}))
+    print(json.dumps({"materials": [], "error": str(e)}))

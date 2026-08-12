@@ -59,7 +59,7 @@ for i in row:
         # ACTIVE USER -> Show Block / Ban Button (Red)
         toggle_button = f"""
             <button class="table-action-btn delete" onclick="toggleUserStatus('{i[0]}', 'block')" title="Block User" value="{i[0]}">
-                <i class="bi bi-ban"></i>
+                <i class="bi-lock-fill"></i>
             </button>
         """
     else:
@@ -67,7 +67,7 @@ for i in row:
         # INACTIVE USER -> Show Unblock Button (Green Checkmark)
         toggle_button = f"""
             <button class="table-action-btn text-success" onclick="toggleUserStatus('{i[0]}', 'unblock')" title="Unblock User" value="{i[0]}">
-                <i class="bi bi-check-circle"></i>
+                <i class="bi-unlock-fill"></i>
             </button>
         """
 

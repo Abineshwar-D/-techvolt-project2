@@ -15,14 +15,12 @@ print("Content-Type: application/json\n")
 form = cgi.FieldStorage()
 user_id = form.getvalue("user_id", None)
 
-# Fallback check from environment HTTP header (in case sent via JS Headers)
 if not user_id:
     user_id = os.environ.get("HTTP_USER_ID", "").strip()
 else:
     user_id = str(user_id).strip()
 
 
-# Helper function for dates
 def safe_format_date(d_val):
     if not d_val:
         return "N/A"
@@ -49,7 +47,6 @@ try:
     user_role = ""
 
     if user_id:
-        # Check admin table first
         cursor.execute(
             "SELECT COUNT(*) FROM admin WHERE employee_id = %s OR user_id = %s",
             (user_id, user_id),
@@ -58,7 +55,6 @@ try:
             is_admin = True
             user_role = "Admin"
 
-        # If not admin, get user role from users table
         if not is_admin:
             cursor.execute(
                 "SELECT role FROM users WHERE employee_id = %s OR user_id = %s",
@@ -69,49 +65,80 @@ try:
                 user_role = str(role_row[0]).strip()
 
     # Step 2: Order Table Filtering Condition
-    # Marketing role can ONLY view orders created by them.
-    # Admin and all other roles (Merchandising, Management, etc.) can view ALL orders.
     if user_role.lower() == "marketing":
-        filter_clause = "created_by_id = %s"
+        filter_clause = "o.created_by_id = %s"
         user_params = [user_id if user_id else "NON_EXISTENT_USER"]
     else:
         filter_clause = "1=1"
         user_params = []
 
+    # =========================================================================
+    # STEP 3: UPDATE THE DATABASE DIRECTLY
+    # This physically updates the `orders` table in MySQL using matching `production_plan` statuses!
+    # =========================================================================
+    update_orders_status_query = """
+        UPDATE orders o
+        INNER JOIN production_plan p ON o.order_number = p.order_no
+        SET o.status = p.status
+        WHERE p.status IS NOT NULL AND TRIM(p.status) != '';
+    """
+    cursor.execute(update_orders_status_query)
+    conn.commit()  # Commits changes so orders.status is updated in DB permanently
+
     # --- KPI Queries ---
     cursor.execute(
-        f"SELECT COUNT(*) FROM orders WHERE {filter_clause}", user_params
+        f"SELECT COUNT(*) FROM orders o WHERE {filter_clause}", user_params
     )
     total_orders = cursor.fetchone()[0] or 0
 
+    # KPI 2: Counts strictly when status is 'running' or 'in progress'
     cursor.execute(
-        f"SELECT COUNT(*) FROM orders WHERE delivery_date >= %s AND {filter_clause}",
-        [today] + user_params,
+        f"""SELECT COUNT(*) FROM orders o 
+            WHERE LOWER(o.status) IN ('running', 'in progress') 
+            AND {filter_clause}""",
+        user_params,
     )
     running_orders = cursor.fetchone()[0] or 0
 
     cursor.execute(
-        f"SELECT COUNT(*) FROM orders WHERE delivery_date < %s AND {filter_clause}",
-        [today] + user_params,
+        f"""SELECT COUNT(*) FROM orders o 
+            WHERE LOWER(o.status) IN ('completed', 'delivered') 
+            AND {filter_clause}""",
+        user_params,
     )
     completed_orders = cursor.fetchone()[0] or 0
 
     cursor.execute(
-        f"SELECT COUNT(*) FROM orders WHERE delivery_date IS NULL AND {filter_clause}",
+        f"""SELECT COUNT(*) FROM orders o 
+            WHERE (o.status IS NULL OR LOWER(o.status) IN ('pending', 'new orders', 'new order', 'assigned')) 
+            AND {filter_clause}""",
         user_params,
     )
     pending_orders = cursor.fetchone()[0] or 0
 
-    # --- Order Table Query ---
+    # --- Step 4: Fetch rows from orders table ---
     query = f"""
         SELECT 
-            order_number, customer, contact, fabric_type, 
-            gsm, color, quantity, total_amount, 
-            remarks, delivery_date, order_date,
-            COALESCE(created_by_name, 'N/A') AS created_by
-        FROM orders 
+            o.order_number, 
+            o.customer, 
+            o.contact, 
+            o.fabric_type, 
+            o.gsm, 
+            o.color, 
+            o.quantity, 
+            o.total_amount, 
+            o.remarks, 
+            o.delivery_date, 
+            o.order_date,
+            COALESCE(o.created_by_name, 'N/A') AS created_by,
+            COALESCE(o.price_per_kg, 0) AS price_per_kg,
+            COALESCE(e.customer_name, o.customer, 'N/A') AS real_customer_name,
+            COALESCE(e.email, 'N/A') AS customer_email,
+            COALESCE(NULLIF(TRIM(o.status), ''), 'New Order') AS order_status
+        FROM orders o
+        LEFT JOIN customers_enquiries e ON o.customer = e.enquiry_id
         WHERE {filter_clause}
-        ORDER BY id DESC
+        ORDER BY o.id DESC
     """
     cursor.execute(query, user_params)
     rows = cursor.fetchall()
@@ -119,12 +146,12 @@ try:
     table_rows_html = ""
 
     if not rows:
-        table_rows_html = "<tr><td colspan='6' class='text-center text-muted py-4'>No orders found for this user.</td></tr>"
+        table_rows_html = "<tr><td colspan='7' class='text-center text-muted py-4'>No orders found for this user.</td></tr>"
     else:
         for row in rows:
             (
                 order_no,
-                cust,
+                cust_id,
                 phone,
                 fabric,
                 gsm,
@@ -135,40 +162,65 @@ try:
                 del_date,
                 ord_date,
                 created_by,
+                price_per_kg,
+                cust_name,
+                cust_email,
+                order_status,
             ) = row
 
             ord_date_str = safe_format_date(ord_date)
             del_date_str = safe_format_date(del_date)
-            cust_name = cust if cust else "Unknown"
-            initials = "".join(word[0] for word in cust_name.split()[:2]).upper()
+            display_cust = cust_name if cust_name and cust_name != "N/A" else cust_id
+            initials = "".join(word[0] for word in display_cust.split()[:2]).upper()
             display_remarks = rem if rem else "No remarks provided."
 
-            # View Button (Always visible for all roles)
+            # Render Status Badge
+            raw_status = str(order_status).strip() if order_status else "New Order"
+            status_lower = raw_status.lower()
+
+            if status_lower in ["new order", "new orders"]:
+                status_badge = f'<span class="badge bg-secondary text-white">{raw_status.title()}</span>'
+            elif status_lower in ["running", "in progress"]:
+                status_badge = f'<span class="badge bg-info text-dark">{raw_status.title()}</span>'
+            elif status_lower in ["completed", "delivered"]:
+                status_badge = f'<span class="badge bg-success text-white">{raw_status.title()}</span>'
+            elif status_lower in ["assigned"]:
+                status_badge = f'<span class="badge bg-primary text-white">{raw_status.title()}</span>'
+            elif status_lower in ["pending"]:
+                status_badge = f'<span class="badge bg-warning text-dark">{raw_status.title()}</span>'
+            else:
+                status_badge = f'<span class="badge bg-primary text-white">{raw_status.title()}</span>'
+
+            # View Button
             view_btn = f"""
                 <button type="button" class="action-btn view-details-btn" 
                         data-bs-toggle="modal" 
-                        data-bs-target="#detailsModal"
-                        data-customer="{cust_name}"
-                        data-contact="{phone or ''}"
+                        data-bs-target="#detailsModal1"
                         data-order="{order_no}"
-                        data-fabric="{fabric or ''}"
-                        data-gsm="{gsm or ''}"
-                        data-color="{color or ''}"
-                        data-total="{total or ''}"
+                        data-customer="{display_cust}"
+                        data-email="{cust_email}"
+                        data-contact="{phone or 'N/A'}"
+                        data-fabric="{fabric or 'N/A'}"
+                        data-gsm="{gsm or 'N/A'}"
+                        data-color="{color or 'N/A'}"
+                        data-qty="{qty or '0'} Kg"
+                        data-price="{price_per_kg}"
+                        data-total="{total or '0'}"
+                        data-orderdate="{ord_date_str}"
+                        data-deliverydate="{del_date_str}"
+                        data-createdby="{created_by}"
+                        data-status="{raw_status.title()}"
                         data-remarks="{display_remarks}"
-                        >
+                        onclick="populateModalDetails(this)">
                     <i class="bi bi-eye"></i>
                 </button>
             """
 
-            # Build Action Buttons depending on user role:
-            # Non-Marketing & Non-Admin roles see ONLY the View button.
-            if is_admin or user_role.lower() == "marketing":
+            if user_role.lower() == "marketing":
                 action_buttons = f"""
-                    {view_btn}
-                    <button class="action-btn"><i class="bi bi-pencil"></i></button>
-                    <button class="action-btn"><i class="bi bi-geo-alt"></i></button>
-                """
+                                {view_btn}
+                                <button class="action-btn" title="Delete" onclick="deleteOrder('{order_no}')"><i class="bi bi-trash"></i></button>
+                            """
             else:
                 action_buttons = f"{view_btn}"
 
@@ -181,12 +233,13 @@ try:
                 <td>
                     <div class="d-flex align-items-center gap-2">
                         <div class="customer-avatar">{initials}</div>
-                        <span class="fw-medium">{cust_name}</span>
+                        <span class="fw-medium">{display_cust}</span>
                     </div>
                 </td>
                 <td>{qty} Kg</td>
                 <td>{del_date_str}</td>
                 <td>{created_by}</td>
+                <td>{status_badge}</td>
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-1">
                         {action_buttons}
@@ -195,7 +248,6 @@ try:
             </tr>
             """
 
-    # Return Output as JSON
     response_data = {
         "status": "success",
         "kpis": {
@@ -215,7 +267,7 @@ except Exception as e:
                 "status": "error",
                 "message": str(e),
                 "kpis": {"total": 0, "running": 0, "completed": 0, "pending": 0},
-                "rows_html": f"<tr><td colspan='6' class='text-danger'>Error: {str(e)}</td></tr>",
+                "rows_html": f"<tr><td colspan='7' class='text-danger'>Error: {str(e)}</td></tr>",
             }
         )
     )

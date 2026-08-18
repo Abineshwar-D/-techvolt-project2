@@ -137,29 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    function showproductionToast() {
-        const toast = document.getElementById('successProductionPlan');
-        if (toast) {
-            toast.classList.remove('hidden');
-            clearTimeout(window.toastTimeout);
-            window.toastTimeout = setTimeout(() => {
-                hideproductionToast();
-            }, 5000);
-        }
-    }
 
-    function hideproductionToast() {
-        const toast = document.getElementById('successProductionPlan');
-        if (toast) {
-            toast.classList.add('hidden');
-        }
-    }
-
-    function handleproductionSubmit(e) {
-        e.preventDefault();
-        showproductionToast();
-    }
-// Load production plans IN TABLE
+// THIS CODE LOADS PRODUCTION PLANS DETAILS
     fetch("../py/inventory/get_production_plan.py")
     .then(response => response.json())
     .then(data => {
@@ -187,104 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => console.error("Error loading production plans:", error));
 
-    const materialName = document.getElementById("materialName");
-    const unitCost = document.getElementById("unitCost");
-    const category = document.querySelector('[name="category"]');
-    const openingStock = document.querySelector('[name="opening_stock"]');
-    const unit = document.querySelector('[name="unit"]');
-    const locationField = document.querySelector('[name="location"]');
-    const statusRadio = document.querySelectorAll('[name="status"]');
 
-    const previewName = document.getElementById("previewMaterialName");
-    const previewCategory = document.getElementById("previewCategory");
-    const previewStock = document.getElementById("previewStock");
-    const previewValue = document.getElementById("previewValue");
-    const previewLocation = document.getElementById("previewLocation");
-    const previewStatus = document.getElementById("previewStatu");
-
-    function updatePreview() {
-        if (previewName && materialName) {
-            previewName.textContent = materialName.value || "-";
-        }
-
-        if (previewCategory && category) {
-            previewCategory.textContent = category.value;
-        }
-
-        if (previewStock && openingStock && unit) {
-            const stock = Number(openingStock.value) || 0;
-            previewStock.textContent = stock.toLocaleString('en-IN') + " " + unit.value;
-        }
-
-        if (previewValue && unitCost && openingStock) {
-            const cost = Number(unitCost.value) || 0;
-            const stock = Number(openingStock.value) || 0;
-            const total = stock * cost;
-            previewValue.textContent = "₹" + total.toLocaleString('en-IN');
-        }
-
-        if (previewLocation && locationField) {
-            previewLocation.textContent = locationField.value || "-";
-        }
-
-        if (previewStatus) {
-            const selectedStatus = document.querySelector('[name="status"]:checked');
-            if (selectedStatus) {
-                previewStatus.innerHTML = `
-                    <span class="status-dot"></span>
-                    ${selectedStatus.value}
-                `;
-            }
-        }
-    }
-
-    if (materialName) materialName.addEventListener("input", updatePreview);
-    if (category) category.addEventListener("change", updatePreview);
-    if (openingStock) openingStock.addEventListener("input", updatePreview);
-    if (unit) unit.addEventListener("change", updatePreview);
-    if (unitCost) unitCost.addEventListener("input", updatePreview);
-    if (locationField) locationField.addEventListener("input", updatePreview);
-
-    if (statusRadio) {
-        statusRadio.forEach(radio => {
-            radio.addEventListener("change", updatePreview);
-        });
-    }
-
-    updatePreview();
-
-    const table = document.getElementById("productionPlanTable");
-    if (table) {
-        table.addEventListener("click", function(e) {
-            const row = e.target.closest("tr");
-            if (!row) return;
-
-            table.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
-            row.classList.add("selected");
-
-            const cells = row.cells;
-            if (cells.length >= 5) {
-                const plan = cells[0].innerText.trim() || "N/A";
-                const order = cells[1].innerText.trim() || "N/A";
-                const machine = cells[2].innerText.trim() || "N/A";
-                const windowText = cells[3].innerText.replace(/\n/g, " ").trim() || "N/A";
-                const priority = cells[4].innerText.trim() || "N/A";
-
-                const detailPlan = document.getElementById("detailPlan");
-                const detailPriority = document.getElementById("detailPriority");
-                const detailOrder = document.getElementById("detailOrder");
-                const detailMachine = document.getElementById("detailMachine");
-                const detailWindow = document.getElementById("detailWindow");
-
-                if (detailPlan) detailPlan.textContent = "Active Plan: " + plan;
-                if (detailPriority) detailPriority.textContent = "Priority: " + priority;
-                if (detailOrder) detailOrder.textContent = order;
-                if (detailMachine) detailMachine.textContent = machine;
-                if (detailWindow) detailWindow.textContent = windowText;
-            }
-        });
-    }
-
+//THIS CODE HANDLES ORDER SEARCH
     const searchInput = document.getElementById("SearchPp");
     if (searchInput) {
         searchInput.addEventListener("keyup", function() {
@@ -300,12 +183,151 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    window.showproductionToast = showproductionToast;
-    window.hideproductionToast = hideproductionToast;
-    window.handleproductionSubmit = handleproductionSubmit;
-
 });
 
+// THIS FUNCTION IS USED TO OPEN VIEW PLAN MODAL
+function openViewPlanModal(btn) {
+    document.getElementById('view_plan_orderno').innerText = btn.getAttribute('data-orderno') || 'N/A';
+    document.getElementById('view_plan_customer').innerText = btn.getAttribute('data-customer') || 'N/A';
+    document.getElementById('view_plan_fabric').innerText = btn.getAttribute('data-fabric') || 'N/A';
+    document.getElementById('view_plan_color').innerText = btn.getAttribute('data-color') || 'N/A';
+    document.getElementById('view_plan_target').innerText = btn.getAttribute('data-target') || 'N/A';
+    document.getElementById('view_plan_startdate').innerText = btn.getAttribute('data-startdate') || 'N/A';
+    document.getElementById('view_plan_enddate').innerText = btn.getAttribute('data-enddate') || 'N/A';
+    document.getElementById('view_plan_machine').innerText = btn.getAttribute('data-machine') || 'N/A';
+    document.getElementById('view_plan_supervisor').innerText = btn.getAttribute('data-supervisor') || 'N/A';
+    document.getElementById('view_plan_status').innerText = btn.getAttribute('data-status') || 'N/A';
+    document.getElementById('view_plan_createdby').innerText = btn.getAttribute('data-createdby') || 'N/A';
+
+    const modal = new bootstrap.Modal(document.getElementById('viewPlanModal'));
+    modal.show();
+}
+
+// THIS FUNCTION IS USED TO OPEN EDIT PLAN MODAL
+function openEditPlanModal(btn) {
+    const planNo = btn.getAttribute('data-plan');
+    const currentStatus = btn.getAttribute('data-status');
+    const isExpired = btn.getAttribute('data-expired') === 'true';
+
+    document.getElementById('edit_plan_no').value = planNo;
+
+    const selectEl = document.getElementById('edit_plan_status_select');
+    const warningEl = document.getElementById('expired_warning_text');
+
+    if (isExpired) {
+        // If end_date < today, lock select options or set to pending
+        selectEl.innerHTML = '<option value="pending" selected>Pending</option>';
+        selectEl.disabled = true;
+        warningEl.classList.remove('d-none');
+    } else {
+        selectEl.innerHTML = `
+            <option value="running" ${currentStatus === 'running' ? 'selected' : ''}>Running</option>
+            <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>Completed</option>
+        `;
+        selectEl.disabled = false;
+        warningEl.classList.add('d-none');
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('editPlanModal'));
+    modal.show();
+}
+
+// THIS FUNCTION IS USED TO UPDATE PLAN STATUS
+function updatePlanStatus() {
+    const planNo = document.getElementById('edit_plan_no').value;
+    const statusVal = document.getElementById('edit_plan_status_select').value;
+
+    const formData = new FormData();
+    formData.append('plan_no', planNo);
+    formData.append('status', statusVal);
+
+    fetch('../py/production/update_plan_status.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.message);
+            const modalEl = document.getElementById('editPlanModal');
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // Refresh table if load function exists
+            if (typeof loadProductionPlans === 'function') {
+                loadProductionPlans();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Failed to update plan status.');
+    });
+}
+
+// THIS FUNCTION HANDLES PRODUCTION PLAN DELETION
+function deleteProductionPlan(planNo) {
+    if (!confirm('Are you sure you want to delete this production plan?')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('plan_no', planNo);
+
+    fetch('../py/production/delete_production_plan.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            const row = document.getElementById(`plan-row-${planNo}`);
+            if (row) row.remove();
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Failed to delete production plan.');
+    });
+}
+
+// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
+document.addEventListener("DOMContentLoaded", function () {
+    const statusSelect = document.querySelector(".filter-select");
+    const tableBody = document.getElementById("productionPlanTable");
+
+    if (statusSelect && tableBody) {
+        statusSelect.addEventListener("change", function () {
+            const selectedFilter = this.value.trim().toLowerCase();
+
+            // Loop through each table row
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                // Find the Status column badge inside the row (7th column)
+                const statusBadge = row.querySelector("td:nth-child(7) .badge");
+
+                if (statusBadge) {
+                    const rowStatus = statusBadge.textContent.trim().toLowerCase();
+
+                    // Show all rows if "All Status" selected, or match selected option
+                    if (selectedFilter === "all status" || rowStatus === selectedFilter) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        });
+    }
+});
 
 /* ==========================================================================
    04. CREATE PRODUCTION PLAN SCREEN
@@ -1102,6 +1124,7 @@ function handlemahineSubmit(e) {
 }
 
 
+
 /* ==========================================================================
    07. ADD MACHINE SCREEN (PAGE 12)
    ========================================================================== */
@@ -1154,6 +1177,42 @@ document.addEventListener('DOMContentLoaded', function () {
     // Trigger filter live as user types
     searchInput.addEventListener('input', filterMachines);
 });
+
+//THIS FUNCTION IS FOR DELETING A MACHINE
+function deleteMachine(machineId) {
+    // 1. Show confirmation alert
+    if (confirm("Are you sure you want to delete this machine?")) {
+        // 2. Send request to backend Python script
+        fetch(`../py/Addmachine/delete_machine.py?id=${machineId}`, {
+            method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                // 3. Remove row from table UI dynamically
+                const rowElement = document.getElementById(`machine-row-${machineId}`);
+                if (rowElement) {
+                    rowElement.remove();
+                }
+
+                // If table becomes empty, display "No machines found" message
+                const tbody = document.querySelector("#machineTableBody"); // Ensure this matches your table body ID
+                if (tbody && tbody.children.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" class="text-center text-muted py-3">No machines found</td></tr>';
+                }
+
+                alert(data.message);
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting machine:", error);
+            alert("An error occurred while deleting the machine.");
+        });
+    }
+}
+
 
 /* ==========================================================================
    08. ADD SUPERVISOR SCREEN (PAGE 13)
@@ -1208,6 +1267,98 @@ document.addEventListener('DOMContentLoaded', function () {
     searchInput.addEventListener('input', filterMachines);
 });
 
+// THIS FUNCTION IS USED TO OPEN SUPERVISOR DETAILS MODAL
+function viewSupervisor(btn) {
+    document.getElementById('view_sup_name').innerText = btn.getAttribute('data-name') || 'N/A';
+    document.getElementById('view_sup_email').innerText = btn.getAttribute('data-email') || 'N/A';
+    document.getElementById('view_sup_phone').innerText = btn.getAttribute('data-phone') || 'N/A';
+    document.getElementById('view_sup_created').innerText = btn.getAttribute('data-created') || 'N/A';
+
+    const modal = new bootstrap.Modal(document.getElementById('supervisorDetailsModal'));
+    modal.show();
+}
+
+// THIS FUNCTION IS USED TO OPEN EDIT SUPERVISOR MODAL
+function openEditSupervisorModal(btn) {
+    document.getElementById('edit_sup_id').value = btn.getAttribute('data-id');
+    document.getElementById('edit_sup_email').value = btn.getAttribute('data-email');
+    document.getElementById('edit_sup_phone').value = btn.getAttribute('data-phone');
+
+    const modal = new bootstrap.Modal(document.getElementById('editSupervisorModal'));
+    modal.show();
+}
+
+//THIS FUNCTION HANDLES SUPERVISOR UPDATE
+function updateSupervisor() {
+    const id = document.getElementById('edit_sup_id').value;
+    const email = document.getElementById('edit_sup_email').value;
+    const phone = document.getElementById('edit_sup_phone').value;
+
+    const formData = new FormData();
+    formData.append("id", id);
+    formData.append("email", email);
+    formData.append("phone", phone);
+
+    fetch("../py/supervisor/update_supervisor.py", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(data.message);
+            // Hide modal
+            const modalEl = document.getElementById('editSupervisorModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            // Reload/Refresh table data
+            if (typeof loadSupervisors === 'function') {
+                loadSupervisors();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Update Error:", err);
+        alert("Failed to update supervisor details.");
+    });
+}
+
+// THIS FUNCTION HANDLES SUPERVISOR DELETION
+function deleteSupervisor(supId) {
+    if (!confirm("Are you sure you want to delete this supervisor?")) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("id", supId);
+
+    fetch("../py/supervisor/delete_supervisor.py", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            // Remove row from table UI
+            const row = document.getElementById(`supervisor-row-${supId}`);
+            if (row) {
+                row.remove();
+            }
+            alert(data.message);
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Delete Error:", err);
+        alert("Failed to delete supervisor record.");
+    });
+}
 
 /* ==========================================================================
    09. DELIVERY & OTHER UTILITIES

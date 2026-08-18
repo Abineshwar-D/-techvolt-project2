@@ -1,0 +1,48 @@
+#!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
+
+import cgi
+import cgitb
+import json
+import pymysql
+
+cgitb.enable()
+
+print("Content-Type: application/json\n")
+
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "",
+    "database": "techvoltproject2",
+    "cursorclass": pymysql.cursors.DictCursor,
+}
+
+try:
+    conn = pymysql.connect(**DB_CONFIG)
+    cursor = conn.cursor()
+
+    # Query POs that are NOT yet added in materials table
+    # Matches po_number against materials.po_orderid
+    query = """SELECT po.po_number, po.material, po.required_qty, COALESCE(po.supplier_name, s.supplier_name, 
+    po.supplier) as supplier_name FROM purchased_order po LEFT JOIN supplier s ON (LOWER(TRIM(po.supplier)) = LOWER(
+    TRIM(s.supplier_code)) OR LOWER(TRIM(po.supplier)) = LOWER(TRIM(s.supplier_name))) WHERE po.po_number NOT IN ( 
+    SELECT DISTINCT po_orderid FROM materials WHERE po_orderid IS NOT NULL AND po_orderid != '' ) 
+    AND LOWER(TRIM(po.status)) = 'completed' ORDER BY po.id DESC"""
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    # Convert Decimal/Float values if any
+    for r in rows:
+        if r.get("required_qty") is not None:
+            r["required_qty"] = float(r["required_qty"])
+
+    print(json.dumps({"status": "success", "data": rows}))
+
+except Exception as e:
+    print(json.dumps({"status": "error", "message": str(e)}))
+
+finally:
+    if "conn" in locals() and conn.open:
+        cursor.close()
+        conn.close()

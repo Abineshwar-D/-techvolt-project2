@@ -38,9 +38,6 @@ def extract_user_id(form_obj):
     return None
 
 
-# Extract parameters
-logged_in_user_id = extract_user_id(form)
-
 # Database Config
 DB_CONFIG = {
     "host": "localhost",
@@ -49,44 +46,58 @@ DB_CONFIG = {
     "database": "techvoltproject2"
 }
 
-# Resolve Creator Full Name based on user_id
-creator_name = "System User"
-if logged_in_user_id:
-    try:
-        conn_check = pymysql.connect(**DB_CONFIG)
-        cur_check = conn_check.cursor()
-
-        # Check 'users' table first
-        cur_check.execute("SELECT fullname FROM users WHERE employee_id=%s", (logged_in_user_id,))
-        u_row = cur_check.fetchone()
-
-        if u_row and u_row[0]:
-            creator_name = u_row[0].strip()
-        else:
-            # Check 'admin' table if not found in 'users'
-            cur_check.execute("SELECT fullname FROM admin WHERE employee_id=%s", (logged_in_user_id,))
-            a_row = cur_check.fetchone()
-            if a_row and a_row[0]:
-                creator_name = a_row[0].strip()
-            elif a_row:
-                creator_name = "Admin"
-
-        cur_check.close()
-        conn_check.close()
-    except Exception:
-        pass
-
 # Extract current page filename
 current_page = form.getvalue("current_page", "Marketing.html")
 if isinstance(current_page, list):
     current_page = current_page[0]
 current_page = str(current_page).strip()
 
-# Target redirect path maintaining user_id query parameter
-if logged_in_user_id:
-    redirect_target = f"/techvoltInstituteProject/pages/{current_page}?user_id={logged_in_user_id}#Enquiry"
+# Check if submission is coming from landing.html
+is_landing_page = current_page.lower() == "landing.html"
+
+# Extract parameters
+logged_in_user_id = extract_user_id(form)
+
+# Resolve Creator Full Name based on user_id (Bypassed for landing.html)
+creator_name = "System User"
+
+if is_landing_page:
+    # Direct Public Enquiries from landing.html don't require user login
+    logged_in_user_id = None
+    creator_name = None
+    redirect_target = "/techvoltInstituteProject/pages/landing.html"
 else:
-    redirect_target = "/techvoltInstituteProject/pages/login.html"
+    # Standard internal user session resolution
+    if logged_in_user_id:
+        try:
+            conn_check = pymysql.connect(**DB_CONFIG)
+            cur_check = conn_check.cursor()
+
+            # Check 'users' table first
+            cur_check.execute("SELECT fullname FROM users WHERE employee_id=%s", (logged_in_user_id,))
+            u_row = cur_check.fetchone()
+
+            if u_row and u_row[0]:
+                creator_name = u_row[0].strip()
+            else:
+                # Check 'admin' table if not found in 'users'
+                cur_check.execute("SELECT fullname FROM admin WHERE employee_id=%s", (logged_in_user_id,))
+                a_row = cur_check.fetchone()
+                if a_row and a_row[0]:
+                    creator_name = a_row[0].strip()
+                elif a_row:
+                    creator_name = "Admin"
+
+            cur_check.close()
+            conn_check.close()
+        except Exception:
+            pass
+
+    # Target redirect path maintaining user_id query parameter
+    if logged_in_user_id:
+        redirect_target = f"/techvoltInstituteProject/pages/{current_page}?user_id={logged_in_user_id}#Enquiry"
+    else:
+        redirect_target = "/techvoltInstituteProject/pages/login.html"
 
 
 # ==================== HELPER VALIDATION FUNCTIONS ====================
@@ -231,7 +242,7 @@ try:
     ins_sql = """INSERT INTO customers_enquiries (
                     enquiry_id, customer_name, company_name, gst_number, 
                     phone_number, email, fabric_type, 
-                     color, price, quantity, 
+                    color, price, quantity, 
                     source, remarks, address, city, state, pincode,
                     created_by_id, created_by_name
                  ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""

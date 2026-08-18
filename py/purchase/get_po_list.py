@@ -1,20 +1,70 @@
 #!C:\Users\abi\AppData\Local\Programs\Python\Python311\python.exe
-
+import sys
 import cgitb
+import html
 import pymysql
+import cgi
+import os
 
 cgitb.enable()
-print("Content-Type: text/html\n")
+sys.stdout.reconfigure(encoding='utf-8')
+print("Content-Type: text/html; charset=utf-8\n")
+
+def get_status_badge(status_text):
+    status_str = str(status_text).strip() if status_text else "Pending"
+    status_lower = status_str.lower()
+
+    if status_lower in ["completed", "new po", "delivered"]:
+        badge_class = "bg-success"
+    elif status_lower in ["pending", "in progress"]:
+        badge_class = "bg-warning text-dark"
+    elif status_lower in ["stored", "active"]:
+        badge_class = "bg-primary"
+    elif status_lower in ["cancelled", "rejected"]:
+        badge_class = "bg-danger"
+    else:
+        badge_class = "bg-secondary"
+
+    return f'<span class="badge {badge_class}">{status_str}</span>'
+
+# Extract user_id from query parameters
+form = cgi.FieldStorage()
+user_id = form.getvalue("user_id", None)
+
+if not user_id:
+    user_id = os.environ.get("HTTP_USER_ID", "").strip()
+else:
+    user_id = str(user_id).strip()
 
 try:
     conn = pymysql.connect(
         host="localhost",
         user="root",
         password="",
-        database="techvoltproject2"
+        database="techvoltproject2",
+        charset='utf8mb4'
     )
 
     cursor = conn.cursor()
+
+    # --- Role Check (Admin Detection) ---
+    is_admin = False
+    if user_id:
+        # Check admin table or employee ID starting with AMD
+        cursor.execute(
+            "SELECT COUNT(*) FROM admin WHERE employee_id = %s OR user_id = %s",
+            (user_id, user_id),
+        )
+        if cursor.fetchone()[0] > 0 or user_id.upper().startswith("AMD"):
+            is_admin = True
+        else:
+            cursor.execute(
+                "SELECT LOWER(role) FROM users WHERE employee_id = %s OR user_id = %s",
+                (user_id, user_id),
+            )
+            role_row = cursor.fetchone()
+            if role_row and role_row[0] == "admin":
+                is_admin = True
 
     cursor.execute("""
         SELECT 
@@ -22,7 +72,11 @@ try:
             COALESCE(s.supplier_name, p.supplier) AS supplier_name, 
             p.material, 
             p.required_qty,
-            COALESCE(p.created_by_name, 'N/A') AS created_by
+            COALESCE(p.created_by_name, 'N/A') AS created_by,
+            p.status,
+            p.available_stock,
+            p.expected_delivery,
+            p.remarks
         FROM purchased_order p
         LEFT JOIN supplier s ON p.supplier = s.supplier_code
         ORDER BY p.id DESC
@@ -31,18 +85,65 @@ try:
     rows = cursor.fetchall()
 
     for row in rows:
+        po_num = row[0]
+        supplier_name = row[1] or ""
+        material = row[2] or ""
+        required_qty = row[3] or 0
+        created_by = row[4] or "N/A"
+        current_st = row[5] if row[5] else "NEW PO"
+        available_stock = row[6] or 0
+        expected_delivery = str(row[7]) if row[7] else "N/A"
+        remarks = row[8] or "N/A"
+
+        status_badge = get_status_badge(current_st)
+
+        # Escape special characters to avoid breaking HTML attributes
+        safe_po_num = html.escape(str(po_num), quote=True)
+        safe_supplier = html.escape(str(supplier_name), quote=True)
+        safe_material = html.escape(str(material), quote=True)
+        safe_created_by = html.escape(str(created_by), quote=True)
+        safe_remarks = html.escape(str(remarks), quote=True)
+
+        # View button
+        view_btn = f"""
+            <button type="button" 
+                    class="action-btn view-po-btn" 
+                    data-po="{safe_po_num}"
+                    data-supplier="{safe_supplier}"
+                    data-material="{safe_material}"
+                    data-avail-stock="{available_stock}"
+                    data-req-qty="{required_qty}"
+                    data-delivery="{expected_delivery}"
+                    data-status="{current_st}"
+                    data-created-by="{safe_created_by}"
+                    data-remarks="{safe_remarks}"
+                    onclick="openViewModal(this)">
+                <i class="bi bi-eye"></i>
+            </button>
+        """
+
+        # Edit button (Hidden for Admin, visible for non-admin)
+        if not is_admin:
+            action_buttons = f"""
+                {view_btn}
+                <button type="button" class="action-btn edit-status-btn" onclick="openStatusModal('{safe_po_num}', '{current_st}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            """
+        else:
+            action_buttons = f"{view_btn}"
+
         print(f"""
         <tr>
-            <td class="po-number">{row[0]}</td>
-            <td class="supplier-name">{row[1]}</td>
-            <td>{row[2]}</td>
-            <td>{row[3]} kg</td>
-            <td>{row[4]}</td>
+            <td class="po-number">{safe_po_num}</td>
+            <td class="supplier-name">{safe_supplier}</td>
+            <td>{safe_material}</td>
+            <td>{required_qty} kg</td>
+            <td>{status_badge}</td>
+            <td>{safe_created_by}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="action-btn view">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                    {action_buttons}
                 </div>
             </td>
         </tr>
@@ -52,4 +153,4 @@ try:
     conn.close()
 
 except Exception as e:
-    print(f"<tr><td colspan='6' class='text-danger'>Error: {str(e)}</td></tr>")
+    print(f"<tr><td colspan='7' class='text-danger'>Error: {str(e)}</td></tr>")

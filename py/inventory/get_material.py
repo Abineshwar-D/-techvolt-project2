@@ -90,22 +90,33 @@ try:
         SELECT COUNT(DISTINCT m.material_id)
         FROM materials m
         INNER JOIN purchased_order p 
-            ON m.material_name = p.material
-            OR m.material_name LIKE CONCAT('%', p.material, '%')
-            OR p.material LIKE CONCAT('%', m.material_name, '%')
+            ON (
+                m.material_name = p.material
+                OR m.material_name LIKE CONCAT('%', p.material, '%')
+                OR p.material LIKE CONCAT('%', m.material_name, '%')
+            )
+        WHERE LOWER(p.status) != 'completed'
     """)
     matched_materials_count = cursor.fetchone()[0] or 0
 
     # --- TABLE DATA: Query Materials Table ---
+    # Included unit (m.unit) and supplier (m.supplier) for View modal
     cursor.execute("""
         SELECT
-            material_code,
-            material_name,
-            opening_stock,
-            delivery_date,
-            COALESCE(created_by_name, 'N/A') AS created_by
-        FROM materials
-        ORDER BY material_id DESC
+            m.material_code,
+            m.material_name,
+            m.opening_stock,
+            m.delivery_date,
+            COALESCE(m.created_by_name, 'N/A') AS created_by,
+            m.manufacturing_date,
+            COALESCE(m.unit, 'Kg') AS unit,
+            COALESCE(m.supplier, 'N/A') AS supplier
+        FROM materials m
+        ORDER BY 
+            (m.opening_stock = 0 OR m.opening_stock IS NULL) ASC,
+            (SELECT MIN(m2.manufacturing_date) FROM materials m2 WHERE m2.material_name = m.material_name) ASC,
+            m.material_name ASC,
+            m.manufacturing_date ASC
     """)
 
     rows = cursor.fetchall()
@@ -118,44 +129,81 @@ try:
         delivery_date_raw = row[3]
         formatted_delivery_date = safe_format_date(delivery_date_raw)
         created_by = row[4] or "N/A"
+        manufacturing_date_raw = row[5]
+        formatted_manufacturing_date = safe_format_date(manufacturing_date_raw)
+        unit = row[6] or "Kg"
+        supplier = row[7] or "N/A"
 
-        # --- Status Calculation Logic ---
-        del_date_obj = get_date_obj(delivery_date_raw)
-        if del_date_obj and del_date_obj < today:
-            status_badge = (
-                '<span class="badge bg-warning text-dark">Pending</span>'
-            )
+        # Updated status logic & edit button disable state if Out of Stock
+        if stock <= 0:
+            status_text = "Out of Stock"
+            status_badge = '<span class="badge bg-danger">Out of Stock</span>'
+            edit_btn = f"""
+                <button class="action-btn edit-stock-btn disabled-btn" 
+                        title="Edit Stock Disabled (Out of Stock)" 
+                        data-code="{material_code}" 
+                        data-name="{material_name}" 
+                        data-stock="{stock:.2f}"
+                        disabled
+                        style="opacity: 0.5; cursor: not-allowed;">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            """
         else:
+            status_text = "Stored"
             status_badge = '<span class="badge bg-success">Stored</span>'
+            edit_btn = f"""
+                <button class="action-btn edit-stock-btn" 
+                        title="Edit Stock" 
+                        data-code="{material_code}" 
+                        data-name="{material_name}" 
+                        data-stock="{stock:.2f}"
+                        onclick="openStockModal(this)">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            """
 
-        # Edit button configured with data attributes for opening the modal
-        edit_btn = f"""
-            <button class="action-btn edit-stock-btn" 
-                    title="Edit Stock" 
-                    data-code="{material_code}" 
-                    data-name="{material_name}" 
-                    data-stock="{stock:.2f}"
-                    onclick="openStockModal(this)">
-                <i class="bi bi-pencil"></i>
+        # View Button configured with data attributes
+        view_btn = f"""
+            <button class="action-btn" 
+                    title="View"
+                    data-name="{material_name}"
+                    data-unit="{unit}"
+                    data-stock="{stock:,.2f}"
+                    data-supplier="{supplier}"
+                    data-mfg="{formatted_manufacturing_date}"
+                    data-status="{status_text}"
+                    data-delivery="{formatted_delivery_date}"
+                    data-createdby="{created_by}"
+                    onclick="openViewModal(this)">
+                <i class="bi bi-eye"></i>
+            </button>
+        """
+
+        # Delete Button configured with onclick function and material code
+        delete_btn = f"""
+            <button class="action-btn" 
+                    title="Delete"
+                    data-code="{material_code}"
+                    onclick="deleteMaterial(this)">
+                <i class="bi bi-trash"></i>
             </button>
         """
 
         # --- Action Buttons Logic based on Admin Check ---
         if is_admin:
             action_buttons = f"""
-                <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
-                {edit_btn}
-                <button class="action-btn" title="Block"><i class="bi bi-slash-circle"></i></button>
+                {view_btn}
             """
         else:
             action_buttons = f"""
-                <button class="action-btn" title="View"><i class="bi bi-eye"></i></button>
+                {view_btn}
                 {edit_btn}
-                <button class="action-btn" title="Delete"><i class="bi bi-trash"></i></button>
+                {delete_btn}
             """
 
         table_html += f"""
-        <tr>
+        <tr id="row-{material_code}">
             <td>
                 <div class="d-flex align-items-center gap-2">
                     <div class="material-icon">
@@ -168,12 +216,18 @@ try:
             </td>
 
             <td class="text-right stock-value">
-                {stock:,.2f} Kg
+                {stock:,.2f} {unit}
             </td>
 
             <td class="text-center">
                 <span class="status-badge">
                     {formatted_delivery_date}
+                </span>
+            </td>
+
+             <td class="text-center">
+                <span class="status-badge">
+                    {formatted_manufacturing_date}
                 </span>
             </td>
 

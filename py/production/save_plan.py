@@ -37,7 +37,7 @@ SMTP_CONFIG = {
     "server": "smtp.gmail.com",
     "port": 587,
     "sender_email": "abineshwar68@gmail.com",      # <--- Sender email
-    "sender_password": "pjloyemfquehtfrl"          # <--- App Password
+    "sender_password": "orsswjpkbkubbmqk"          # <--- App Password
 }
 
 # Resolve Creator Full Name based on user_id (Check users table first, then admin table)

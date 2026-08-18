@@ -166,28 +166,7 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
-const tbody = document.getElementById("materialTableBody");
-if (tbody) {
-    tbody.addEventListener("click", function (e) {
-        if (e.target.closest(".action-btn")) return;
 
-        const row = e.target.closest("tr");
-        if (!row) return;
-
-        document.querySelectorAll("#materialTableBody tr").forEach(r => r.classList.remove("selected"));
-        row.classList.add("selected");
-
-        const elName = document.getElementById("detailMaterialName");
-        const elStock = document.getElementById("detailStock");
-        const elReorder = document.getElementById("detailReorder");
-        const elCost = document.getElementById("detailCost");
-
-        if (elName) elName.textContent = row.cells[0]?.innerText.trim();
-        if (elStock) elStock.textContent = row.cells[1]?.innerText.trim();
-        if (elReorder) elReorder.textContent = row.cells[2]?.innerText.trim();
-        if (elCost) elCost.textContent = row.cells[3]?.innerText.trim();
-    });
-}
 //THIS FUNCTION IS FOR LIVE SEARCH
 document.addEventListener('DOMContentLoaded', function () {
     const searchInventory = document.getElementById('searchInventory');
@@ -229,45 +208,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-//THIS FUNCTION IS USED TO SEARCH INVENTORY
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInventory = document.getElementById('searchInventory');
-    const inventoryRefresh = document.getElementById('inventoryRefresh');
-    const materialTableBody = document.getElementById('materialTableBody');
-
-    // Filter Function
-    function filterInventory() {
-        const query = searchInventory.value.toLowerCase().trim();
-        const rows = materialTableBody.getElementsByTagName('tr');
-
-        Array.from(rows).forEach(row => {
-            // Get text from columns (0 = Material Name, 1 = Stock, 2 = Date)
-            const materialName = row.children[0]?.textContent.toLowerCase() || '';
-            const availableStock = row.children[1]?.textContent.toLowerCase() || '';
-            const deliveryDate = row.children[2]?.textContent.toLowerCase() || '';
-
-            // Check if search query matches ANY column
-            const matchesSearch = materialName.includes(query) ||
-                                  availableStock.includes(query) ||
-                                  deliveryDate.includes(query);
-
-            if (matchesSearch) {
-                row.style.display = ''; // Show row
-            } else {
-                row.style.display = 'none'; // Hide row
-            }
-        });
-    }
-
-    // Event Listener for live search as you type
-    searchInventory.addEventListener('input', filterInventory);
-
-    // Refresh Button Listener (Clears search & displays all rows)
-    inventoryRefresh.addEventListener('click', function () {
-        searchInventory.value = '';
-        filterInventory();
-    });
-});
 
 // THIS FUNCTION IS USED TO OPEN STOCK MODAL
 function openStockModal(btn) {
@@ -351,69 +291,136 @@ function submitStockUpdate() {
         }
     });
 }
+
+// THIS FUNCTION IS USED TO OPEN VIEW MODAL AND FETCH DATA OF INVENTORY DETAILS
+function openViewModal(btn) {
+    document.getElementById('view_material_name').innerText = btn.getAttribute('data-name') || 'N/A';
+    document.getElementById('view_unit').innerText = btn.getAttribute('data-unit') || 'N/A';
+    document.getElementById('view_opening_stock').innerText = (btn.getAttribute('data-stock') || '0.00') + ' ' + (btn.getAttribute('data-unit') || 'Kg');
+    document.getElementById('view_supplier').innerText = btn.getAttribute('data-supplier') || 'N/A';
+    document.getElementById('view_mfg_date').innerText = btn.getAttribute('data-mfg') || 'N/A';
+
+    const statusVal = btn.getAttribute('data-status');
+    const statusTd = document.getElementById('view_status');
+    if (statusVal === "Out of Stock") {
+        statusTd.innerHTML = '<span class="badge bg-danger">Out of Stock</span>';
+    } else {
+        statusTd.innerHTML = '<span class="badge bg-success">Stored</span>';
+    }
+
+    document.getElementById('view_delivery_date').innerText = btn.getAttribute('data-delivery') || 'N/A';
+    document.getElementById('view_created_by').innerText = btn.getAttribute('data-createdby') || 'N/A';
+
+    // Open Bootstrap Modal
+    const viewModal = new bootstrap.Modal(document.getElementById('inventoryDetailsModal'));
+    viewModal.show();
+}
+
+// THIS FUNCTION IS USED TO DELETE MATERIAL
+function deleteMaterial(btn) {
+    const materialCode = btn.getAttribute('data-code');
+
+    if (confirm("Are you sure you want to delete this record?")) {
+        // Send request to backend API to delete record from DB
+        fetch(`../py/inventory/delete_material.py?material_code=${materialCode}`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove row from table UI
+                const row = document.getElementById(`row-${materialCode}`);
+                if (row) {
+                    row.remove();
+                }
+                alert("Record deleted successfully.");
+            } else {
+                alert("Error deleting record: " + (data.error || "Unknown error"));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Failed to delete record. Please try again.");
+        });
+    }
+}
+
 /* ==========================================================================
    04. ADD MATERIAL SCREEN
    ========================================================================== */
 
+
+//THIS CODE IS USED TO LOAD PURCHASE ORDERS DETAILS
+let poDataMap = {};
+
 document.addEventListener("DOMContentLoaded", function () {
-    const dateInput = document.getElementById("delivery_date");
-    if (dateInput) {
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.setAttribute("min", today);
-    }
+    loadPurchaseOrders();
+
+    // Event listener on PO Dropdown selection change
+    document.getElementById("purchaseOrder").addEventListener("change", function () {
+        const selectedPO = this.value;
+
+        if (selectedPO && poDataMap[selectedPO]) {
+            const data = poDataMap[selectedPO];
+
+            // Auto-fill form fields based on selection
+            document.getElementById("materialName").value = data.material || "";
+            document.getElementById("openingStock").value = data.required_qty || 0;
+            document.getElementById("supplierInput").value = data.supplier_name || "";
+        } else {
+            // Clear fields if default 'select option' is chosen
+            document.getElementById("materialName").value = "";
+            document.getElementById("openingStock").value = "";
+            document.getElementById("supplierInput").value = "";
+        }
+    });
 });
 
-// Function to load supplier dropdown
-function loadSupplierDropdown() {
-    const selectElement = document.getElementById("supplierSelect");
-    if (!selectElement) return;
+// THIS FUNCTION IS USED TO LOAD PURCHASE ORDERS
+function loadPurchaseOrders() {
+    fetch("../py/inventory/get_purchase_orders.py")
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === "success") {
+                const poSelect = document.getElementById("purchaseOrder");
+                poSelect.innerHTML = '<option value="">select option</option>';
 
-    // Add timestamp ?t= to prevent Python CGI browser caching
-    fetch("../py/inventory/get_suppliers_dropdown.py?t=" + new Date().getTime())
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP Error ${response.status}`);
+                poDataMap = {}; // Reset map
+
+                res.data.forEach(item => {
+                    // Store details mapped by po_number
+                    poDataMap[item.po_number] = item;
+
+                    // Add option to dropdown
+                    const option = document.createElement("option");
+                    option.value = item.po_number;
+                    option.textContent = item.po_number;
+                    poSelect.appendChild(option);
+                });
+            } else {
+                console.error("Error loading POs:", res.message);
             }
-            return response.json();
         })
-        .then(suppliers => {
-            // Save current selected value so it doesn't lose user choice during auto-refresh
-            const currentValue = selectElement.value;
-
-            // Clear and reset default option
-            selectElement.innerHTML = '<option value="" disabled selected>Select Supplier</option>';
-
-            suppliers.forEach(supplierName => {
-                const option = document.createElement("option");
-                option.value = supplierName;
-                option.textContent = supplierName;
-
-                // Keep selected if user already selected this supplier
-                if (supplierName === currentValue) {
-                    option.selected = true;
-                }
-
-                selectElement.appendChild(option);
-            });
-        })
-        .catch(error => console.error("Error loading suppliers:", error));
+        .catch(error => {
+            console.error("Fetch error:", error);
+        });
 }
 
 //
-document.addEventListener("DOMContentLoaded", function () {
-    loadSupplierDropdown();
+//document.addEventListener("DOMContentLoaded", function () {
+//
+//
+//    const selectElement = document.getElementById("supplierSelect");
+//
+//    // 2. Refresh when user CLICKS or FOCUSES on the dropdown field
+////    if (selectElement) {
+////        selectElement.addEventListener("focus", loadSupplierDropdown);
+////    }
+//});
 
-    const selectElement = document.getElementById("supplierSelect");
-
-    // 2. Refresh when user CLICKS or FOCUSES on the dropdown field
-    if (selectElement) {
-        selectElement.addEventListener("focus", loadSupplierDropdown);
-    }
-});
-
-// 3. Refresh when switching back to this browser TAB/WINDOW
+// THIS CODE IS USED TO AUTO-REFRESH WHILE PAGE IS OPEN
 window.addEventListener("focus", function () {
-    loadSupplierDropdown();
+        loadPurchaseOrders()
 });
 
 
@@ -427,8 +434,11 @@ function loadSuppliersAndKPIs() {
     var supplierTableBody = document.getElementById("supplierTableBody");
 
     if (supplierTableBody) {
-        // Adding ?t= prevents browser caching
-        fetch("../py/supplier/get_supplier.py?t=" + new Date().getTime())
+        // Extract user_id from URL (e.g. ?user_id=AMD007)
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("user_id") || "";
+
+        fetch(`../py/supplier/get_supplier.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -450,7 +460,6 @@ function loadSuppliersAndKPIs() {
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);
-            supplierTableBody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error connecting to server.</td></tr>";
         });
     }
 }
@@ -520,7 +529,63 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+//THIS FUNCTION IS USED TO VIEW SUPPLIER
+document.addEventListener('DOMContentLoaded', function () {
 
+    // Global Event Listener for View Buttons (Works with AJAX-loaded table_html)
+    document.addEventListener('click', function (event) {
+
+        // Check if clicked element or its parent is the view button
+        const viewBtn = event.target.closest('.view-btn');
+
+        if (viewBtn) {
+            // Extract attributes from clicked row button
+            const supplierName = viewBtn.dataset.supplierName || '-';
+            const phone = viewBtn.dataset.phone || '-';
+            const email = viewBtn.dataset.email || '-';
+            const gst = viewBtn.dataset.gst || '-';
+            const city = viewBtn.dataset.city || '-';
+            const state = viewBtn.dataset.state || '-';
+            const createdBy = viewBtn.dataset.createdBy || '-';
+            const rawMaterials = viewBtn.dataset.materials || '';
+
+            // Populate Modal Text
+            document.getElementById('modalSupplierName').textContent = supplierName;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalEmail').textContent = email;
+            document.getElementById('modalGstNumber').textContent = gst;
+            document.getElementById('modalCity').textContent = city;
+            document.getElementById('modalState').textContent = state;
+            document.getElementById('modalCreatedBy').textContent = createdBy;
+
+            // Handle Material Supplied (Comma split)
+            const materialContainer = document.getElementById('modalMaterialSupplied');
+            materialContainer.innerHTML = ''; // Clear old badges
+
+            if (rawMaterials && rawMaterials.trim() !== '') {
+                // Split material by commas
+                const materialsList = rawMaterials.split(',');
+
+                materialsList.forEach(item => {
+                    const cleanMaterial = item.trim();
+                    if (cleanMaterial) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-primary text-wrap py-2 px-3 fw-normal';
+                        badge.textContent = cleanMaterial;
+                        materialContainer.appendChild(badge);
+                    }
+                });
+            } else {
+                materialContainer.innerHTML = '<span class="text-muted small">No materials listed</span>';
+            }
+
+            // Show the Bootstrap Modal
+            const supplierModal = new bootstrap.Modal(document.getElementById('supplierModal'));
+            supplierModal.show();
+        }
+    });
+
+});
 
 /* ==========================================================================
    06. ADD SUPPLIER SCREEN
@@ -608,26 +673,30 @@ function refreshAllData() {
             loadSampleData();
         });
 
-    // 2. FETCH KPI DATA (JSON)
-    fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === "success") {
-                const totalPoElem = document.getElementById("kpi-total-po");
-                const pendingPoElem = document.getElementById("kpi-pending-po");
+   // 2. FETCH KPI DATA (JSON)
+fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === "success") {
+            const totalPoElem = document.getElementById("kpi-total-po");
+            const pendingPoElem = document.getElementById("kpi-pending-po");
+            const approvedPoElem = document.getElementById("kpi-approved-po");
+            const rejectedPoElem = document.getElementById("kpi-rejected-po");
 
-                if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
-                if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
-            } else {
-                console.error("Error fetching PO KPIs:", data.message);
-            }
-        })
-        .catch(error => {
-            console.error("KPI fetch error:", error);
-        });
+            if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
+            if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
+            if (approvedPoElem) approvedPoElem.innerText = data.approved_po ?? 0;
+            if (rejectedPoElem) rejectedPoElem.innerText = data.rejected_po ?? 0;
+        } else {
+            console.error("Error fetching PO KPIs:", data.message);
+        }
+    })
+    .catch(error => {
+        console.error("KPI fetch error:", error);
+    });
 }
 
 // 1. Trigger when DOM page finishes loading
@@ -640,6 +709,116 @@ window.addEventListener("focus", function () {
     refreshAllData();
 });
 
+// Open Modal when pencil button is clicked
+window.openStatusModal = function(poNumber, currentStatus) {
+    document.getElementById('modal_po_number').value = poNumber;
+
+    var selectElem = document.getElementById('modal_status_select');
+    if (currentStatus === "Completed" || currentStatus === "Rejected") {
+        selectElem.value = currentStatus;
+    } else {
+        selectElem.value = "Completed";
+    }
+
+    var myModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+    myModal.show();
+};
+
+// THIS FUNCTION IS USED FOR SUBMITTING THE STATUS UPDATE
+function submitStatusUpdate(event) {
+    event.preventDefault();
+
+    var poNumber = document.getElementById('modal_po_number').value;
+    var statusVal = document.getElementById('modal_status_select').value;
+
+    var formData = new FormData();
+    formData.append('po_number', poNumber);
+    formData.append('status', statusVal);
+
+    // Calls the SEPARATE update script
+    fetch('../py/purchase/update_po_status.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Hide Modal
+            var modalElem = document.getElementById('statusUpdateModal');
+            var modal = bootstrap.Modal.getInstance(modalElem);
+            if (modal) modal.hide();
+
+            // Reload page or refresh table
+            location.reload();
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        alert("System error: " + error);
+    });
+}
+
+//THIS FUNCTION IS FOR THE DROPDOWN FILTER
+document.addEventListener('DOMContentLoaded', function () {
+    const statusFilter = document.getElementById('statusFilter');
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function () {
+            // Get selected option value
+            const selectedStatus = this.value.toLowerCase().trim();
+
+            // Get all rows in the table
+            const rows = document.querySelectorAll('#poTableBody tr');
+
+            rows.forEach(row => {
+                // Column index 4 is STATUS
+                const statusCell = row.cells[4];
+
+                if (statusCell) {
+                    // innerText strips HTML tags (like <span class="badge">)
+                    const cellText = statusCell.innerText.toLowerCase().trim();
+
+                    if (selectedStatus === 'all' || cellText === selectedStatus) {
+                        row.style.display = ''; // Show row
+                    } else {
+                        row.style.display = 'none'; // Hide row
+                    }
+                }
+            });
+        });
+    }
+});
+
+// THIS FUNCTION IS USED TO OPEN VIEW MODAL
+function openViewModal(btn) {
+    // Read data attributes from the clicked button
+    const po = btn.getAttribute('data-po');
+    const supplier = btn.getAttribute('data-supplier');
+    const material = btn.getAttribute('data-material');
+    const availStock = btn.getAttribute('data-avail-stock');
+    const reqQty = btn.getAttribute('data-req-qty');
+    const delivery = btn.getAttribute('data-delivery');
+    const status = btn.getAttribute('data-status');
+    const createdBy = btn.getAttribute('data-created-by');
+    const remarks = btn.getAttribute('data-remarks');
+
+    // Populate modal fields
+    document.getElementById('v_po_number').innerText = po;
+    document.getElementById('v_supplier_name').innerText = supplier;
+    document.getElementById('v_material').innerText = material;
+    document.getElementById('v_available_stock').innerText = availStock + " kg";
+    document.getElementById('v_required_qty').innerText = reqQty + " kg";
+    document.getElementById('v_expected_delivery').innerText = delivery;
+    document.getElementById('v_status').innerText = status;
+    document.getElementById('v_created_by').innerText = createdBy;
+    document.getElementById('v_remarks').innerText = remarks;
+
+    // Show the Bootstrap Modal
+    const viewModal = new bootstrap.Modal(document.getElementById('viewPoModal'));
+    viewModal.show();
+}
 
 /* ==========================================================================
    08. ADD PURCHASE ORDER SCREEN
@@ -700,6 +879,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
 
 
 /* ==========================================================================

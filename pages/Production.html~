@@ -289,15 +289,16 @@
                 <i class="bi bi-search"></i>
                 <input type="text" placeholder="Search Production Plans..." id="SearchPp">
             </div>
-            <div class="select-wrapper">
-                <select class="filter-select">
-                    <option>All Status</option>
-                    <option>Running</option>
-                    <option>Completed</option>
-                    <option>Pending</option>
-                </select>
-                <i class="bi bi-chevron-down"></i>
-            </div>
+           <div class="select-wrapper">
+    <select class="filter-select">
+        <option value="All Status">All Status</option>
+        <option value="Running">Running</option>
+        <option value="Completed">Completed</option>
+        <option value="Pending">Pending</option>
+        <option value="Assigned">Assigned</option>
+    </select>
+    <i class="bi bi-chevron-down"></i>
+</div>
             <button class="btn-create" onclick="showpage('ProductionPlan')">
                 <i class="bi bi-plus-lg"></i> Create Production Plan
             </button>
@@ -318,8 +319,10 @@
                                     <th>Plan No</th>
                                     <th>Order No</th>
                                     <th>Machine</th>
-                                    <th>Dates</th>
+                                    <th>Start Dates</th>
+                                    <th>End Dates</th>
                                     <th>Created By</th>
+                                    <th>Status</th>
                                     <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
@@ -328,7 +331,7 @@
                     </div>
 
                     <div class="p-3 border-top text-center bg-light bg-opacity-30">
-                        <a href="#" class="text-secondary fw-semibold text-decoration-none small">Load More Plans</a>
+
                     </div>
                 </div>
             </div>
@@ -934,6 +937,135 @@
             </form>
         </div>
     </div>
+</div>
+
+<!-- IN THIS CODE VIEW SUPPERVISOR DETAILS -->
+<div class="modal fade" id="supervisorDetailsModal" tabindex="-1" aria-labelledby="supervisorDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="supervisorDetailsModalLabel">supervisorDetails</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered mb-0">
+          <tbody>
+            <tr>
+              <th class="bg-light" style="width: 40%;">supervisor Name</th>
+              <td id="view_sup_name"></td>
+            </tr>
+            <tr>
+              <th class="bg-light">supervisor email</th>
+              <td id="view_sup_email"></td>
+            </tr>
+            <tr>
+              <th class="bg-light">supervisor phone</th>
+              <td id="view_sup_phone"></td>
+            </tr>
+            <tr>
+              <th class="bg-light">created_at date</th>
+              <td id="view_sup_created"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- IN THIS CODE EDIT SUPERVISOR -->
+<div class="modal fade" id="editSupervisorModal" tabindex="-1" aria-labelledby="editSupervisorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="editSupervisorModalLabel">Edit Supervisor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editSupervisorForm">
+          <input type="hidden" id="edit_sup_id">
+          <div class="mb-3">
+            <label for="edit_sup_email" class="form-label font-weight-bold">Email</label>
+            <input type="email" class="form-control" id="edit_sup_email" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_sup_phone" class="form-label font-weight-bold">Phone</label>
+            <input type="text" class="form-control" id="edit_sup_phone" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="updateSupervisor()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THIS MODAL IS FOR VIEW PLAN -->
+<div class="modal fade" id="viewPlanModal" tabindex="-1" aria-labelledby="viewPlanModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="viewPlanModalLabel">Production Plan Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered mb-0">
+          <tbody>
+            <tr><th class="bg-light" style="width: 45%;">Order No</th><td id="view_plan_orderno"></td></tr>
+            <tr><th class="bg-light">Customer Name</th><td id="view_plan_customer"></td></tr>
+            <tr><th class="bg-light">Fabric Type</th><td id="view_plan_fabric"></td></tr>
+            <tr><th class="bg-light">Color</th><td id="view_plan_color"></td></tr>
+            <tr><th class="bg-light">Production Target</th><td id="view_plan_target"></td></tr>
+            <tr><th class="bg-light">Start Date</th><td id="view_plan_startdate"></td></tr>
+            <tr><th class="bg-light">End Date</th><td id="view_plan_enddate"></td></tr>
+            <tr><th class="bg-light">Machine</th><td id="view_plan_machine"></td></tr>
+            <tr><th class="bg-light">Supervisor</th><td id="view_plan_supervisor"></td></tr>
+            <tr><th class="bg-light">Status</th><td id="view_plan_status"></td></tr>
+            <tr><th class="bg-light">Created By Name</th><td id="view_plan_createdby"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THIS MODAL IS FOR EDIT PLAN -->
+<div class="modal fade" id="editPlanModal" tabindex="-1" aria-labelledby="editPlanModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="editPlanModalLabel">Production Status Update</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editPlanForm">
+          <input type="hidden" id="edit_plan_no">
+          <div class="mb-3">
+            <label for="edit_plan_status_select" class="form-label fw-bold">Select Status</label>
+            <select class="form-select" id="edit_plan_status_select">
+              <option value="running">Running</option>
+              <option value="completed">Completed</option>
+            </select>
+            <small id="expired_warning_text" class="text-danger d-none mt-1 d-block">
+              End Date is past today's date. Status is automatically set to Pending.
+            </small>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="updatePlanStatus()">Update</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ========================================================================== -->

@@ -3,6 +3,7 @@
 import cgi
 import cgitb
 import pymysql
+from datetime import date
 
 cgitb.enable()
 
@@ -18,8 +19,10 @@ category = form.getvalue("category", "").strip()
 unit = form.getvalue("unit", "").strip()
 opening_stock = form.getvalue("opening_stock", "").strip()
 supplier = form.getvalue("supplier", "").strip()
-delivery_date = form.getvalue("delivery_date", "").strip()
-status = form.getvalue("status", "").strip()
+manufacturing_date = form.getvalue("manufacturing_date", "").strip()
+delivery_date = date.today().strftime("%Y-%m-%d")
+status = "Stored"
+purchase_order = form.getvalue("purchase_order", "").strip()
 description = form.getvalue("description", "").strip()
 
 # DB Config
@@ -83,11 +86,8 @@ if not unit:
 if not supplier or supplier in ["Select Supplier", "select option"]:
     errors.append("Please select a valid Supplier.")
 
-if not delivery_date:
-    errors.append("Delivery Date is required.")
-
-if not status:
-    errors.append("Status is required.")
+if not manufacturing_date:
+    errors.append("Manufacturing Date is required.")
 
 # Numeric Field Safety Check for Opening Stock
 if not opening_stock:
@@ -146,18 +146,18 @@ try:
     else:
         new_code = "MAT001"
 
-    # 3. Insert Record into SQL Database
+    # 3. Insert Record into SQL Database (Includes manufacturing_date)
     insert_sql = """
     INSERT INTO materials (
-        material_code, material_name, category, unit,
-        opening_stock, supplier, delivery_date, status, description,
+        po_orderid,  material_code, material_name, category, unit,
+        opening_stock, supplier, manufacturing_date, delivery_date, status, description,
         created_by_id, created_by_name
-    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
     cursor.execute(insert_sql, (
-        new_code, material_name, category, unit,
-        opening_stock, supplier, delivery_date, status, description,
+        purchase_order, new_code, material_name, category, unit,
+        opening_stock, supplier, manufacturing_date, delivery_date, status, description,
         logged_in_user_id, creator_name
     ))
 

@@ -321,17 +321,31 @@
 
         <!-- Orders Table -->
         <div class="table-container mb-4">
-            <div class="px-4 py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-                <h5 class="fw-bold mb-0">Recent Orders</h5>
-                <div class="d-flex align-items-center gap-2 w-100 w-md-auto">
+           <div class="px-4 py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <h5 class="fw-bold mb-0">Recent Orders</h5>
 
-                    <div class="position-relative flex-grow-1" style="max-width: 260px;">
-                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                        <input type="text" id="searchOrder" class="form-control rounded-3 ps-5" placeholder="Search Orders" style="background: #f2f4f6; border: 1px solid #c6c6cd; padding: 6px 12px 6px 40px; font-size: 14px;">
-                    </div>
+    <div class="d-flex align-items-center gap-2 ms-md-auto">
+        <!-- Search Input -->
+        <div class="position-relative flex-grow-1" style="max-width: 260px;">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input type="text" id="searchOrder" class="form-control rounded-3 ps-5" placeholder="Search Orders" style="background: #f2f4f6; border: 1px solid #c6c6cd; padding: 6px 12px 6px 40px; font-size: 14px;">
+        </div>
 
-                </div>
+        <!-- Filter Select -->
+        <div class="filter-bar">
+            <div class="select-wrapper">
+                <select class="filter-select">
+                    <option value="All Status">All Status</option>
+                    <option value="Running">Running</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Assigned">Assigned</option>
+                </select>
+                <i class="bi bi-chevron-down"></i>
             </div>
+        </div>
+    </div>
+</div>
 
             <div class="table-responsive">
                 <table class="table-custom">
@@ -342,6 +356,7 @@
                             <th>Quantity</th>
                             <th>Delivery Date</th>
                             <th>Created By</th>
+                             <th>Status</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
@@ -350,72 +365,6 @@
             </div>
         </div>
 
-        <!-- Customer Details Modal -->
-        <div class="modal fade" id="detailsModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content shadow rounded-4">
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title"><i class="bi bi-person-circle"></i> Customer Details</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Customer Name</small>
-                                    <h6 class="fw-bold mb-0" id="modalCustomerName">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Email</small>
-                                    <h6 class="fw-bold mb-0" id="modalEmail">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Phone / Company</small>
-                                    <h6 class="fw-bold mb-0" id="modalPhone">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Status</small><br>
-                                    <span class="badge" id="modalStatusBadge">--</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Fabric / GSM</small>
-                                    <h6 class="fw-bold mb-0" id="modalFabric">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Color</small>
-                                    <h6 class="fw-bold mb-0" id="modalColor">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Total Price</small>
-                                    <h6 class="fw-bold mb-0 text-success" id="modalPrice">--</h6>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="card border-0 bg-light p-2">
-                                    <small class="text-muted">Description/Remarks</small>
-                                    <p class="mb-0 mt-1" id="modalRemarks">--</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </section>
 
     <!-- ==================== SCREEN 3: PURCHASE ORDERS ==================== -->
@@ -437,14 +386,15 @@
                 <input type="text" id="SearchPo" placeholder="Search Purchase Order">
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
-                <label class="text-muted small fw-medium">Filter by Status:</label>
-                <select class="filter-select">
-                    <option>All Statuses</option>
-                    <option>Pending</option>
-                    <option>Approved</option>
-                    <option>Rejected</option>
-                </select>
-            </div>
+    <label class="text-muted small fw-medium">Filter by Status:</label>
+    <select class="filter-select" id="statusFilter">
+        <option value="all">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option> <!-- Fixed value here -->
+        <option value="rejected">Rejected</option>
+        <option value="new po">new po</option>
+    </select>
+</div>
             <button class="btn-filter"><i class="bi bi-funnel"></i> More Filters</button>
         </div>
 
@@ -477,8 +427,8 @@
                         <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
                         <span class="trend-label text-success">88% Rate</span>
                     </div>
-                    <p class="kpi-label mb-0">Approved Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0">0</h3>
+                    <p class="kpi-label mb-0">Completed Orders</p>
+                    <h3 class="fw-bold fs-2 mb-0"  id="kpi-approved-po">0</h3>
                 </div>
             </div>
 
@@ -489,7 +439,7 @@
                         <span class="trend-label text-danger">-5% MoM</span>
                     </div>
                     <p class="kpi-label mb-0">Rejected Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0">0</h3>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpi-rejected-po">0</h3>
                 </div>
             </div>
         </div>
@@ -505,6 +455,7 @@
                                     <th>SUPPLIER NAME</th>
                                     <th>MATERIAL NAME</th>
                                     <th>QUANTITY</th>
+                                    <th>STATUS</th>
                                     <th>Created By</th>
                                     <th class="text-end">ACTIONS</th>
                                 </tr>
@@ -835,7 +786,290 @@
         </div>
     </div>
 </div>
+</section>
 
+
+<!--PO Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="statusModalLabel">Status Update</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="statusUpdateForm" onsubmit="submitStatusUpdate(event)">
+          <div class="modal-body">
+            <input type="hidden" id="modal_po_number" name="po_number">
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Select Status:</label>
+                <select id="modal_status_select" name="status" class="form-select" required>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- THIS MODEL IS FOR ORDER DETAILS -->
+<div class="modal fade" id="detailsModal1" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="detailsModalLabel"><i class="bi bi-person-circle"></i> Customer & Order Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Order Number</small>
+                            <h6 class="fw-bold mb-0" id="modalOrderNumber">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Customer Name</small>
+                            <h6 class="fw-bold mb-0" id="modalCustomerName">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Fabric Type</small>
+                            <h6 class="fw-bold mb-0" id="modalFabric">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Color</small>
+                            <h6 class="fw-bold mb-0" id="modalColor">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Quantity</small>
+                            <h6 class="fw-bold mb-0" id="modalQuantity">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Price per Kg</small>
+                            <h6 class="fw-bold mb-0" id="modalPricePerKg">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Total Amount</small>
+                            <h6 class="fw-bold mb-0 text-success" id="modalTotalAmount">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Status</small><br>
+                            <span class="badge bg-secondary" id="modalStatusBadge">--</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Order Date</small>
+                            <h6 class="fw-bold mb-0" id="modalOrderDate">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Delivery Date</small>
+                            <h6 class="fw-bold mb-0" id="modalDeliveryDate">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Created By Name</small>
+                            <h6 class="fw-bold mb-0" id="modalCreatedBy">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Description / Remarks</small>
+                            <p class="mb-0 mt-1" id="modalRemarks">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- THIS MODEL IS FOR VIEWING SUPPLIER DETAILS -->
+<div class="modal fade" id="supplierModal" tabindex="-1" aria-labelledby="supplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="supplierModalLabel">Supplier Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">SUPPLIER NAME</label>
+            <p id="modalSupplierName" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">PHONE</label>
+            <p id="modalPhone" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">EMAIL</label>
+            <p id="modalEmail" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">GST NUMBER</label>
+            <p id="modalGstNumber" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">CITY</label>
+            <p id="modalCity" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">STATE</label>
+            <p id="modalState" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <div class="col-md-6">
+            <label class="text-muted small fw-bold">CREATED BY NAME</label>
+            <p id="modalCreatedBy1" class="fw-semibold text-dark mb-0">-</p>
+          </div>
+
+          <!-- Material Supplied Container -->
+          <div class="col-md-12 mt-3">
+            <label class="text-muted small fw-bold mb-2">MATERIAL SUPPLIED</label>
+            <div id="modalMaterialSupplied" class="d-flex flex-wrap gap-2">
+              <!-- Material badges rendered here -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- THIS MODEL IS FOR EDITING SUPPLIER -->
+<div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow rounded-4">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title fw-bold" id="editSupplierModalLabel"><i class="bi bi-pencil-square"></i> Edit Supplier</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editSupplierForm">
+          <input type="hidden" id="edit_supplier_code">
+
+          <div class="mb-3">
+            <label for="edit_supplier_phone" class="form-label fw-bold">Phone Number</label>
+            <input type="text" class="form-control" id="edit_supplier_phone" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_supplier_email" class="form-label fw-bold">Email Address</label>
+            <input type="email" class="form-control" id="edit_supplier_email" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_supplier_materials" class="form-label fw-bold">Material Supplied</label>
+            <textarea class="form-control" id="edit_supplier_materials" rows="2" required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit_supplier_status" class="form-label fw-bold">Status</label>
+            <select class="form-select" id="edit_supplier_status" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary rounded-pill" onclick="submitUpdateSupplier()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THIS MODEL IS FOR VIEWING PO DETAILS -->
+<div class="modal fade" id="viewPoModal" tabindex="-1" aria-labelledby="viewPoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="viewPoModalLabel">Purchase Order Details: <span id="v_po_number" class="text-primary fw-bold"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <strong>Supplier Name:</strong>
+                        <p id="v_supplier_name" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Material:</strong>
+                        <p id="v_material" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Available Stock:</strong>
+                        <p id="v_available_stock" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Required Quantity:</strong>
+                        <p id="v_required_qty" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Expected Delivery:</strong>
+                        <p id="v_expected_delivery" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Status:</strong>
+                        <p id="v_status" class="mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Created By:</strong>
+                        <p id="v_created_by" class="text-muted mb-0"></p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Remarks:</strong>
+                        <p id="v_remarks" class="text-muted mb-0"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ========================================================================== -->
 <!-- SCRIPTS & INLINE ROUTING                                                  -->

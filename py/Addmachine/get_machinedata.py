@@ -32,17 +32,14 @@ try:
             m_code = row[1]
             m_name = row[2]
 
-            # Generating table rows displaying Machine Name (and Machine Code under it)
+            # Generating table rows with unique id for each <tr>
             table_html += f"""
-            <tr>
+            <tr id="machine-row-{m_id}">
                 <td>
                     <div class="fw-semibold text-dark">{m_name}</div>
                     <small class="text-muted">{m_code}</small>
                 </td>
                 <td class="text-end">
-                    <button class="btn btn-sm btn-light text-primary" title="Edit" onclick="editMachine({m_id})">
-                        <i class="bi bi-pencil"></i>
-                    </button>
                     <button class="btn btn-sm btn-light text-danger" title="Delete" onclick="deleteMachine({m_id})">
                         <i class="bi bi-trash"></i>
                     </button>

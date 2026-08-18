@@ -14,7 +14,7 @@ enq_id = form.getvalue("enquiry_id")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SENDER_EMAIL = "abineshwar68@gmail.com"
-SENDER_PASSWORD = "pjlo yemf queh tfrl"
+SENDER_PASSWORD = "orsswjpkbkubbmqk"
 
 
 def calculate_quotation(enq_data):
@@ -23,8 +23,8 @@ def calculate_quotation(enq_data):
     quantity = float(enq_data['quantity']) if enq_data['quantity'] else 0.0
 
     subtotal = color_price * quantity
-    gst_half = subtotal * 0.9
-    gst_secondhalf = subtotal * 0.9
+    gst_half = subtotal * 0.09
+    gst_secondhalf = subtotal * 0.09
     gst_amount = subtotal * 0.18
     total_amount = subtotal + gst_amount
 
@@ -105,11 +105,11 @@ try:
                     <td style="padding: 5px 0; width: 120px;"><strong>₹{prices['subtotal']:.2f}</strong></td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px 0; color: #7f8c8d;">GST (9%):</td>
+                    <td style="padding: 5px 0; color: #7f8c8d;">CGST (9%):</td>
                     <td style="padding: 5px 0;"><strong>₹{prices['gst_half']:.2f}</strong></td>
                 </tr>
                 <tr>
-                    <td style="padding: 5px 0; color: #7f8c8d;">GST (9%):</td>
+                    <td style="padding: 5px 0; color: #7f8c8d;">SGST (9%):</td>
                     <td style="padding: 5px 0;"><strong>₹{prices['gst_half']:.2f}</strong></td>
                 </tr>
                 <tr>

@@ -3,6 +3,7 @@
 import cgi
 import cgitb
 import pymysql
+from datetime import date
 
 cgitb.enable()
 
@@ -18,8 +19,10 @@ category = form.getvalue("category", "").strip()
 unit = form.getvalue("unit", "").strip()
 opening_stock = form.getvalue("opening_stock", "").strip()
 supplier = form.getvalue("supplier", "").strip()
-delivery_date = form.getvalue("delivery_date", "").strip()
-status = form.getvalue("status", "").strip()
+manufacturing_date = form.getvalue("manufacturing_date", "").strip()
+delivery_date = date.today().strftime("%Y-%m-%d")
+status = "Stored"
+purchase_order = form.getvalue("purchase_order", "").strip()
 description = form.getvalue("description", "").strip()
 
 # DB Config
@@ -83,11 +86,8 @@ if not unit:
 if not supplier or supplier in ["Select Supplier", "select option"]:
     errors.append("Please select a valid Supplier.")
 
-if not delivery_date:
-    errors.append("Delivery Date is required.")
-
-if not status:
-    errors.append("Status is required.")
+if not manufacturing_date:
+    errors.append("Manufacturing Date is required.")
 
 # Numeric Field Safety Check for Opening Stock
 if not opening_stock:
@@ -117,4 +117,70 @@ try:
 
     # 1. Prevent Duplicate Material Names
     check_sql = "SELECT material_id FROM materials WHERE LOWER(material_name) = LOWER(%s)"
-    cursor.execute(check_sql
+    cursor.execute(check_sql, (material_name,))
+
+    if cursor.fetchone():
+        print("""
+        <script>
+            alert("Error: A material with this name already exists in inventory!");
+            window.history.back();
+        </script>
+        """)
+        exit()
+
+    # 2. Generate Next Material Code (MAT001, MAT002...)
+    cursor.execute("""
+        SELECT material_code
+        FROM materials
+        ORDER BY material_id DESC
+        LIMIT 1
+    """)
+    row = cursor.fetchone()
+
+    if row and row[0].startswith("MAT"):
+        try:
+            last_no = int(row[0][3:])
+            new_code = f"MAT{last_no + 1:03d}"
+        except ValueError:
+            new_code = "MAT001"
+    else:
+        new_code = "MAT001"
+
+    # 3. Insert Record into SQL Database (Includes manufacturing_date)
+    insert_sql = """
+    INSERT INTO materials (
+        po_orderid,  material_code, material_name, category, unit,
+        opening_stock, supplier, manufacturing_date, delivery_date, status, description,
+        created_by_id, created_by_name
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+
+    cursor.execute(insert_sql, (
+        purchase_order, new_code, material_name, category, unit,
+        opening_stock, supplier, manufacturing_date, delivery_date, status, description,
+        logged_in_user_id, creator_name
+    ))
+
+    conn.commit()
+
+    # Success Redirect with user_id attached in the URL
+    print(f"""
+    <script>
+        alert("Material saved successfully!");
+        window.location.href = "{redirect_url}";
+    </script>
+    """)
+
+except Exception as e:
+    print(f"""
+    <script>
+        alert("Database Error: {str(e)}");
+        window.history.back();
+    </script>
+    """)
+
+finally:
+    if 'cursor' in locals():
+        cursor.close()
+    if 'conn' in locals() and conn.open:
+        conn.close()

@@ -24,13 +24,23 @@ try:
     cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE expected_delivery <= CURDATE()")
     pending_po = cursor.fetchone()[0]
 
+    # Card 3: Approved/Completed Orders Count
+    cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE LOWER(status) = 'completed'")
+    approved_po = cursor.fetchone()[0]
+
+    # Card 4: Rejected Orders Count
+    cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE LOWER(status) = 'rejected'")
+    rejected_po = cursor.fetchone()[0]
+
     cursor.close()
     conn.close()
 
     response = {
         "status": "success",
         "total_po": total_po,
-        "pending_po": pending_po
+        "pending_po": pending_po,
+        "approved_po": approved_po,
+        "rejected_po": rejected_po
     }
     print(json.dumps(response))
 

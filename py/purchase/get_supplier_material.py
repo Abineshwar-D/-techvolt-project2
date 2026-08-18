@@ -28,9 +28,8 @@ try:
     row = cursor.fetchone()
 
     if row and row[0]:
-        # Converts "sun run,bun" -> "sun run bun" -> ['sun', 'run', 'bun']
-        raw_materials = str(row[0]).replace(",", " ")
-        materials_list = raw_materials.split()
+        # Converts "sun run,bun" -> ['sun run', 'bun']
+        materials_list = str(row[0]).split(",")
 
     cursor.close()
     conn.close()

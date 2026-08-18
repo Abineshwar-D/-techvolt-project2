@@ -426,6 +426,105 @@ document.addEventListener('visibilitychange', function() {
 
 console.log(" Script loaded successfully");
 
+//THIS FUNCTION UPDATES THE BALANCE IN THE ENQUIRY FORM
+function updateBalanceFromTotal() {
+    // Read total text, remove '₹' and commas, convert to number
+    let totalText = document.getElementById('totalAmounts').innerText;
+    let totalValue = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
+
+    // Calculate 50%
+    let balanceValue = totalValue * 0.50;
+
+    // Update the balance element
+    document.getElementById('balanceAmount').innerText = '₹' + balanceValue.toLocaleString('en-IN');
+}
+
+//THIS FUNCTION HANDLE ORDER VIEW MODAL
+function populateModalDetails(btn) {
+    document.getElementById('modalOrderNumber').innerText = btn.getAttribute('data-order') || '--';
+    document.getElementById('modalCustomerName1').innerText = btn.getAttribute('data-customer') || '--';
+    document.getElementById('modalFabric1').innerText = btn.getAttribute('data-fabric') || '--';
+    document.getElementById('modalColor1').innerText = btn.getAttribute('data-color') || '--';
+    document.getElementById('modalQuantity').innerText = btn.getAttribute('data-qty') || '--';
+    document.getElementById('modalPricePerKg').innerText = "₹" + (btn.getAttribute('data-price') || '0');
+    document.getElementById('modalTotalAmount').innerText = "₹" + (btn.getAttribute('data-total') || '0');
+    document.getElementById('modalOrderDate').innerText = btn.getAttribute('data-orderdate') || '--';
+    document.getElementById('modalDeliveryDate').innerText = btn.getAttribute('data-deliverydate') || '--';
+    document.getElementById('modalCreatedBy').innerText = btn.getAttribute('data-createdby') || '--';
+    document.getElementById('modalRemarks1').innerText = btn.getAttribute('data-remarks') || 'No remarks provided.';
+
+    const statusVal = btn.getAttribute('data-status') || 'New Order';
+    const badgeEl = document.getElementById('modalStatusBadge1');
+    badgeEl.innerText = statusVal;
+
+    if (statusVal.toLowerCase() === 'new order') {
+        badgeEl.className = 'badge bg-secondary';
+    } else if (statusVal.toLowerCase() === 'running') {
+        badgeEl.className = 'badge bg-info text-dark';
+    } else if (statusVal.toLowerCase() === 'completed') {
+        badgeEl.className = 'badge bg-success';
+    } else {
+        badgeEl.className = 'badge bg-primary';
+    }
+}
+
+// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
+document.addEventListener("DOMContentLoaded", function () {
+    const statusSelect = document.querySelector(".filter-select");
+    const tableBody = document.getElementById("ordersTableBody");
+
+    if (statusSelect && tableBody) {
+        statusSelect.addEventListener("change", function () {
+            const selectedFilter = this.value.trim().toLowerCase();
+
+            // Loop through each table row
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                // Find the Status column badge inside the row (7th column)
+                const statusBadge = row.querySelector("td:nth-child(6) .badge");
+
+                if (statusBadge) {
+                    const rowStatus = statusBadge.textContent.trim().toLowerCase();
+
+                    // Show all rows if "All Status" selected, or match selected option
+                    if (selectedFilter === "all status" || rowStatus === selectedFilter) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        });
+    }
+});
+
+// THIS FUNCTION HANDLES ORDER DELETION
+function deleteOrder(orderNo) {
+    if (confirm("Are you sure you want to delete this order?")) {
+        var formData = new FormData();
+        formData.append('order_number', orderNo);
+
+        fetch('../py//orders/delete_order.py', {
+            method: 'POST',
+            body: formData
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.status === 'success') {
+                alert(data.message);
+                location.reload(); // Reload table
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(function(error) {
+            alert('Error deleting order.');
+        });
+    }
+}
 
 /* ==========================================================================
    05. CREATE ORDER SCREEN
@@ -489,6 +588,8 @@ function fillOrderForm(enqId) {
 
             const total = document.getElementById("totalAmounts");
             if (total) total.innerText = "₹" + totalAmount.toFixed(2);
+
+            updateBalanceFromTotal();
 
             const hiddenId = document.getElementById("customerId");
             if (hiddenId) hiddenId.value = p[10];
@@ -748,6 +849,86 @@ function filterEnquiriesByStatus() {
     }
 }
 
+
+// THIS CODE IS USED FOR OPEN EDIT ENQUIRY MODAL
+  document.addEventListener('click', function (e) {
+    var editBtn = e.target.closest('.edit-btn');
+    if (editBtn) {
+      var id = editBtn.getAttribute('data-id');
+      var name = editBtn.getAttribute('data-name');
+      var phone = editBtn.getAttribute('data-phone');
+      var email = editBtn.getAttribute('data-email');
+      var quantity = editBtn.getAttribute('data-quantity');
+
+      document.getElementById('edit_db_id').value = id;
+      document.getElementById('edit_customer_name').value = name;
+      document.getElementById('edit_phone').value = phone;
+      document.getElementById('edit_email').value = email;
+      document.getElementById('edit_quantity').value = quantity;
+
+      var modalElement = document.getElementById('editEnquiryModal');
+      var modalInstance = new bootstrap.Modal(modalElement);
+      modalInstance.show();
+    }
+  });
+
+  // THIS FUNCTION IS USED FOR UPDATING ENQUIRIES
+  document.getElementById('editEnquiryForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    fetch('../py/enquiry/update_enquiry.py', {
+      method: 'POST',
+      body: new FormData(this)
+    })
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      if (data.status === 'success') {
+        alert(data.message);
+        var modalElement = document.getElementById('editEnquiryModal');
+        var modalInstance = bootstrap.Modal.getInstance(modalElement);
+        if (modalInstance) {
+          modalInstance.hide();
+        }
+        location.reload();
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(function (error) {
+      alert('Error updating data.');
+    });
+  });
+
+  // THIS FUNCTION IS USED FOR DELETING ENQUIRIES
+  function deleteCustomer(dbId) {
+    var confirmDelete = confirm("Are you sure you want to delete this enquiry?");
+    if (confirmDelete) {
+
+      var formData = new FormData();
+      formData.append('db_id', dbId);
+
+      fetch('../py/enquiry/delete_enquiry.py', {
+        method: 'POST',
+        body: formData
+      })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        if (data.status === 'success') {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(function (error) {
+        alert('Error deleting data.');
+      });
+    }
+  }
 /* ==========================================================================
    07. CREATE ENQUIRY SCREEN
    ========================================================================== */

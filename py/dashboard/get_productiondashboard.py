@@ -31,48 +31,50 @@ if action == "get_dashboard_data":
         today = datetime.now().strftime('%Y-%m-%d')
 
         # ========================================
-        # KPI 1: Today's Production
-        # Sum of all production_target from production_plan
-        # WHERE today's date is between start_date and end_date
+        # KPI 1: Completed Production
+        # Sum of production_target from production_plan
+        # WHERE status is 'completed'
         # ========================================
         cursor.execute("""
             SELECT COALESCE(SUM(production_target), 0) 
             FROM production_plan 
-            WHERE DATE(start_date) <= %s AND DATE(end_date) >= %s
-        """, (today, today))
+            WHERE LOWER(status) = 'completed'
+        """)
         today_production = cursor.fetchone()[0]
 
         # ========================================
-        # KPI 2: Production Target
-        # Sum of ALL production_target from production_plan
+        # KPI 2: Remaining Production
+        # Sum of production_target from production_plan
+        # WHERE status is NOT 'completed'
         # ========================================
         cursor.execute("""
             SELECT COALESCE(SUM(production_target), 0) 
             FROM production_plan
+            WHERE LOWER(status) != 'completed' OR status IS NULL
         """)
         production_target = cursor.fetchone()[0]
 
         # ========================================
-        # KPI 3: Running Orders
-        # Count of DISTINCT plan_no from machine_allocations
-        # WHERE status = 'Running'
+        # KPI 3: Running Production
+        # Count of records from production_plan
+        # WHERE status is 'running'
         # ========================================
         cursor.execute("""
-            SELECT COUNT(DISTINCT plan_no) 
-            FROM machine_allocations 
-            WHERE status = 'Running' AND DATE(allocation_date) = %s
-        """, (today,))
+            SELECT COUNT(*) 
+            FROM production_plan 
+            WHERE LOWER(status) = 'running'
+        """)
         running_orders = cursor.fetchone()[0] or 0
 
         # ========================================
         # KPI 4: Pending Production
-        # Sum of (order_quantity - production_target) from production_plan
-        # WHERE end_date >= today (not completed)
+        # Sum of production_target from production_plan
+        # WHERE end_date < today
         # ========================================
         cursor.execute("""
-            SELECT COALESCE(SUM(order_quantity - production_target), 0) 
+            SELECT COALESCE(SUM(production_target), 0) 
             FROM production_plan 
-            WHERE DATE(end_date) >= %s
+            WHERE DATE(end_date) < %s
         """, (today,))
         pending_production = cursor.fetchone()[0] or 0
 
@@ -80,13 +82,11 @@ if action == "get_dashboard_data":
         # Production Performance Metrics
         # ========================================
 
-        # For Target: Same as production_target
-        target_value = production_target
+        # Total Overall Target (Completed + Remaining)
+        total_target_value = production_target
 
-        # For Produced: Same as today_production
+        target_value = total_target_value
         produced_value = today_production
-
-        # For Pending: Same as pending_production
         pending_value = pending_production
 
         # Calculate Completion Percentage
@@ -102,7 +102,7 @@ if action == "get_dashboard_data":
             "data": {
                 # KPI Cards
                 "today_production": str(today_production),
-                "production_target":str(production_target),
+                "production_target": str(production_target),
                 "running_orders": str(running_orders),
                 "pending_production": str(pending_production),
 

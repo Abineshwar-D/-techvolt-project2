@@ -260,7 +260,7 @@ try:
             f_data["color"],
             price,
             f_data["qty"],
-            f_data["source"],
+            f_data["source"] or "WEB-SITE",
             f_data["rem"],
             f_data["addr"],
             f_data["city"],

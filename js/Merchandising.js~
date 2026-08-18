@@ -153,6 +153,65 @@ document.addEventListener('DOMContentLoaded', function () {
     searchOrder.addEventListener('input', filterOrders);
 });
 
+//THIS FUNCTION HANDLE ORDER VIEW MODAL
+function populateModalDetails(btn) {
+    document.getElementById('modalOrderNumber').innerText = btn.getAttribute('data-order') || '--';
+    document.getElementById('modalCustomerName').innerText = btn.getAttribute('data-customer') || '--';
+    document.getElementById('modalFabric').innerText = btn.getAttribute('data-fabric') || '--';
+    document.getElementById('modalColor').innerText = btn.getAttribute('data-color') || '--';
+    document.getElementById('modalQuantity').innerText = btn.getAttribute('data-qty') || '--';
+    document.getElementById('modalPricePerKg').innerText = "₹" + (btn.getAttribute('data-price') || '0');
+    document.getElementById('modalTotalAmount').innerText = "₹" + (btn.getAttribute('data-total') || '0');
+    document.getElementById('modalOrderDate').innerText = btn.getAttribute('data-orderdate') || '--';
+    document.getElementById('modalDeliveryDate').innerText = btn.getAttribute('data-deliverydate') || '--';
+    document.getElementById('modalCreatedBy').innerText = btn.getAttribute('data-createdby') || '--';
+    document.getElementById('modalRemarks').innerText = btn.getAttribute('data-remarks') || 'No remarks provided.';
+
+    const statusVal = btn.getAttribute('data-status') || 'New Order';
+    const badgeEl = document.getElementById('modalStatusBadge');
+    badgeEl.innerText = statusVal;
+
+    if (statusVal.toLowerCase() === 'new order') {
+        badgeEl.className = 'badge bg-secondary';
+    } else if (statusVal.toLowerCase() === 'running') {
+        badgeEl.className = 'badge bg-info text-dark';
+    } else if (statusVal.toLowerCase() === 'completed') {
+        badgeEl.className = 'badge bg-success';
+    } else {
+        badgeEl.className = 'badge bg-primary';
+    }
+}
+
+// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
+document.addEventListener("DOMContentLoaded", function () {
+    const statusSelect = document.querySelector(".filter-select");
+    const tableBody = document.getElementById("ordersTableBody");
+
+    if (statusSelect && tableBody) {
+        statusSelect.addEventListener("change", function () {
+            const selectedFilter = this.value.trim().toLowerCase();
+
+            // Loop through each table row
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(row => {
+                // Find the Status column badge inside the row (7th column)
+                const statusBadge = row.querySelector("td:nth-child(6) .badge");
+
+                if (statusBadge) {
+                    const rowStatus = statusBadge.textContent.trim().toLowerCase();
+
+                    // Show all rows if "All Status" selected, or match selected option
+                    if (selectedFilter === "all status" || rowStatus === selectedFilter) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        });
+    }
+});
 
 /* ==========================================================================
    04. PURCHASE ORDERS (PO) SCREEN (PAGE 5)
@@ -210,78 +269,82 @@ if (searchPoKeyUp) {
     });
 }
 
-const poTableBodyElem = document.getElementById("poTableBody");
-if (poTableBodyElem) {
-    poTableBodyElem.addEventListener("click", function(e) {
-        const row = e.target.closest("tr");
-        if (!row) return;
-
-        document.querySelectorAll("#poTableBody tr").forEach(r => {
-            r.classList.remove("selected");
-        });
-
-        row.classList.add("selected");
-
-        const poNumber = row.cells[0].textContent.trim();
-        const supplier = row.cells[1].textContent.trim();
-        const material = row.cells[2].textContent.trim();
-        const quantity = row.cells[3].textContent.trim();
-        const status = row.querySelector(".status-badge").textContent.trim();
-
-        document.getElementById("detailPo").textContent = poNumber;
-        document.getElementById("detailSupplier").textContent = supplier;
-        document.getElementById("detailMaterial").textContent = material;
-        document.getElementById("detailQuantity").textContent = quantity;
-        document.getElementById("Status").textContent = status;
-    });
-}
+//const poTableBodyElem = document.getElementById("poTableBody");
+//if (poTableBodyElem) {
+//    poTableBodyElem.addEventListener("click", function(e) {
+//        const row = e.target.closest("tr");
+//        if (!row) return;
+//
+//        document.querySelectorAll("#poTableBody tr").forEach(r => {
+//            r.classList.remove("selected");
+//        });
+//
+//        row.classList.add("selected");
+//
+//        const poNumber = row.cells[0].textContent.trim();
+//        const supplier = row.cells[1].textContent.trim();
+//        const material = row.cells[2].textContent.trim();
+//        const quantity = row.cells[3].textContent.trim();
+//        const status = row.querySelector(".status-badge").textContent.trim();
+//
+//        document.getElementById("detailPo").textContent = poNumber;
+//        document.getElementById("detailSupplier").textContent = supplier;
+//        document.getElementById("detailMaterial").textContent = material;
+//        document.getElementById("detailQuantity").textContent = quantity;
+//        document.getElementById("Status").textContent = status;
+//    });
+//}
 
 // Master function to fetch both the Table and the KPIs
 function refreshAllData() {
     const tableBody = document.getElementById("poTableBody");
 
-    // 1. FETCH TABLE DATA (HTML)
-fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-        return response.text();
-    })
-    .then(data => {
-        if (data.trim() && tableBody) {
-            tableBody.innerHTML = data;
-        } else if (tableBody) {
-            //  Show a clean message if no data exists instead of crashing
-            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
-        }
-
-        if (typeof initializeTableEvents === "function") {
-            initializeTableEvents();
-        }
-    })
-    .catch(err => {
-        console.error("Table fetch error:", err);
-    });
+//    // 1. FETCH TABLE DATA (HTML)
+//fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
+//    .then(response => {
+//        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+//        return response.text();
+//    })
+//    .then(data => {
+//        if (data.trim() && tableBody) {
+//            tableBody.innerHTML = data;
+//        } else if (tableBody) {
+//            //  Show a clean message if no data exists instead of crashing
+//            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
+//        }
+//
+//        if (typeof initializeTableEvents === "function") {
+//            initializeTableEvents();
+//        }
+//    })
+//    .catch(err => {
+//        console.error("Table fetch error:", err);
+//    });
 
     // 2. FETCH KPI DATA (JSON)
-    fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
-        .then(response => {
-            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            if (data.status === "success") {
-                const totalPoElem = document.getElementById("kpi-total-po");
-                const pendingPoElem = document.getElementById("kpi-pending-po");
+   fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
+    .then(response => {
+        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === "success") {
+            const totalPoElem = document.getElementById("kpi-total-po");
+            const pendingPoElem = document.getElementById("kpi-pending-po");
+            const approvedPoElem = document.getElementById("kpi-approved-po");
+            const rejectedPoElem = document.getElementById("kpi-rejected-po");
 
-                if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
-                if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
-            } else {
-                console.error("Error fetching PO KPIs:", data.message);
-            }
-        })
-        .catch(error => {
-            console.error("KPI fetch error:", error);
-        });
+            if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
+            if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
+            if (approvedPoElem) approvedPoElem.innerText = data.approved_po ?? 0;
+            if (rejectedPoElem) rejectedPoElem.innerText = data.rejected_po ?? 0;
+        } else {
+            console.error("Error fetching PO KPIs:", data.message);
+        }
+    })
+    .catch(error => {
+        console.error("KPI fetch error:", error);
+    });
 }
 
 // 1. Trigger when DOM page finishes loading
@@ -293,6 +356,117 @@ document.addEventListener('DOMContentLoaded', function() {
 window.addEventListener("focus", function () {
     refreshAllData();
 });
+
+// Open Modal when pencil button is clicked
+window.openStatusModal = function(poNumber, currentStatus) {
+    document.getElementById('modal_po_number').value = poNumber;
+
+    var selectElem = document.getElementById('modal_status_select');
+    if (currentStatus === "Completed" || currentStatus === "Rejected") {
+        selectElem.value = currentStatus;
+    } else {
+        selectElem.value = "Completed";
+    }
+
+    var myModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+    myModal.show();
+};
+
+// THIS FUNCTION IS USED FOR SUBMITTING THE STATUS UPDATE
+function submitStatusUpdate(event) {
+    event.preventDefault();
+
+    var poNumber = document.getElementById('modal_po_number').value;
+    var statusVal = document.getElementById('modal_status_select').value;
+
+    var formData = new FormData();
+    formData.append('po_number', poNumber);
+    formData.append('status', statusVal);
+
+    // Calls the SEPARATE update script
+    fetch('../py/purchase/update_po_status.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            // Hide Modal
+            var modalElem = document.getElementById('statusUpdateModal');
+            var modal = bootstrap.Modal.getInstance(modalElem);
+            if (modal) modal.hide();
+
+            // Reload page or refresh table
+            location.reload();
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => {
+        alert("System error: " + error);
+    });
+}
+
+//THIS FUNCTION IS FOR THE DROPDOWN FILTER
+document.addEventListener('DOMContentLoaded', function () {
+    const statusFilter = document.getElementById('statusFilter');
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function () {
+            // Get selected option value
+            const selectedStatus = this.value.toLowerCase().trim();
+
+            // Get all rows in the table
+            const rows = document.querySelectorAll('#poTableBody tr');
+
+            rows.forEach(row => {
+                // Column index 4 is STATUS
+                const statusCell = row.cells[4];
+
+                if (statusCell) {
+                    // innerText strips HTML tags (like <span class="badge">)
+                    const cellText = statusCell.innerText.toLowerCase().trim();
+
+                    if (selectedStatus === 'all' || cellText === selectedStatus) {
+                        row.style.display = ''; // Show row
+                    } else {
+                        row.style.display = 'none'; // Hide row
+                    }
+                }
+            });
+        });
+    }
+});
+
+// THIS FUNCTION IS USED TO OPEN VIEW MODAL
+function openViewModal(btn) {
+    // Read data attributes from the clicked button
+    const po = btn.getAttribute('data-po');
+    const supplier = btn.getAttribute('data-supplier');
+    const material = btn.getAttribute('data-material');
+    const availStock = btn.getAttribute('data-avail-stock');
+    const reqQty = btn.getAttribute('data-req-qty');
+    const delivery = btn.getAttribute('data-delivery');
+    const status = btn.getAttribute('data-status');
+    const createdBy = btn.getAttribute('data-created-by');
+    const remarks = btn.getAttribute('data-remarks');
+
+    // Populate modal fields
+    document.getElementById('v_po_number').innerText = po;
+    document.getElementById('v_supplier_name').innerText = supplier;
+    document.getElementById('v_material').innerText = material;
+    document.getElementById('v_available_stock').innerText = availStock + " kg";
+    document.getElementById('v_required_qty').innerText = reqQty + " kg";
+    document.getElementById('v_expected_delivery').innerText = delivery;
+    document.getElementById('v_status').innerText = status;
+    document.getElementById('v_created_by').innerText = createdBy;
+    document.getElementById('v_remarks').innerText = remarks;
+
+    // Show the Bootstrap Modal
+    const viewModal = new bootstrap.Modal(document.getElementById('viewPoModal'));
+    viewModal.show();
+}
 
 /* ==========================================================================
    05. ADD PURCHASE ORDER SCREEN
@@ -341,17 +515,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!supplierSelect || !materialSelect || !availableStockInput) return;
 
-    fetch('../py/purchase/get_supplier_option.py')
-        .then(response => response.json())
-        .then(suppliers => {
-            supplierSelect.innerHTML = '<option value="">Select Supplier</option>';
-            if (Array.isArray(suppliers)) {
-                suppliers.forEach(sup => {
-                    supplierSelect.innerHTML += `<option value="${sup.code}">${sup.name}</option>`;
-                });
-            }
-        })
-        .catch(err => console.error("Error loading suppliers:", err));
+    function loadSuppliers() {
+        if (!supplierSelect) return;
+
+        // Adding ?t= prevents browser caching of the API response
+        fetch('../py/purchase/get_supplier_option.py?t=' + new Date().getTime())
+            .then(response => response.json())
+            .then(suppliers => {
+                supplierSelect.innerHTML = '<option value="">Select Supplier</option>';
+                if (Array.isArray(suppliers)) {
+                    suppliers.forEach(sup => {
+                        supplierSelect.innerHTML += `<option value="${sup.code}">${sup.name}</option>`;
+                    });
+                }
+            })
+            .catch(err => console.error("Error loading suppliers:", err));
+    }
+
+    // 2. Initial load when DOM is ready
+    loadSuppliers();
+
+    // 3. Auto-refresh options whenever the browser tab gains focus
+    window.addEventListener('focus', function () {
+        loadSuppliers();
+    });
 
     supplierSelect.addEventListener("change", function () {
     const supplierCode = this.value;
@@ -379,27 +566,30 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
     materialSelect.addEventListener("change", function () {
-        const materialName = this.value;
+    const materialName = this.value;
 
-        if (!materialName) {
-            availableStockInput.value = "0";
-            return;
-        }
+    // Reset input if default blank option is selected
+    if (!materialName) {
+        availableStockInput.value = "0";
+        return;
+    }
 
-        fetch(`../py/purchase/get_material_option.py?material_name=${encodeURIComponent(materialName)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.stock !== undefined) {
-                    availableStockInput.value = data.stock;
-                } else {
-                    availableStockInput.value = "0";
-                }
-            })
-            .catch(err => {
-                console.error("Error checking material stock:", err);
+    fetch(`../py/purchase/get_material_option.py?material_name=${encodeURIComponent(materialName)}`)
+        .then(response => response.json())
+        .then(data => {
+            // If material is in 'materials' table -> fills with real stock value
+            // If material is ONLY in 'supplier' table -> fills with 0
+            if (data && data.stock !== undefined) {
+                availableStockInput.value = data.stock;
+            } else {
                 availableStockInput.value = "0";
-            });
-    });
+            }
+        })
+        .catch(err => {
+            console.error("Error checking material stock:", err);
+            availableStockInput.value = "0";
+        });
+});
 });
 
 const poForm = document.getElementById("poForm");
@@ -477,8 +667,11 @@ function loadSuppliersAndKPIs() {
     var supplierTableBody = document.getElementById("supplierTableBody");
 
     if (supplierTableBody) {
-        // Adding ?t= prevents browser caching
-        fetch("../py/supplier/get_supplier.py?t=" + new Date().getTime())
+        // Extract user_id from URL (e.g. ?user_id=AMD007)
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get("user_id") || "";
+
+        fetch(`../py/supplier/get_supplier.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             if (data.error) {
@@ -500,7 +693,6 @@ function loadSuppliersAndKPIs() {
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);
-            supplierTableBody.innerHTML = "<tr><td colspan='7' class='text-danger text-center'>Error connecting to server.</td></tr>";
         });
     }
 }
@@ -568,6 +760,134 @@ document.addEventListener('DOMContentLoaded', function () {
         filterSuppliers();
     });
 });
+
+
+//THIS FUNCTION IS USED TO VIEW SUPPLIER
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Global Event Listener for View Buttons (Works with AJAX-loaded table_html)
+    document.addEventListener('click', function (event) {
+
+        // Check if clicked element or its parent is the view button
+        const viewBtn = event.target.closest('.view-btn');
+
+        if (viewBtn) {
+            // Extract attributes from clicked row button
+            const supplierName = viewBtn.dataset.supplierName || '-';
+            const phone = viewBtn.dataset.phone || '-';
+            const email = viewBtn.dataset.email || '-';
+            const gst = viewBtn.dataset.gst || '-';
+            const city = viewBtn.dataset.city || '-';
+            const state = viewBtn.dataset.state || '-';
+            const createdBy = viewBtn.dataset.createdBy || '-';
+            const rawMaterials = viewBtn.dataset.materials || '';
+
+            // Populate Modal Text
+            document.getElementById('modalSupplierName').textContent = supplierName;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalEmail').textContent = email;
+            document.getElementById('modalGstNumber').textContent = gst;
+            document.getElementById('modalCity').textContent = city;
+            document.getElementById('modalState').textContent = state;
+            document.getElementById('modalCreatedBy1').textContent = createdBy;
+
+            // Handle Material Supplied (Comma split)
+            const materialContainer = document.getElementById('modalMaterialSupplied');
+            materialContainer.innerHTML = ''; // Clear old badges
+
+            if (rawMaterials && rawMaterials.trim() !== '') {
+                // Split material by commas
+                const materialsList = rawMaterials.split(',');
+
+                materialsList.forEach(item => {
+                    const cleanMaterial = item.trim();
+                    if (cleanMaterial) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-primary text-wrap py-2 px-3 fw-normal';
+                        badge.textContent = cleanMaterial;
+                        materialContainer.appendChild(badge);
+                    }
+                });
+            } else {
+                materialContainer.innerHTML = '<span class="text-muted small">No materials listed</span>';
+            }
+
+            // Show the Bootstrap Modal
+            const supplierModal = new bootstrap.Modal(document.getElementById('supplierModal'));
+            supplierModal.show();
+        }
+    });
+
+});
+
+// Function to open Edit Modal and populate form fields
+function openEditSupplierModal(btn) {
+    const code = btn.getAttribute("data-code");
+    const phone = btn.getAttribute("data-phone") || "";
+    const email = btn.getAttribute("data-email") || "";
+    const materials = btn.getAttribute("data-materials") || "";
+    const status = btn.getAttribute("data-status") || "Active";
+
+    document.getElementById("edit_supplier_code").value = code;
+    document.getElementById("edit_supplier_phone").value = phone;
+    document.getElementById("edit_supplier_email").value = email;
+    document.getElementById("edit_supplier_materials").value = materials;
+    document.getElementById("edit_supplier_status").value = status;
+
+    const modalEl = document.getElementById("editSupplierModal");
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
+// THIS FUNCTION IS USED TO UPDATE SUPPLIER
+function submitUpdateSupplier() {
+    const code = document.getElementById("edit_supplier_code").value;
+    const phone = document.getElementById("edit_supplier_phone").value;
+    const email = document.getElementById("edit_supplier_email").value;
+    const materials = document.getElementById("edit_supplier_materials").value;
+    const status = document.getElementById("edit_supplier_status").value;
+
+    if (!code) {
+        alert("Supplier Code is missing.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("supplier_code", code);
+    formData.append("phone", phone);
+    formData.append("email", email);
+    formData.append("material_supplied", materials);
+    formData.append("status", status);
+
+    fetch("../py/supplier/update_supplier.py", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(data.message);
+
+            // Hide modal safely
+            const modalEl = document.getElementById("editSupplierModal");
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // Refresh table and KPIs
+            if (typeof loadSuppliersAndKPIs === "function") {
+                loadSuppliersAndKPIs();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Update Error:", err);
+        alert("Failed to update supplier record.");
+    });
+}
 
 /* ==========================================================================
    07. ADD SUPPLIER SCREEN

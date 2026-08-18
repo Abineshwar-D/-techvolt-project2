@@ -17,7 +17,7 @@ print("Content-Type: application/json\n\n")
 # EMAIL & COMPANY CONFIGURATION
 # ---------------------------------------------------------
 SENDER_EMAIL = "abineshwar68@gmail.com"
-SENDER_PASSWORD = "pjlo yemf queh tfrl".replace(" ", "")
+SENDER_PASSWORD = "orsswjpkbkubbmqk".replace(" ", "")
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 
@@ -78,12 +78,13 @@ def parse_float(value, default=0.0):
 
 
 # 1. READ FORM DATA
-supplier = form.getvalue("supplier_name", "").strip()
+supplier = form.getvalue("supplier_name", "").strip() # Holds Supplier Code / ID like SUP0001
 material = form.getvalue("material_name", "").strip()
 available_stock = parse_float(form.getvalue("available_stock"), 0.0)
 required_qty = parse_float(form.getvalue("required_qty"), 0.0)
 expected_delivery = form.getvalue("expected_delivery", "").strip()
 remarks = form.getvalue("remarks", "").strip()
+status = "NEW PO"
 
 
 # 2. VALIDATION
@@ -108,25 +109,27 @@ try:
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    # Fetch Supplier Details
-    sup_contact_person = supplier
-    sup_shop_name = supplier
+    # Fetch Supplier Details AND Supplier Name specifically using Supplier ID/Code
+    sup_contact_person = "N/A"
+    sup_shop_name = "N/A"
+    supplier_name_val = ""
     sup_address = "N/A"
     sup_phone = "N/A"
     sup_email = ""
 
     cursor.execute("""
-        SELECT contact_person, supplier_name, address, city, state, pincode, phone, email 
+        SELECT supplier_name, contact_person, address, city, state, pincode, phone, email 
         FROM supplier 
-        WHERE LOWER(TRIM(supplier_name)) = LOWER(TRIM(%s)) 
-           OR LOWER(TRIM(supplier_code)) = LOWER(TRIM(%s)) 
+        WHERE LOWER(TRIM(supplier_code)) = LOWER(TRIM(%s)) 
+           OR LOWER(TRIM(supplier_name)) = LOWER(TRIM(%s)) 
         LIMIT 1
     """, (supplier, supplier))
     sup_row = cursor.fetchone()
 
     if sup_row:
-        sup_contact_person = sup_row[0] or supplier
-        sup_shop_name = sup_row[1] or supplier
+        supplier_name_val = sup_row[0] or ""   # Fetches 'ABC Yarns Pvt Ltd'
+        sup_contact_person = sup_row[1] or supplier_name_val
+        sup_shop_name = supplier_name_val
         addr_parts = [p for p in [sup_row[2], sup_row[3], sup_row[4], sup_row[5]] if p]
         sup_address = ", ".join(addr_parts) if addr_parts else "N/A"
         sup_phone = sup_row[6] or "N/A"
@@ -150,19 +153,19 @@ try:
     else:
         po_number = "PO0001"
 
-    # Insert including created_by_id and created_by_name
+    # Insert including supplier_name fetched from supplier table
     sql = """
         INSERT INTO purchased_order (
-            po_number, supplier, material,
+            po_number, supplier, supplier_name, material,
             available_stock, required_qty,
-            expected_delivery, remarks,
+            expected_delivery, remarks, status,
             created_by_id, created_by_name
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     values = (
-        po_number, supplier, material,
+        po_number, supplier, supplier_name_val, material,
         available_stock, required_qty,
-        expected_delivery, remarks,
+        expected_delivery, remarks, status,
         logged_in_user_id, creator_name
     )
 

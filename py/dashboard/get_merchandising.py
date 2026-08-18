@@ -25,7 +25,7 @@ try:
     # ---------------------------------------------------------
     # CARD 2: Machine Allocations count where status = 'completed'
     # ---------------------------------------------------------
-    cursor.execute("SELECT COUNT(*) FROM machine_allocations WHERE LOWER(status) = 'completed'")
+    cursor.execute("SELECT COUNT(*) FROM production_plan WHERE LOWER(status) = 'completed'")
     card2_completed_allocations = cursor.fetchone()[0]
 
     # ---------------------------------------------------------
@@ -42,8 +42,7 @@ try:
         SELECT COUNT(DISTINCT o.order_number) 
         FROM orders o
         JOIN production_plan p ON o.order_number = p.order_no
-        JOIN machine_allocations m ON p.plan_no = m.plan_no
-        WHERE LOWER(m.status) = 'running'
+        WHERE LOWER(p.status) = 'running'
     """
     cursor.execute(card4_sql)
     card4_running_orders = cursor.fetchone()[0]
@@ -57,7 +56,7 @@ try:
     # ---------------------------------------------------------
     # CARD 6: Machine Allocations count where end_date <= TODAY
     # ---------------------------------------------------------
-    cursor.execute("SELECT COUNT(*) FROM machine_allocations WHERE end_date <= CURDATE()")
+    cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE expected_delivery < CURDATE()")
     card6_pending_allocations = cursor.fetchone()[0]
 
     cursor.close()

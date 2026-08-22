@@ -672,11 +672,12 @@ function loadSuppliersAndKPIs() {
             // Update Table HTML
             supplierTableBody.innerHTML = data.table_html || '';
 
-            // FORCE CLEAR THE SUPPLIER SEARCH BAR INSIDE DATA LOADER
-            const searchInput = document.getElementById("searchSupplier");
-            if (searchInput) {
-                searchInput.value = "";
-            }
+            // Add inside loadSuppliersAndKPIs() in Merchandising.js
+const searchInput = document.getElementById("searchSupplier");
+const supplierStatus = document.getElementById("supplierStatus");
+
+if (searchInput) searchInput.value = "";
+if (supplierStatus) supplierStatus.value = "";
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);

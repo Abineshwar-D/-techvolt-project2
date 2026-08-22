@@ -214,7 +214,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-box bg-dark-light"><i class="bi bi-bag"></i></div>
-                        <span class="trend-label text-secondary">+12% vs LW</span>
+
                     </div>
                     <p class="text-muted small fw-medium mb-0">Total Orders</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpiTotalOrders">1,284</h3>
@@ -541,7 +541,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="icon-box bg-primary-light"><i class="bi bi-file-text"></i></div>
-                        <span class="trend-up">+12% vs LY</span>
+
                     </div>
                     <p class="text-muted small">Total Enquiries</p>
                     <h3 class="fw-bold fs-2 mb-0" id="totalEnquiries">0</h3>
@@ -552,7 +552,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="icon-box bg-teal"><i class="bi bi-clock"></i></div>
-                        <span class="text-muted small">Current Batch</span>
+
                     </div>
                     <p class="text-muted small">Pending Enquiries</p>
                     <h3 class="fw-bold fs-2 mb-0" id="pendingEnquiries">0</h3>
@@ -563,7 +563,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="icon-box bg-tertiary"><i class="bi bi-arrow-right"></i></div>
-                        <span class="trend-label text-danger">Action Needed</span>
+
                     </div>
                     <p class="text-muted small">Follow-up Required</p>
                     <h3 class="fw-bold fs-2 mb-0" id="followupRequired">0</h3>
@@ -574,7 +574,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
-                        <span class="trend-up">61.5% Rate</span>
+
                     </div>
                     <p class="text-muted small">Converted Orders</p>
                     <h3 class="fw-bold fs-2 mb-0" id="convertedOrders">0</h3>
@@ -605,7 +605,7 @@
                     <div class="table-container">
                         <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-light">
                             <h5 class="fw-bold mb-0">Recent Enquiries</h5>
-                            <a href="#" class="text-secondary fw-semibold text-decoration-none small">View All</a>
+
                         </div>
                         <div class="table-responsive">
                             <table class="table-custom">
@@ -1047,7 +1047,7 @@
     // 5. Automatically reload data & reset filters for Marketing screens
     if (pageId === "page1" && typeof loadMarketingDashboard === "function") {
         loadMarketingDashboard(); // Dashboard Overview
-    } else if (pageId === "Enquiry" && typeof loadEnquiries === "function") {
+    } else if (pageId === "Enquiry" && typeof fetchEnquiryData === "function") {
         fetchEnquiryData(); // Customer Enquiries
     } else if (pageId === "page3" && typeof loadOrdersAndKPIs === "function") {
         loadOrdersAndKPIs(); // Orders

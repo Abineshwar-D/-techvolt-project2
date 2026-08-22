@@ -67,7 +67,11 @@ function loadStoreInventory() {
         .then(data => {
             if (data.status === "success") {
                 document.getElementById('totalMaterials1').innerText = data.kpis.total_materials1;
-                document.getElementById('availableStock1').innerText = data.kpis.available_stock.toLocaleString();
+
+                if (document.getElementById('activeSuppliers1')) {
+                    document.getElementById('activeSuppliers1').innerText = data.kpis.active_suppliers1;
+                }
+
                 document.getElementById('poMatchedMaterials1').innerText = data.kpis.po_matched_materials1;
                 document.getElementById('dueDeliveries').innerText = data.kpis.due_deliveries;
 

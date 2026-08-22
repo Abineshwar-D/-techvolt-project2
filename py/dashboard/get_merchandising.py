@@ -22,11 +22,11 @@ try:
     cursor.execute("SELECT COUNT(*) FROM orders")
     card1_total_orders = cursor.fetchone()[0]
 
-    # # ---------------------------------------------------------
-    # # CARD 2: Machine Allocations count where status = 'completed'
-    # # ---------------------------------------------------------
-    # cursor.execute("SELECT COUNT(*) FROM production_plan WHERE LOWER(status) = 'completed'")
-    # card2_completed_allocations = cursor.fetchone()[0]
+    # ---------------------------------------------------------
+    # CARD 2: Completed Orders Count from 'orders' table
+    # ---------------------------------------------------------
+    cursor.execute("SELECT COUNT(*) FROM orders WHERE LOWER(status) = 'completed'")
+    card2_completed_orders = cursor.fetchone()[0]
 
     # ---------------------------------------------------------
     # CARD 3: Total count from 'purchased_order' table
@@ -36,7 +36,6 @@ try:
 
     # ---------------------------------------------------------
     # CARD 4: Running Orders count
-    # (orders -> production_plan -> machine_allocations where status = 'running')
     # ---------------------------------------------------------
     card4_sql = """
         SELECT COUNT(DISTINCT o.order_number) 
@@ -54,7 +53,7 @@ try:
     card5_total_suppliers = cursor.fetchone()[0]
 
     # ---------------------------------------------------------
-    # CARD 6: Machine Allocations count where end_date <= TODAY
+    # CARD 6: Pending Allocations/Deliveries count
     # ---------------------------------------------------------
     cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE expected_delivery < CURDATE()")
     card6_pending_allocations = cursor.fetchone()[0]
@@ -66,6 +65,7 @@ try:
     response_data = {
         "status": "success",
         "card1": card1_total_orders,
+        "card2": card2_completed_orders,
         "card3": card3_purchased_orders,
         "card4": card4_running_orders,
         "card5": card5_total_suppliers,

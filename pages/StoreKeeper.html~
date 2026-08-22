@@ -56,13 +56,7 @@
             <span>Logout</span>
         </div>
 
-<!--        <div class="d-flex align-items-center gap-3 mt-3 px-2">-->
-<!--            <img class="user-avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1cHYSImRS2hLFrXelwgJxBspBeFh8flZ6nrhSd_DtU4KlkPR_Ngp3U0iSZ18NKeQjN_BoSTxezk63H&#45;&#45;vp_OndLiGZm8h85eEakW0Mu803R566UJlpMePqqmOaPt23DPchI4ni51Dn3iCQa8sq8_G6PiBnAU_Bn0-45b69fwNIOGcBemTlm0zzDDGzcUQ-GjoYxKgTyXwvqg1yKU-oNeGOrjk4mxg7DkQA1Lu6IT5Nm11r-kkeOSMCj4S_lNJmBQZZMpa9IFEPcs" alt="User Avatar">-->
-<!--            <div class="overflow-hidden">-->
-<!--                <p class="fw-bold mb-0 small text-truncate" id="header-user-name"></p>-->
-<!--                <p class="text-muted small mb-0 text-truncate" id="header-user-role"></p>-->
-<!--            </div>-->
-<!--        </div>-->
+
     </div>
 </aside>
 
@@ -134,10 +128,10 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-box bg-primary-fixed"><i class="bi bi-boxes"></i></div>
-                        <span class="text-muted small fw-medium">Total SKU</span>
+                        <span class="text-muted small fw-medium">Total Materials</span>
                     </div>
                     <h3 class="fw-bold text-dark" id="totalMaterials1">0</h3>
-                    <p class="text-muted small mb-0">Material Categories</p>
+
                 </div>
             </div>
 
@@ -148,7 +142,6 @@
                         <span class="text-muted small fw-medium">Current Volume</span>
                     </div>
                     <h3 class="fw-bold text-dark"><span id="availableStock1">0</span> <span class="fs-6 fw-normal">Kg</span></h3>
-                    <p class="text-muted small mb-0">Across all warehouses</p>
                 </div>
             </div>
 
@@ -159,7 +152,6 @@
                         <span class="text-dark small fw-medium">Total Purchase Orders</span>
                     </div>
                     <h3 class="fw-bold text-dark" id="poMatchedMaterials1">0</h3>
-                    <p class="text-muted small mb-0">Purchase Order Count</p>
                 </div>
             </div>
 
@@ -170,7 +162,6 @@
                         <span class="text-muted small fw-medium">Pending Orders</span>
                     </div>
                     <h3 class="fw-bold text-dark" id="dueDeliveries">0</h3>
-                    <p class="text-muted small mb-0">Active POs in transit</p>
                 </div>
             </div>
         </div>
@@ -202,7 +193,7 @@
             </div>
             <button class="btn btn-dark px-4 py-2 rounded-3 d-flex align-items-center gap-2 mt-3 mt-md-0" onclick="showpage('AddMaterial')">
                 <i class="bi bi-plus-lg"></i>
-                + Add Material
+                 Add Material
             </button>
         </div>
 
@@ -211,7 +202,6 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box"><i class="bi bi-tags"></i></div>
-                        <span class="trend-label">+4% from last month</span>
                     </div>
                     <p class="kpi-label mb-0">Total Materials</p>
                     <h3 class="fw-bold fs-2 mb-0" id="totalMaterials">0</h3>
@@ -222,7 +212,6 @@
                 <div class="kpi-card warning">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box"><i class="bi bi-exclamation-triangle"></i></div>
-                        <span class="trend-label">Requires Attention</span>
                     </div>
                     <p class="kpi-label mb-0">out Stock Items</p>
                     <h3 class="fw-bold fs-2 mb-0" id="poMatchedMaterials">0</h3>
@@ -262,7 +251,7 @@
             <div class="table-container">
                 <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
                     <h5 class="fw-bold mb-0">Inventory Materials</h5>
-                    <a href="#" class="text-secondary fw-bold text-decoration-none small">View All</a>
+
                 </div>
 
                 <div class="table-responsive">
@@ -491,8 +480,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-dark"><i class="bi bi-receipt"></i></div>
-                        <span class="trend-label text-secondary">+12%</span>
-                    </div>
+                   </div>
                     <p class="kpi-label mb-0">Total  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-total-po">0</h3>
                 </div>
@@ -502,7 +490,6 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
-                        <span class="trend-label text-warning">24 High</span>
                     </div>
                     <p class="kpi-label mb-0">Pending  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-pending-po">0</h3>
@@ -513,8 +500,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
-                        <span class="trend-label text-success">88% Rate</span>
-                    </div>
+                  </div>
                     <p class="kpi-label mb-0">Completed  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-approved-po">0</h3>
                 </div>
@@ -524,7 +510,6 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-red"><i class="bi bi-x-circle"></i></div>
-                        <span class="trend-label text-danger">-5% MoM</span>
                     </div>
                     <p class="kpi-label mb-0">Rejected  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-rejected-po">0</h3>
@@ -542,11 +527,11 @@
            <div class="d-flex align-items-center gap-2 flex-wrap">
     <label class="text-muted small fw-medium">Filter by Status:</label>
     <select class="filter-select" id="statusFilter1">
-        <option value="all">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="completed">Completed</option> <!-- Fixed value here -->
-        <option value="rejected">Rejected</option>
-        <option value="new po">new po</option>
+        <option value="all">All Status</option>
+        <option value="pending">Pending Orders</option>
+        <option value="completed">Completed Orders</option> <!-- Fixed value here -->
+        <option value="rejected">Rejected Orders</option>
+        <option value="new po">new Orders</option>
     </select>
 </div>
     </div>
@@ -931,11 +916,22 @@
             page.style.display = "block";
         }
 
-        // 4. Update active CSS class in sidebar
-        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
-        if (activeNavItem) {
-            activeNavItem.classList.add('active');
-        }
+         // 4. Update active CSS class in sidebar
+    const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
+    }
+
+    // 5. Reload data & reset filters for StoreKeeper screens
+    if (pageId === "Store" && typeof loadStoreInventory === "function") {
+        loadStoreInventory(); // Storekeeper Dashboard
+    } else if (pageId === "page6" && typeof loadMaterialsAndKPIs === "function") {
+        loadMaterialsAndKPIs(); // Inventory
+    } else if (pageId === "page4" && typeof loadSuppliersAndKPIs === "function") {
+        loadSuppliersAndKPIs(); // Suppliers
+    } else if (pageId === "page5" && typeof refreshAllData === "function") {
+        refreshAllData(); // Purchase Orders
+    }
 
         // 5. Save current page in URL hash and localStorage
         if (pageId !== "logout") {

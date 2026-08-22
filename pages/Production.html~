@@ -234,58 +234,62 @@
     <!-- ==================== SCREEN 2: PRODUCTION PLANNING ==================== -->
     <section id="page7" class="page" style="display: none;">
         <div class="row g-3 mb-4" id="loadkpidata">
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Total Plans</span>
-                        <div class="icon-box bg-dark"><i class="bi bi-list-ul" style="color: white;"></i></div>
-                    </div>
-                    <div class="mt-2">
-                        <h3 class="fw-bold fs-2 mb-0" id="totalPlans">0</h3>
-                        <p class="trend-up"><i class="bi bi-arrow-up-short"></i> +12% this month</p>
-                    </div>
-                </div>
+    <!-- Card 1: Total Plans -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="text-muted small fw-medium text-uppercase tracking-wide">Total Plans</span>
+                <div class="icon-box bg-dark"><i class="bi bi-list-ul" style="color: white;"></i></div>
             </div>
-
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Running Plans</span>
-                        <div class="icon-box bg-teal"><i class="bi bi-play-circle-fill"></i></div>
-                    </div>
-                    <div class="mt-2">
-                        <h3 class="fw-bold fs-2 mb-0" id="runningPlans">0</h3>
-                        <p class="text-muted small">On 15 machines</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Completed Plans</span>
-                        <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
-                    </div>
-                    <div class="mt-2">
-                        <h3 class="fw-bold fs-2 mb-0" id="completedPlans">0</h3>
-                        <p class="text-muted small">98% success rate</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span class="text-muted small fw-medium text-uppercase tracking-wide">Pending Plans</span>
-                        <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
-                    </div>
-                    <div class="mt-2">
-                        <h3 class="fw-bold fs-2 mb-0" id="pendingPlans">0</h3>
-                        <p class="text-danger small d-flex align-items-center gap-1"><i class="bi bi-exclamation-triangle-fill"></i> 2 High Priority</p>
-                    </div>
-                </div>
+            <div>
+                <h3 class="fw-bold fs-2 mb-1" id="totalPlans">0</h3>
+                
             </div>
         </div>
+    </div>
+
+    <!-- Card 2: Running Plans -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="text-muted small fw-medium text-uppercase tracking-wide">Running Plans</span>
+                <div class="icon-box bg-teal"><i class="bi bi-play-circle-fill"></i></div>
+            </div>
+            <div>
+                <h3 class="fw-bold fs-2 mb-1" id="runningPlans">0</h3>
+                <p class="text-muted small mb-0">On 15 machines</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Completed Plans -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="text-muted small fw-medium text-uppercase tracking-wide">Completed Plans</span>
+                <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
+            </div>
+            <div>
+                <h3 class="fw-bold fs-2 mb-1" id="completedPlans">0</h3>
+                <p class="text-muted small mb-0">98% success rate</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Pending Plans -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="text-muted small fw-medium text-uppercase tracking-wide">Pending Plans</span>
+                <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
+            </div>
+            <div>
+                <h3 class="fw-bold fs-2 mb-1" id="pendingPlans">0</h3>
+                <p class="text-danger small d-flex align-items-center gap-1 mb-0"><i class="bi bi-exclamation-triangle-fill"></i> 2 High Priority</p>
+            </div>
+        </div>
+    </div>
+</div>
 
         <div class="filter-bar mb-4">
 
@@ -1152,6 +1156,17 @@ function showpage(pageId) {
         if (window.location.hash !== "#" + pageId) {
             history.replaceState(null, "", "#" + pageId);
         }
+    }
+
+     // 6. Refresh dynamic section data & reset filters
+    if (pageId === "Dashboard" && typeof fetchDashboardData === "function") {
+        fetchDashboardData(); // Dashboard Overview
+    } else if (pageId === "page7" && typeof loadProductionPlans === "function") {
+        loadProductionPlans(); // Production Planning
+    } else if (pageId === "page12" && typeof loadMachinesTable === "function") {
+        loadMachinesTable(); // Machine Table
+    } else if (pageId === "page13" && typeof loadSupervisorTable === "function") {
+        loadSupervisorTable(); // Supervisor Table
     }
 
     // 6. Clear search inputs on page switch

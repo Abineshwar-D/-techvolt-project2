@@ -19,9 +19,9 @@ try:
     cursor.execute("SELECT COUNT(*) FROM materials")
     total_materials = cursor.fetchone()[0] or 0
 
-    # 2. Total Available Stock Volume (Card 2)
-    cursor.execute("SELECT COALESCE(SUM(opening_stock), 0) FROM materials")
-    available_stock = float(cursor.fetchone()[0] or 0)
+    # 2. Total Active Suppliers Count (Card 2)
+    cursor.execute("SELECT COUNT(*) FROM supplier WHERE LOWER(status) = 'active'")
+    active_suppliers = cursor.fetchone()[0] or 0
 
     # 3. Total PO Count (Card 3: count of purchased_order table)
     try:
@@ -38,7 +38,6 @@ try:
         due_deliveries = 0
 
     # 5. Fetch Materials to generate Main Inventory Summary Bento Cards
-    # Grouping by material_name to sum opening_stock and remove duplicates
     cursor.execute("""
         SELECT material_name, SUM(opening_stock) AS total_opening_stock, MAX(unit) AS unit 
         FROM materials 
@@ -58,7 +57,6 @@ try:
         stock_formatted = f"{stock_val:,.0f}" if stock_val.is_integer() else f"{stock_val:,.2f}"
         unit_str = unit if unit else "Kg"
 
-        # Safe progress percentage without relying on reorder_level
         percentage = min(100, max(20, int((stock_val / 1000) * 100))) if stock_val > 0 else 10
 
         icon_class = icons[index % len(icons)]
@@ -85,7 +83,7 @@ try:
         "status": "success",
         "kpis": {
             "total_materials1": total_materials,
-            "available_stock": available_stock,
+            "active_suppliers1": active_suppliers,
             "po_matched_materials1": po_matched_materials,
             "due_deliveries": due_deliveries
         },

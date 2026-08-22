@@ -120,79 +120,90 @@
 <main id="manager" class="main-content">
 
     <!-- ==================== SCREEN 1: MERCHANDISING DASHBOARD ==================== -->
-    <section id="page1" class="page">
-        <!-- KPI Cards -->
-        <section class="row g-4 mb-4">
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="kpi-card">
-                    <div>
-                        <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Total Orders</p>
-                        <h3 class="fw-bold text-dark mt-1" id="kpi-card1">0</h3>
-                        <p class="trend-up mt-2"><i class="bi bi-arrow-up-short"></i> +12% from last month</p>
-                    </div>
-                    <div class="icon-box bg-dark"><i class="bi bi-bag"></i></div>
-                </div>
-            </div>
+    <!-- ==================== SCREEN 1: MERCHANDISING DASHBOARD ==================== -->
+<section id="page1" class="page">
+    <!-- KPI Cards -->
+    <section class="row g-4 mb-4">
+        <!-- CARD 1: Total Orders -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Total Orders</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card1">0</h3>
 
-           <div class="col-12 col-sm-6 col-xl-4">
-           <div class="kpi-card ">
-    <div>
-        <p class="text-muted fw-medium mb-1" style="font-size: 12px;">PURCHASE ORDER </p>
-        <h3 class="fw-bold text-dark mb-1" id="kpi-card3">0</h3>
-        <div class="trend-up small fw-bold">
-            <i class="bi bi-bag-check-fill"></i> Lifetime purchase orders
-        </div>
-    </div>
-    <div class="icon-box">
-        <!-- Purchase Order / Receipt Logo -->
-        <i class="bi bi-receipt"></i>
-    </div>
-</div>
+                </div>
+                <div class="icon-box bg-dark"><i class="bi bi-bag"></i></div>
+            </div>
         </div>
 
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="kpi-card">
-                    <div class="w-100">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-arrow-repeat text-secondary"></i>
-                            <p class="text-muted fw-medium text-uppercase mb-0" style="font-size: 12px; letter-spacing: 0.5px;">Running Orders</p>
-                        </div>
-                        <h3 class="fw-bold text-dark" id="kpi-card4">0</h3>
+        <!-- CARD 2: Completed Orders (NEW) -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Completed Orders</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card2">0</h3>
+                    <div class="trend-up small fw-bold mt-2">
+                        <i class="bi bi-check-circle-fill"></i> Total completed orders
                     </div>
                 </div>
+                <div class="icon-box bg-dark"><i class="bi bi-check2-all"></i></div>
             </div>
+        </div>
 
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="kpi-card">
-                    <div class="w-100">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-grid text-dark"></i>
-                            <p class="text-muted fw-medium text-uppercase mb-0" style="font-size: 12px; letter-spacing: 0.5px;">Suppliers</p>
-                        </div>
-                        <h3 class="fw-bold text-dark" id="kpi-card5">0</h3>
-                        <div class="d-flex gap-2 mt-3">
-                            <span class="px-2 py-1 bg-teal text-secondary rounded small fw-bold text-uppercase" style="font-size: 10px;">Processing</span>
-                            <span class="px-2 py-1 bg-light text-muted rounded small fw-bold text-uppercase" style="font-size: 10px;">Queued</span>
-                        </div>
+        <!-- CARD 3: Purchase Orders -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Purchase Order</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card3">0</h3>
+                    <div class="trend-up small fw-bold mt-2">
+                        <i class="bi bi-bag-check-fill"></i> Lifetime purchase orders
                     </div>
                 </div>
+                <div class="icon-box bg-dark"><i class="bi bi-receipt"></i></div>
             </div>
+        </div>
 
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="kpi-card">
-                    <div class="w-100">
-                        <div class="d-flex align-items-center gap-2 mb-2">
-                            <i class="bi bi-truck text-dark"></i>
-                            <p class="text-muted fw-medium text-uppercase mb-0" style="font-size: 12px; letter-spacing: 0.5px;">Pending Deliveries</p>
-                        </div>
-                        <h3 class="fw-bold text-dark" id="kpi-card6">0</h3>
-                        <p class="text-muted small mt-3 fst-italic">Next dispatch scheduled: 2:00 PM</p>
+        <!-- CARD 4: Running Orders -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Running Orders</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card4">0</h3>
+                    <div class="trend-up small fw-bold mt-2">
+                        <i class="bi bi-arrow-repeat"></i> Active running orders
                     </div>
                 </div>
+                <div class="icon-box bg-dark"><i class="bi bi-arrow-repeat"></i></div>
             </div>
-        </section>
+        </div>
 
+        <!-- CARD 5: Suppliers -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Suppliers</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card5">0</h3>
+                    <div class="d-flex gap-2 mt-2">
+                    </div>
+                </div>
+                <div class="icon-box bg-dark"><i class="bi bi-grid"></i></div>
+            </div>
+        </div>
+
+        <!-- CARD 6: Pending Deliveries -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="kpi-card">
+                <div>
+                    <p class="text-muted fw-medium text-uppercase mb-1" style="font-size: 12px; letter-spacing: 0.5px;">Pending Deliveries</p>
+                    <h3 class="fw-bold text-dark mt-1" id="kpi-card6">0</h3>
+
+                </div>
+                <div class="icon-box bg-dark"><i class="bi bi-truck"></i></div>
+            </div>
+        </div>
     </section>
+</section>
 
     <!-- ==================== SCREEN 2: ORDERS ==================== -->
     <section class="page" id="page3" style="display: none;">
@@ -209,10 +220,10 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-box bg-dark-light"><i class="bi bi-bag"></i></div>
-                        <span class="trend-label text-secondary">+12% vs LW</span>
+
                     </div>
                     <p class="text-muted small fw-medium mb-0">Total Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0" id="kpiTotalOrders">1,284</h3>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiTotalOrders">0</h3>
                 </div>
             </div>
 
@@ -223,7 +234,7 @@
                         <span class="trend-label text-primary">Active</span>
                     </div>
                     <p class="text-muted small fw-medium mb-0">Running Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0" id="kpiRunningOrders">45</h3>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiRunningOrders">0</h3>
                 </div>
             </div>
 
@@ -234,7 +245,7 @@
                         <span class="trend-label text-success">Completed</span>
                     </div>
                     <p class="text-muted small fw-medium mb-0">Completed Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0" id="kpiCompletedOrders">1,202</h3>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiCompletedOrders">0</h3>
                 </div>
             </div>
 
@@ -242,10 +253,10 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <div class="icon-box bg-red"><i class="bi bi-hourglass"></i></div>
-                        <span class="trend-label text-danger">Action Required</span>
+                        <span class="trend-label text-danger">Pending</span>
                     </div>
                     <p class="text-muted small fw-medium mb-0">Pending Orders</p>
-                    <h3 class="fw-bold fs-2 mb-0" id="kpiPendingOrders">37</h3>
+                    <h3 class="fw-bold fs-2 mb-0" id="kpiPendingOrders">0</h3>
                 </div>
             </div>
         </div>
@@ -325,9 +336,9 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-dark"><i class="bi bi-receipt"></i></div>
-                        <span class="trend-label text-secondary">+12%</span>
+
                     </div>
-                    <p class="kpi-label mb-0">Total POs</p>
+                    <p class="kpi-label mb-0">Total Orders</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-total-po">0</h3>
                 </div>
             </div>
@@ -336,9 +347,9 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
-                        <span class="trend-label text-warning">24 High</span>
+
                     </div>
-                    <p class="kpi-label mb-0">Pending Approvals</p>
+                    <p class="kpi-label mb-0">Pending Orders </p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-pending-po">0</h3>
                 </div>
             </div>
@@ -347,7 +358,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
-                        <span class="trend-label text-success">88% Rate</span>
+
                     </div>
                     <p class="kpi-label mb-0">Completed Orders</p>
                     <h3 class="fw-bold fs-2 mb-0"  id="kpi-approved-po">0</h3>
@@ -358,7 +369,7 @@
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box bg-red"><i class="bi bi-x-circle"></i></div>
-                        <span class="trend-label text-danger">-5% MoM</span>
+
                     </div>
                     <p class="kpi-label mb-0">Rejected Orders</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-rejected-po">0</h3>
@@ -382,11 +393,11 @@
             <div class="d-flex align-items-center gap-2 flex-wrap">
     <label class="text-muted small fw-medium">Filter by Status:</label>
     <select class="filter-select" id="statusFilter">
-        <option value="all">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="completed">Completed</option> <!-- Fixed value here -->
-        <option value="rejected">Rejected</option>
-        <option value="new po">new po</option>
+        <option value="all">All Status</option>
+        <option value="pending">Pending Orders</option>
+        <option value="completed">Completed Orders</option> <!-- Fixed value here -->
+        <option value="rejected">Rejected Orders</option>
+        <option value="new po">new Orders</option>
     </select>
 </div>
         </div>

@@ -864,10 +864,10 @@ const userId = urlParams.get('user_id') || '';
 
            // Add/update inside refreshAllData() in StoreKeeper.js
 const searchInput = document.getElementById("SearchPo");
-const statusFilter = document.getElementById("statusFilter1");
+
 
 if (searchInput) searchInput.value = "";
-if (statusFilter) statusFilter.value = "all";
+
         })
         .catch(err => {
             console.error("Table fetch error:", err);

@@ -80,11 +80,12 @@ function fetchKPIData() {
 }
 
 function updateKPIElements(data) {
-    document.getElementById("kpi-card1").innerText = data.card1;
-    document.getElementById("kpi-card3").innerText = data.card3;
-    document.getElementById("kpi-card4").innerText = data.card4;
-    document.getElementById("kpi-card5").innerText = data.card5;
-    document.getElementById("kpi-card6").innerText = data.card6;
+    if (document.getElementById("kpi-card1")) document.getElementById("kpi-card1").innerText = data.card1;
+    if (document.getElementById("kpi-card2")) document.getElementById("kpi-card2").innerText = data.card2;
+    if (document.getElementById("kpi-card3")) document.getElementById("kpi-card3").innerText = data.card3;
+    if (document.getElementById("kpi-card4")) document.getElementById("kpi-card4").innerText = data.card4;
+    if (document.getElementById("kpi-card5")) document.getElementById("kpi-card5").innerText = data.card5;
+    if (document.getElementById("kpi-card6")) document.getElementById("kpi-card6").innerText = data.card6;
 }
 
 document.addEventListener("DOMContentLoaded", function () {

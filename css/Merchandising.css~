@@ -104,7 +104,7 @@
             min-height: calc(100vh - 64px);
         }
 
-/* ========== KPI CARDS (#page1) ========== */
+       /* ========== KPI CARDS (#page1) ========== */
 #page1 .kpi-card {
     background: #ffffff;
     padding: 24px;
@@ -116,12 +116,11 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    cursor: pointer;
 }
 
 #page1 .kpi-card:hover {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
 }
 
 #page1 .kpi-card .icon-box {
@@ -131,7 +130,6 @@
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
-    font-size: 20px;
 }
 
 #page1 .kpi-card .icon-box.bg-dark {
@@ -139,17 +137,10 @@
     color: #7c839b;
 }
 
-/* ACTIVE HOVER EFFECT FOR ALL ICONS & CARDS */
-#page1 .kpi-card:hover .icon-box,
-#page1 .kpi-card .icon-box:hover {
-    background: #86f2e4 !important;
-    color: #006f66 !important;
-    transform: scale(1.1);
-}
-
-#page1 .kpi-card:hover .icon-box i,
-#page1 .kpi-card .icon-box:hover i {
-    color: #006f66 !important;
+/* Hover effect on ALL card icons */
+#page1 .kpi-card:hover .icon-box {
+    background: #86f2e4;
+    color: #006f66;
 }
         /* ========== PROGRESS BARS ========== */
       #page1  .progress-custom {

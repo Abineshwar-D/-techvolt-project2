@@ -150,8 +150,8 @@ try:
                 </button>
             """
         else:
-            status_text = "Stored"
-            status_badge = '<span class="badge bg-success">Stored</span>'
+            status_text = "IN STOCK"
+            status_badge = '<span class="badge bg-success"> IN STOCK</span>'
             edit_btn = f"""
                 <button class="action-btn edit-stock-btn" 
                         title="Edit Stock" 
@@ -194,8 +194,6 @@ try:
         if is_admin:
             action_buttons = f"""
                 {view_btn}
-                {edit_btn}
-                <button class="action-btn" title="Block"><i class="bi bi-slash-circle"></i></button>
             """
         else:
             action_buttons = f"""
@@ -218,7 +216,7 @@ try:
             </td>
 
             <td class="text-right stock-value">
-                {stock:,.2f} {unit}
+                {stock:,.2f} 
             </td>
 
             <td class="text-center">

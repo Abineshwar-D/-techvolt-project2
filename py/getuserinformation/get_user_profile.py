@@ -6,6 +6,7 @@ import pymysql
 import json
 import os
 import time
+import re
 
 cgitb.enable()
 print("Content-Type: application/json\r\n\r\n")
@@ -25,6 +26,29 @@ def get_db_connection():
         database="techvoltproject2",
         cursorclass=pymysql.cursors.DictCursor
     )
+
+
+def validate_password(password):
+    """
+    Validates password criteria:
+    - Minimum 8 characters
+    - At least 1 uppercase letter
+    - At least 1 lowercase letter
+    - At least 1 number
+    - At least 1 special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?]", password):
+        return False, "Password must contain at least one special character."
+
+    return True, "Valid"
 
 
 if user_id:
@@ -121,16 +145,36 @@ if user_id:
             else:
                 response = {"success": False, "message": "Form input parameter 'profile_pic' missing."}
 
-        # CHANGE PASSWORD
+        # CHANGE PASSWORD WITH VALIDATION & DUPLICATE CHECK
         elif action == "change_password":
             new_password = form.getvalue("new_password")
             if new_password:
-                rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
-                if rows == 0:
-                    cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                is_valid, val_message = validate_password(new_password)
+                if not is_valid:
+                    response = {"success": False, "message": val_message}
+                else:
+                    # 1. Fetch current existing password from users or admin table
+                    cur.execute("SELECT password FROM users WHERE employee_id=%s", (user_id,))
+                    current_user = cur.fetchone()
 
-                con.commit()
-                response = {"success": True, "message": "Password updated successfully!"}
+                    if not current_user:
+                        cur.execute("SELECT password FROM admin WHERE employee_id=%s", (user_id,))
+                        current_user = cur.fetchone()
+
+                    # 2. Check if the new password matches the existing password
+                    if current_user and current_user.get("password") == new_password:
+                        response = {
+                            "success": False,
+                            "message": "New password cannot be the same as your current password!"
+                        }
+                    else:
+                        # 3. Update the password
+                        rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                        if rows == 0:
+                            cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
+
+                        con.commit()
+                        response = {"success": True, "message": "Password updated successfully!"}
             else:
                 response = {"success": False, "message": "New password is required"}
 

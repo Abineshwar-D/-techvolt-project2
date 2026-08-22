@@ -92,7 +92,6 @@ function loadDashboardCounts() {
 document.addEventListener("DOMContentLoaded", function () {
     // 1. Fetch immediately on page load
     loadDashboardCounts();
-
     // 2. Refresh counts automatically every 5 seconds (5000ms)
     setInterval(loadDashboardCounts, 5000);
 });
@@ -122,6 +121,12 @@ function loadFabricTable() {
             if (tableBody) {
                 tableBody.innerHTML = data;
             }
+             // 2. Clear the Search Bar
+            const searchInput = document.getElementById("searchFabric");
+            if (searchInput) {
+                searchInput.value = "";
+            }
+
         })
         .catch(error => {
             console.error("Error loading fabric table:", error);
@@ -317,6 +322,7 @@ function getUserIdFromURL() {
 }
 
 // 2. Load Table Data for Admin
+// 2. Load Table Data for Admin
 function loadCustomerTable() {
     const userId = getUserIdFromURL();
     fetch(`../py/customer/get_customer.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
@@ -326,6 +332,13 @@ function loadCustomerTable() {
             if (tableBody) {
                 tableBody.innerHTML = data;
             }
+
+            // FORCE CLEAR THE SEARCH BAR AFTER DATA LOADS
+            const searchInput = document.getElementById("searchCustomer");
+const statusFilter = document.getElementById("statusFilter");
+
+if (searchInput) searchInput.value = "";
+if (statusFilter) statusFilter.value = "all";
         })
         .catch(error => console.error("Error fetching admin customer data:", error));
 }
@@ -389,7 +402,7 @@ document.getElementById("searchCustomer")?.addEventListener("keyup", function ()
 // 7. Event Listeners for Auto-Refresh & Tab Focus
 document.addEventListener("DOMContentLoaded", function () {
     loadCustomerTable();
-    setInterval(loadCustomerTable, 5000);
+//    setInterval(loadCustomerTable, 5000);
 });
 
 window.addEventListener("focus", function () {
@@ -398,6 +411,7 @@ window.addEventListener("focus", function () {
 
 //THIS FUNCTION IS USED TO FILTER CUSTOMER BY STATUS
 document.addEventListener("DOMContentLoaded", function () {
+
     const statusFilter = document.getElementById("statusFilter");
     const tableBody = document.getElementById("customerTableBody");
 
@@ -532,14 +546,14 @@ function viewCustomer(id) {
    06. ORDERS SCREEN
    ========================================================================== */
 
-//THIS FUNCTION LOAD TABLE DATA
+// THIS FUNCTION LOAD TABLE DATA
 function loadOrdersAndKPIs() {
     var ordersTableBody = document.getElementById("ordersTableBody");
     const urlParams = new URLSearchParams(window.location.search);
     const currentUserId = urlParams.get('user_id') || '';
 
     if (ordersTableBody) {
-        fetch(`../py/orders/get_orders.py?user_id=${currentUserId}`)
+        fetch(`../py/orders/get_orders.py?user_id=${encodeURIComponent(currentUserId)}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" || data.kpis) {
@@ -552,6 +566,13 @@ function loadOrdersAndKPIs() {
             } else {
                 ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Failed to load data.</td></tr>";
             }
+
+            // FORCE CLEAR THE SEARCH BAR AFTER DATA LOADS
+           const searchInput = document.getElementById("searchOrder");
+const statusFilter = document.getElementById("orderStatusFilter");
+
+if (searchInput) searchInput.value = "";
+if (statusFilter) statusFilter.value = "All Status";
         })
         .catch(err => {
             console.error("Error loading orders and KPIs:", err);
@@ -563,7 +584,7 @@ function loadOrdersAndKPIs() {
 // Auto-refresh logic
 document.addEventListener("DOMContentLoaded", function() {
     loadOrdersAndKPIs();
-    setInterval(loadOrdersAndKPIs, 5000);
+//    setInterval(loadOrdersAndKPIs, 5000);
 });
 
 window.addEventListener("focus", function() {
@@ -634,25 +655,21 @@ function populateModalDetails(btn) {
     }
 }
 
-// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
+// THIS FUNCTION HANDLES ORDERS STATUS FILTER
 document.addEventListener("change", function (e) {
-    // Check if the changed element is the status filter dropdown
-    if (e.target && e.target.classList.contains("filter-select")) {
+    if (e.target && e.target.id === "orderStatusFilter") {
         const selectedFilter = e.target.value.trim().toLowerCase();
         const tableBody = document.getElementById("ordersTableBody");
 
         if (tableBody) {
-            // Fetch rows dynamically at the exact moment user changes filter
             const rows = tableBody.querySelectorAll("tr");
 
             rows.forEach(function (row) {
-                // Find status badge in the 6th <td> column (Status)
                 const statusBadge = row.querySelector("td:nth-child(6) .badge");
 
                 if (statusBadge) {
                     const rowStatus = statusBadge.textContent.trim().toLowerCase();
 
-                    // Show row if "all status" is selected OR if row text contains selected status
                     if (selectedFilter === "all status" || rowStatus.includes(selectedFilter) || selectedFilter.includes(rowStatus)) {
                         row.style.display = "";
                     } else {
@@ -664,6 +681,19 @@ document.addEventListener("change", function (e) {
     }
 });
 
+
+// Ensure both search inputs are cleared immediately upon soft-reload restoration
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const orderSearch = document.getElementById("searchOrder");
+
+        if (orderSearch) orderSearch.value = "";
+
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
 
 /* ==========================================================================
    07. CREATE ORDER SCREEN
@@ -690,8 +720,8 @@ function hideorderToast() {
    08. SUPPLIER SCREEN
    ========================================================================== */
 
-    // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
-    function loadSuppliersAndKPIs() {
+   // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
+function loadSuppliersAndKPIs() {
     var supplierTableBody = document.getElementById("supplierTableBody");
 
     if (supplierTableBody) {
@@ -718,6 +748,13 @@ function hideorderToast() {
 
             // Update Table HTML
             supplierTableBody.innerHTML = data.table_html || '';
+
+            // FORCE CLEAR THE SUPPLIER SEARCH BAR INSIDE DATA LOADER
+            const searchInput = document.getElementById("searchSupplier");
+const statusFilter = document.getElementById("supplierStatus");
+
+if (searchInput) searchInput.value = "";
+if (statusFilter) statusFilter.value = "";
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);
@@ -725,10 +762,23 @@ function hideorderToast() {
     }
 }
 
+// Individual listener only for searchSupplier
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("searchSupplier");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
 // Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function () {
     loadSuppliersAndKPIs();
-    setInterval(loadSuppliersAndKPIs, 5000);
+//    setInterval(loadSuppliersAndKPIs, 5000);
 });
 
 // Auto-refresh when switching back to this window/screen
@@ -860,7 +910,6 @@ function openEditSupplierModal(btn) {
     document.getElementById("edit_supplier_phone").value = phone;
     document.getElementById("edit_supplier_email").value = email;
     document.getElementById("edit_supplier_materials").value = materials;
-    document.getElementById("edit_supplier_status").value = status;
 
     const modalEl = document.getElementById("editSupplierModal");
     const modal = new bootstrap.Modal(modalEl);
@@ -873,7 +922,6 @@ function submitUpdateSupplier() {
     const phone = document.getElementById("edit_supplier_phone").value;
     const email = document.getElementById("edit_supplier_email").value;
     const materials = document.getElementById("edit_supplier_materials").value;
-    const status = document.getElementById("edit_supplier_status").value;
 
     if (!code) {
         alert("Supplier Code is missing.");
@@ -983,28 +1031,83 @@ function refreshAllData() {
    // Get user_id from the current browser URL query string (e.g. ?user_id=AMD007)
 const urlParams = new URLSearchParams(window.location.search);
 const userId = urlParams.get('user_id') || '';
+ // 1. FETCH TABLE DATA (HTML) WITH USER_ID PARAMETER
+    fetch("../py/purchase/get_po_list.py?user_id=" + encodeURIComponent(userId) + "&t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.text();
+        })
+        .then(data => {
+            if (data.trim() && tableBody) {
+                tableBody.innerHTML = data;
+            } else if (tableBody) {
+                // Show a clean message if no data exists instead of crashing
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
+            }
 
-// 1. FETCH TABLE DATA (HTML) WITH USER_ID PARAMETER
-fetch("../py/purchase/get_po_list.py?user_id=" + encodeURIComponent(userId) + "&t=" + new Date().getTime())
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-        return response.text();
-    })
-    .then(data => {
-        if (data.trim() && tableBody) {
-            tableBody.innerHTML = data;
-        } else if (tableBody) {
-            // Show a clean message if no data exists instead of crashing
-            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
-        }
+const statusFilter = document.getElementById("statusFilter1");
+if (statusFilter) statusFilter.value = "new po";
 
-        if (typeof initializeTableEvents === "function") {
-            initializeTableEvents();
+            // Apply filter immediately after HTML is inserted into table body
+            applyStatusFilter();
+
+            if (typeof initializeTableEvents === "function") {
+                initializeTableEvents();
+            }
+
+            // FORCE CLEAR THE PO SEARCH BAR INSIDE DATA LOADER
+            const searchInput = document.getElementById("SearchPo");
+            if (searchInput) {
+                searchInput.value = "";
+            }
+        })
+        .catch(err => {
+            console.error("Table fetch error:", err);
+        });
+
+        // Individual listener only for SearchPo
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("SearchPo");
+        if (searchInput) {
+            searchInput.value = "";
         }
-    })
-    .catch(err => {
-        console.error("Table fetch error:", err);
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
+// THIS FUNCTION LOADS TABLE DATA PREFERENCES BY STATUS FILTER
+function applyStatusFilter() {
+    const statusFilter = document.getElementById("statusFilter1");
+    if (!statusFilter) return;
+
+    const filterValue = statusFilter.value.toLowerCase().trim();
+    const rows = document.querySelectorAll("#poTableBody tr");
+
+    rows.forEach(row => {
+        // Skip message row if no records exist
+        if (row.cells.length <= 1) return;
+
+        // Status is in the 5th column (Index 4: 0=PO, 1=Supplier, 2=Material, 3=Qty, 4=Status)
+        const statusCell = row.cells[4];
+
+        if (statusCell) {
+            const statusText = statusCell.textContent.toLowerCase().trim();
+
+            if (filterValue === "all" || statusText === filterValue) {
+                row.style.display = ""; // Show row
+            } else {
+                row.style.display = "none"; // Hide row
+            }
+        }
     });
+}
+
+// 3. LISTEN FOR DROPDOWN CHANGES (When user manually changes option)
+document.getElementById("statusFilter1")?.addEventListener("change", applyStatusFilter);
+
     // 2. FETCH KPI DATA (JSON)
    fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
     .then(response => {
@@ -1207,6 +1310,31 @@ document.addEventListener("DOMContentLoaded", function () {
    12. INVENTORY SCREEN
    ========================================================================== */
 
+
+// THIS FUNCTION IS USED TO OPEN VIEW MODAL AND FETCH DATA OF INVENTORY DETAILS
+function openViewModal1(btn) {
+    document.getElementById('view_material_name').innerText = btn.getAttribute('data-name') || 'N/A';
+    document.getElementById('view_unit').innerText = btn.getAttribute('data-unit') || 'N/A';
+    document.getElementById('view_opening_stock').innerText = (btn.getAttribute('data-stock') || '0.00') + ' ' + (btn.getAttribute('data-unit') || 'Kg');
+    document.getElementById('view_supplier').innerText = btn.getAttribute('data-supplier') || 'N/A';
+    document.getElementById('view_mfg_date').innerText = btn.getAttribute('data-mfg') || 'N/A';
+
+    const statusVal = btn.getAttribute('data-status');
+    const statusTd = document.getElementById('view_status');
+    if (statusVal === "Out of Stock") {
+        statusTd.innerHTML = '<span class="badge bg-danger">Out of Stock</span>';
+    } else {
+        statusTd.innerHTML = '<span class="badge bg-success">Stored</span>';
+    }
+
+    document.getElementById('view_delivery_date').innerText = btn.getAttribute('data-delivery') || 'N/A';
+    document.getElementById('view_created_by').innerText = btn.getAttribute('data-createdby') || 'N/A';
+
+    // Open Bootstrap Modal
+    const viewModal = new bootstrap.Modal(document.getElementById('inventoryDetailsModal'));
+    viewModal.show();
+}
+
 // THIS FUNCTION LOADS MATERIAL TABLE DATA & KPIS
 function loadMaterialsAndKPIs() {
     var materialTableBody = document.getElementById("materialTableBody");
@@ -1236,6 +1364,22 @@ function loadMaterialsAndKPIs() {
 
             // Update Table
             materialTableBody.innerHTML = data.table_html;
+
+            // 1. Force the filter dropdown to "in_stock" on load
+            const statusFilter = document.getElementById("statusFilter2");
+            if (statusFilter) {
+                statusFilter.value = "in_stock";
+            }
+
+            // 2. Apply the filter to hide non-matching rows immediately
+            filterMaterialTable();
+
+            // FORCE CLEAR THE INVENTORY SEARCH BAR INSIDE DATA LOADER
+           const searchInput = document.getElementById("searchInventory");
+
+
+if (searchInput) searchInput.value = "";
+
         })
         .catch(err => {
             console.error("Error loading materials and KPIs:", err);
@@ -1244,10 +1388,54 @@ function loadMaterialsAndKPIs() {
     }
 }
 
+// Individual listener only for searchInventory
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("searchInventory");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
+// THIS FUNCTION FILTERS MATERIAL TABLE DATA BY STATUS
+function filterMaterialTable() {
+    const statusFilter = document.getElementById("statusFilter2");
+    if (!statusFilter) return;
+
+    const selectedFilter = statusFilter.value.trim().toLowerCase();
+    const rows = document.querySelectorAll("#materialTableBody tr");
+
+    rows.forEach(row => {
+        const statusCell = row.cells[4]; // 5th column (Status)
+        if (!statusCell) return;
+
+        const statusText = statusCell.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+
+        if (selectedFilter === "all") {
+            row.style.display = ""; // Show all rows
+        }
+        else if (selectedFilter === "out_of_stock" && statusText.includes("out of stock")) {
+            row.style.display = ""; // Show Out of Stock
+        }
+        else if (selectedFilter === "in_stock" && statusText.includes("in stock")) {
+            row.style.display = ""; // Show In Stock
+        }
+        else {
+            row.style.display = "none"; // Hide non-matching rows
+        }
+    });
+}
+
+// ATTACH LISTENER TO DROPDOWN
+document.getElementById("statusFilter2")?.addEventListener("change", filterMaterialTable);
+
 // Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function() {
     loadMaterialsAndKPIs();
-    setInterval(loadMaterialsAndKPIs, 5000);
 });
 
 // Auto-refresh when switching back to this window/screen
@@ -1350,7 +1538,7 @@ function loadProductionPlans() {
     const userId = urlParams.get('user_id') || '';
 
     // 2. Pass user_id to the Python script
-    fetch("../py/inventory/get_production_plan.py?user_id=" + encodeURIComponent(userId))
+    fetch("../py/inventory/get_production_plan.py?user_id=" + encodeURIComponent(userId) + "&t=" + new Date().getTime())
     .then(response => response.json())
     .then(data => {
         if (data.error) {
@@ -1374,16 +1562,36 @@ function loadProductionPlans() {
         if (tableBody) {
             tableBody.innerHTML = data.table_html;
         }
+
+        // FORCE CLEAR THE PRODUCTION PLAN SEARCH BAR INSIDE DATA LOADER
+        const searchInput = document.getElementById("SearchPp");
+const statusFilter = document.getElementById("productionPlanStatusFilter");
+
+if (searchInput) searchInput.value = "";
+if (statusFilter) statusFilter.value = "All Status";
     })
     .catch(error => console.error("Error loading production plans:", error));
 }
+
+// Individual listener only for SearchPp
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("SearchPp");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
 
 // 1. Initial load when DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
     loadProductionPlans();
 
-    // 2. Auto-refresh every 5 seconds
-    setInterval(loadProductionPlans, 5000);
+//    // 2. Auto-refresh every 5 seconds
+//    setInterval(loadProductionPlans, 5000);
 });
 
 // 3. Instant refresh when switching back to this tab
@@ -1407,23 +1615,19 @@ if (searchPp) {
 
 // THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
 document.addEventListener("change", function (e) {
-    // Check if the changed element is the status filter dropdown
-    if (e.target && e.target.classList.contains("filter-select")) {
+    if (e.target && e.target.id === "productionPlanStatusFilter") {
         const selectedFilter = e.target.value.trim().toLowerCase();
         const tableBody = document.getElementById("productionPlanTable");
 
         if (tableBody) {
-            // Fetch rows dynamically at the exact moment user changes filter
             const rows = tableBody.querySelectorAll("tr");
 
             rows.forEach(function (row) {
-                // Find status badge in the 6th <td> column (Status)
                 const statusBadge = row.querySelector("td:nth-child(7) .badge");
 
                 if (statusBadge) {
                     const rowStatus = statusBadge.textContent.trim().toLowerCase();
 
-                    // Show row if "all status" is selected OR if row text contains selected status
                     if (selectedFilter === "all status" || rowStatus.includes(selectedFilter) || selectedFilter.includes(rowStatus)) {
                         row.style.display = "";
                     } else {
@@ -1553,6 +1757,14 @@ function loadUserData() {
             if (document.getElementById("inactiveUsersCount")) {
                 document.getElementById("inactiveUsersCount").innerText = data.inactive_users ?? 0;
             }
+             // 2. Clear the Search Bar
+           const searchInput = document.getElementById("searchUser");
+const roleFilter = document.getElementById("filterRole");
+const statusFilter = document.getElementById("filterStatus");
+
+if (searchInput) searchInput.value = "";
+if (roleFilter) roleFilter.value = "";
+if (statusFilter) statusFilter.value = "";
         })
         .catch(error => console.error("Error fetching user data:", error));
 }

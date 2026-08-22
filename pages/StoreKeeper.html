@@ -96,8 +96,6 @@
         <!-- Dropdown Menu -->
         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="header-user-avatar">
             <li class="px-3 py-2 border-bottom">
-                <span class="d-block text-muted small">Logged in as:</span>
-                <strong id="header-dropdown-userid" class="text-primary">EMP000</strong>
             </li>
             <li>
                 <label class="dropdown-item mb-0" style="cursor: pointer;">
@@ -157,10 +155,10 @@
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="kpi-card warning">
                     <div class="d-flex justify-content-between align-items-start mb-3">
-                        <div class="icon-box bg-error-container"><i class="bi bi-exclamation-triangle-fill"></i></div>
-                        <span class="text-danger small fw-medium">Total Orders</span>
+                        <div class="icon-box bg-container"> <i class="bi bi-bag-check-fill"></i></div>
+                        <span class="text-dark small fw-medium">Total Purchase Orders</span>
                     </div>
-                    <h3 class="fw-bold text-danger" id="poMatchedMaterials1">0</h3>
+                    <h3 class="fw-bold text-dark" id="poMatchedMaterials1">0</h3>
                     <p class="text-muted small mb-0">Purchase Order Count</p>
                 </div>
             </div>
@@ -209,7 +207,7 @@
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-12 col-sm-6 col-lg-4">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="kpi-card">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box"><i class="bi bi-tags"></i></div>
@@ -220,48 +218,41 @@
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-4">
-                <div class="kpi-card">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="icon-box"><i class="bi bi-box-seam"></i></div>
-                    </div>
-                    <p class="kpi-label mb-0">Available Stock</p>
-                    <h3 class="fw-bold fs-2 mb-0" id="availableStock">0 Kg</h3>
-                </div>
-            </div>
-
-            <div class="col-12 col-sm-6 col-lg-4">
+            <div class="col-12 col-sm-6 col-lg-6">
                 <div class="kpi-card warning">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <div class="icon-box"><i class="bi bi-exclamation-triangle"></i></div>
                         <span class="trend-label">Requires Attention</span>
                     </div>
-                    <p class="kpi-label mb-0">Low Stock Items</p>
+                    <p class="kpi-label mb-0">out Stock Items</p>
                     <h3 class="fw-bold fs-2 mb-0" id="poMatchedMaterials">0</h3>
                 </div>
             </div>
 
-<!--            <div class="col-12 col-sm-6 col-lg-3">-->
-<!--                <div class="kpi-card">-->
-<!--                    <div class="d-flex justify-content-between align-items-start mb-2">-->
-<!--                        <div class="icon-box"><i class="bi bi-currency-rupee"></i></div>-->
-<!--                    </div>-->
-<!--                    <p class="kpi-label mb-0">Inventory Value</p>-->
-<!--                    <h3 class="fw-bold fs-2 mb-0">₹12.5L</h3>-->
-<!--                </div>-->
-<!--            </div>-->
         </div>
 
-          <!-- ===== FILTER BAR ===== -->
+         <!-- ===== FILTER BAR ===== -->
         <div class="filter-bar mb-4">
+
             <div class="search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" placeholder="Search User" id="searchInventory">
             </div>
+
+               <div class="d-flex align-items-center gap-2 flex-wrap">
+   <label class="text-muted small fw-medium">Filter by Status:</label>
+<select class="filter-select" id="statusFilter2">
+    <option value="all">All Statuses</option>
+    <option value="out_of_stock">Out of Stock</option>
+    <option value="in_stock" selected>In Stock</option>
+</select>
+</div>
+
             <button class="btn-refresh" id="inventoryRefresh">
                 <i class="bi bi-arrow-repeat fs-5"></i>
             </button>
         </div>
+
 
        <div class="row g-4">
     <!-- Changed col-lg-13 to col-12 (Bootstrap grid is 12 columns) -->
@@ -493,24 +484,7 @@
             </div>
         </div>
 
-        <div class="filter-bar mb-4">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" id="SearchPo" placeholder="Search Purchase Order">
-            </div>
 
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-    <label class="text-muted small fw-medium">Filter by Status:</label>
-    <select class="filter-select" id="statusFilter">
-        <option value="all">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="completed">Completed</option> <!-- Fixed value here -->
-        <option value="rejected">Rejected</option>
-        <option value="new po">new po</option>
-    </select>
-</div>
-            <button class="btn-filter"><i class="bi bi-funnel"></i> More Filters</button>
-        </div>
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-sm-6 col-lg-3">
@@ -519,7 +493,7 @@
                         <div class="icon-box bg-dark"><i class="bi bi-receipt"></i></div>
                         <span class="trend-label text-secondary">+12%</span>
                     </div>
-                    <p class="kpi-label mb-0">Total POs</p>
+                    <p class="kpi-label mb-0">Total  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-total-po">0</h3>
                 </div>
             </div>
@@ -530,7 +504,7 @@
                         <div class="icon-box bg-orange"><i class="bi bi-clock"></i></div>
                         <span class="trend-label text-warning">24 High</span>
                     </div>
-                    <p class="kpi-label mb-0">Pending Approvals</p>
+                    <p class="kpi-label mb-0">Pending  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-pending-po">0</h3>
                 </div>
             </div>
@@ -541,7 +515,7 @@
                         <div class="icon-box bg-green"><i class="bi bi-check-circle"></i></div>
                         <span class="trend-label text-success">88% Rate</span>
                     </div>
-                    <p class="kpi-label mb-0">Completed Orders</p>
+                    <p class="kpi-label mb-0">Completed  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-approved-po">0</h3>
                 </div>
             </div>
@@ -552,11 +526,30 @@
                         <div class="icon-box bg-red"><i class="bi bi-x-circle"></i></div>
                         <span class="trend-label text-danger">-5% MoM</span>
                     </div>
-                    <p class="kpi-label mb-0">Rejected Orders</p>
+                    <p class="kpi-label mb-0">Rejected  ORDERS</p>
                     <h3 class="fw-bold fs-2 mb-0" id="kpi-rejected-po">0</h3>
                 </div>
             </div>
         </div>
+
+
+            <!-- Filter Bar -->
+    <div class="filter-bar mb-4">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="SearchPo" placeholder="Search Purchase Order">
+        </div>
+           <div class="d-flex align-items-center gap-2 flex-wrap">
+    <label class="text-muted small fw-medium">Filter by Status:</label>
+    <select class="filter-select" id="statusFilter1">
+        <option value="all">All Statuses</option>
+        <option value="pending">Pending</option>
+        <option value="completed">Completed</option> <!-- Fixed value here -->
+        <option value="rejected">Rejected</option>
+        <option value="new po">new po</option>
+    </select>
+</div>
+    </div>
 
         <div class="row g-4">
             <div class="col-lg-13">
@@ -612,7 +605,7 @@
     </section>
 </main>
 
- <!-- Change Password Modal -->
+<!-- Change Password Modal -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -622,14 +615,28 @@
             </div>
             <form id="changePasswordForm">
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Email ID</label>
-                        <input type="email" class="form-control" id="pwd_email" required readonly>
+
+                    <!-- Password Requirements Instruction Block -->
+                    <div class="alert alert-info py-2 px-3 mb-3 small border-0 bg-light-info text-dark rounded-3">
+                        <div class="fw-bold mb-1 text-primary">
+                            <i class="bi bi-info-circle me-1"></i> Password Requirements:
+                        </div>
+                        <ul class="mb-0 ps-3 text-muted" style="font-size: 0.85rem;">
+                            <li>Minimum <strong>8 characters</strong> long</li>
+                            <li>At least one <strong>uppercase letter</strong> (A-Z)</li>
+                            <li>At least one <strong>lowercase letter</strong> (a-z)</li>
+                            <li>At least one <strong>number</strong> (0-9)</li>
+                            <li>At least one <strong>special character</strong> (!@#$%^&* etc.)</li>
+                        </ul>
                     </div>
+
+                    <!-- New Password Field -->
                     <div class="mb-3">
                         <label class="form-label">New Password</label>
                         <input type="password" class="form-control" id="pwd_new" required placeholder="Enter new password">
                     </div>
+
+                    <!-- Confirm Password Field -->
                     <div class="mb-3">
                         <label class="form-label">Confirm Password</label>
                         <input type="password" class="form-control" id="pwd_confirm" required placeholder="Confirm new password">
@@ -699,7 +706,7 @@
         <h5 class="modal-title" id="statusModalLabel">Status Update</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="statusUpdateForm" onsubmit="submitStatusUpdate(event)">
+      <form id="statusUpdateForm" onsubmit="window.submitStatusUpdate(event); return false;">
           <div class="modal-body">
             <input type="hidden" id="modal_po_number" name="po_number">
 
@@ -788,7 +795,7 @@
 </div>
 
 <!-- TO VIEW INVENTORY DETAILS -->
-<div class="modal fade" id="inventoryDetailsModal" tabindex="-1" aria-labelledby="inventoryDetailsModalLabel" aria-hidden="true">
+<div class="modal fade" id="inventoryDetailsModal" tabindex="-1" aria-labelledby="inventoryDetailsModalLabel" >
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -903,7 +910,7 @@
 
 
 <script>
-    function showpage(pageId) {
+     function showpage(pageId) {
         // 1. Hide all pages
         document.querySelectorAll('.page').forEach(page => {
             page.style.display = "none";
@@ -924,11 +931,22 @@
             page.style.display = "block";
         }
 
-        // 4. Update active CSS class in sidebar
-        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
-        if (activeNavItem) {
-            activeNavItem.classList.add('active');
-        }
+         // 4. Update active CSS class in sidebar
+    const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
+    }
+
+    // 5. Reload data & reset filters for StoreKeeper screens
+    if (pageId === "Store" && typeof loadStoreInventory === "function") {
+        loadStoreInventory(); // Storekeeper Dashboard
+    } else if (pageId === "page6" && typeof loadMaterialsAndKPIs === "function") {
+        loadMaterialsAndKPIs(); // Inventory
+    } else if (pageId === "page4" && typeof loadSuppliersAndKPIs === "function") {
+        loadSuppliersAndKPIs(); // Suppliers
+    } else if (pageId === "page5" && typeof refreshAllData === "function") {
+        refreshAllData(); // Purchase Orders
+    }
 
         // 5. Save current page in URL hash and localStorage
         if (pageId !== "logout") {

@@ -15,28 +15,37 @@ try:
     )
     cursor = conn.cursor()
 
-    # 1. Total Materials Count (Card 1: materials table count)
+    # 1. Total Materials Count (Card 1)
     cursor.execute("SELECT COUNT(*) FROM materials")
     total_materials = cursor.fetchone()[0] or 0
 
-    # 2. Total Available Stock Volume (Card 2: SUM of opening_stock from materials table)
+    # 2. Total Available Stock Volume (Card 2)
     cursor.execute("SELECT COALESCE(SUM(opening_stock), 0) FROM materials")
     available_stock = float(cursor.fetchone()[0] or 0)
 
     # 3. Total PO Count (Card 3: count of purchased_order table)
-    cursor.execute("SELECT COUNT(*) FROM purchased_order")
-    po_matched_materials = cursor.fetchone()[0] or 0
+    try:
+        cursor.execute("SELECT COUNT(*) FROM purchased_order")
+        po_matched_materials = cursor.fetchone()[0] or 0
+    except Exception:
+        po_matched_materials = 0
 
-    # 4.  Deliveries Count (Card 4: expected_delivery <= CURDATE() from purchased_order table)
-    cursor.execute(
-        "SELECT COUNT(*) FROM purchased_order WHERE expected_delivery IS NOT NULL AND expected_delivery <= CURDATE()")
-    due_deliveries = cursor.fetchone()[0] or 0
+    # 4. Deliveries Count (Card 4)
+    try:
+        cursor.execute(
+            "SELECT COUNT(*) FROM purchased_order WHERE expected_delivery IS NOT NULL AND expected_delivery <= "
+            "CURDATE()")
+        due_deliveries = cursor.fetchone()[0] or 0
+    except Exception:
+        due_deliveries = 0
 
     # 5. Fetch Materials to generate Main Inventory Summary Bento Cards
+    # Grouping by material_name to sum opening_stock and remove duplicates
     cursor.execute("""
-        SELECT material_name, opening_stock, unit, 
+        SELECT material_name, SUM(opening_stock) AS total_opening_stock, MAX(unit) AS unit 
         FROM materials 
-        ORDER BY material_id DESC
+        GROUP BY LOWER(material_name)
+        ORDER BY MAX(material_id) DESC
     """)
     materials_list = cursor.fetchall()
 
@@ -44,26 +53,25 @@ try:
     stock_cards_html = ""
 
     for index, item in enumerate(materials_list):
-        mat_name, opening_stock, unit, reorder_level = item
+        mat_name, opening_stock, unit = item
 
         # Formatting stock display
         stock_val = float(opening_stock or 0)
         stock_formatted = f"{stock_val:,.0f}" if stock_val.is_integer() else f"{stock_val:,.2f}"
         unit_str = unit if unit else "Kg"
 
-        # Calculate dynamic progress fill percentage relative to reorder level or max stock cap
-        r_level = float(reorder_level or 1000)
-        percentage = min(100, max(15, int((stock_val / (r_level * 2)) * 100))) if r_level > 0 else 50
+        # Safe progress percentage without relying on reorder_level
+        percentage = min(100, max(20, int((stock_val / 1000) * 100))) if stock_val > 0 else 10
 
         icon_class = icons[index % len(icons)]
 
         stock_cards_html += f"""
-        <div class="col-md-4">
-            <div class="stock-item border p-3 rounded-3">
+        <div class="col-md-4 mb-3">
+            <div class="stock-item border p-3 rounded-3 shadow-sm bg-white">
                 <div class="icon-circle mb-2">
                     <i class="bi {icon_class}"></i>
                 </div>
-                <p class="fw-bold mb-0">{mat_name}</p>
+                <p class="fw-bold mb-0 text-dark">{mat_name}</p>
                 <h4 class="fw-bold mt-2">{stock_formatted} <span class="fs-6 fw-normal text-muted">{unit_str}</span></h4>
                 <div class="progress-stock mt-2" style="height: 6px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
                     <div class="progress-fill bg-primary" style="width: {percentage}%; height: 100%;"></div>

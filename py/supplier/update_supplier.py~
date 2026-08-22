@@ -18,7 +18,7 @@ try:
     phone = form.getvalue("phone", "").strip()
     email = form.getvalue("email", "").strip()
     material_supplied = form.getvalue("material_supplied", "").strip()
-    # status = form.getvalue("status", "").strip()
+    status = form.getvalue("status", "").strip()
 
     if not supplier_code:
         print(json.dumps({"status": "error", "message": "Supplier code is missing."}))
@@ -37,9 +37,9 @@ try:
     # Update supplier record in database
     cursor.execute("""
         UPDATE supplier 
-        SET phone = %s, email = %s, material_supplied = %s
+        SET phone = %s, email = %s, material_supplied = %s, status = %s 
         WHERE supplier_code = %s
-    """, (phone, email, material_supplied, supplier_code))
+    """, (phone, email, material_supplied, status, supplier_code))
 
     cursor.close()
     conn.close()

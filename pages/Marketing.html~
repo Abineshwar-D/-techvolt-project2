@@ -68,18 +68,13 @@
         <button class="sidebar-toggle" id="sidebarToggle">
             <i class="bi bi-list"></i>
         </button>
-        <div class="search-box d-none d-md-flex">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Search customers or enquiries...">
-        </div>
+
     </div>
 
     <div class="d-flex align-items-center gap-3">
 
 
-        <button class="btn btn-link text-muted p-0 text-decoration-none">
-            <i class="bi bi-gear fs-5"></i>
-        </button>
+
 
        <div class="d-flex align-items-center gap-3 ps-3 border-start">
     <div class="user-details text-end">
@@ -97,8 +92,6 @@
         <!-- Dropdown Menu -->
         <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="header-user-avatar">
             <li class="px-3 py-2 border-bottom">
-                <span class="d-block text-muted small">Logged in as:</span>
-                <strong id="header-dropdown-userid" class="text-primary">EMP000</strong>
             </li>
             <li>
                 <label class="dropdown-item mb-0" style="cursor: pointer;">
@@ -267,16 +260,24 @@
             <div class="px-4 py-3 border-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <h5 class="fw-bold mb-0">Recent Orders</h5>
                  <div class="d-flex align-items-center gap-2 ms-md-auto">
-        <!-- Search Input -->
-        <div class="position-relative flex-grow-1" style="max-width: 260px;">
-            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-            <input type="text" id="searchOrder" class="form-control rounded-3 ps-5" placeholder="Search Orders" style="background: #f2f4f6; border: 1px solid #c6c6cd; padding: 6px 12px 6px 40px; font-size: 14px;">
-        </div>
+
+      <form autocomplete="off" onsubmit="return false;" style="margin: 0;">
+    <div class="position-relative flex-grow-1 flex-md-grow-0" style="max-width: 260px;">
+        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+        <input type="text"
+               id="searchOrder"
+               name="order_search_field"
+               autocomplete="off"
+               class="form-control rounded-3 ps-5"
+               placeholder="Search Orders"
+               style="background: #f2f4f6; border: 1px solid #c6c6cd; padding: 6px 12px 6px 40px; font-size: 14px;">
+    </div>
+</form>
 
         <!-- Filter Select -->
         <div class="filter-bar">
             <div class="select-wrapper">
-                <select class="filter-select">
+                <select class="filter-select" id="orderStatusFilter">
                     <option value="All Status">All Status</option>
                     <option value="Running">Running</option>
                     <option value="Completed">Completed</option>
@@ -583,14 +584,19 @@
 
            <!-- ===== FILTER BAR ===== -->
         <div class="filter-bar mb-4">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Search User" id="searchEnquiry">
-            </div>
 
-            <button class="btn-refresh" id="enquiryRefresh">
-                <i class="bi bi-arrow-repeat fs-5"></i>
-            </button>
+           <form autocomplete="off" onsubmit="return false;" style="margin: 0;">
+    <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text"
+               id="searchEnquiry"
+               name="enquiry_search_field"
+               autocomplete="off"
+               placeholder="Search Fabric Type">
+    </div>
+</form>
+
+
         </div>
 
         <div class="row g-4">
@@ -780,7 +786,7 @@
         </div>
     </section>
 
-    <!-- Change Password Modal -->
+<!-- Change Password Modal -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -790,14 +796,31 @@
             </div>
             <form id="changePasswordForm">
                 <div class="modal-body">
+                    <!-- Email ID Field -->
                     <div class="mb-3">
-                        <label class="form-label">Email ID</label>
-                        <input type="email" class="form-control" id="pwd_email" required readonly>
                     </div>
+
+                    <!-- Password Requirements Instruction Block -->
+                    <div class="alert alert-info py-2 px-3 mb-3 small border-0 bg-light-info text-dark rounded-3">
+                        <div class="fw-bold mb-1 text-primary">
+                            <i class="bi bi-info-circle me-1"></i> Password Requirements:
+                        </div>
+                        <ul class="mb-0 ps-3 text-muted" style="font-size: 0.85rem;">
+                            <li>Minimum <strong>8 characters</strong> long</li>
+                            <li>At least one <strong>uppercase letter</strong> (A-Z)</li>
+                            <li>At least one <strong>lowercase letter</strong> (a-z)</li>
+                            <li>At least one <strong>number</strong> (0-9)</li>
+                            <li>At least one <strong>special character</strong> (!@#$%^&* etc.)</li>
+                        </ul>
+                    </div>
+
+                    <!-- New Password Field -->
                     <div class="mb-3">
                         <label class="form-label">New Password</label>
                         <input type="password" class="form-control" id="pwd_new" required placeholder="Enter new password">
                     </div>
+
+                    <!-- Confirm Password Field -->
                     <div class="mb-3">
                         <label class="form-label">Confirm Password</label>
                         <input type="password" class="form-control" id="pwd_confirm" required placeholder="Confirm new password">
@@ -853,54 +876,134 @@
   </div>
 </div>
 
-   <!-- THIS MODAL IS FOR EDIT ENQUIRY DETAILS -->
-<div class="modal fade" id="editEnquiryModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+     <!-- THIS MODEL IS FOR ORDER DETAILS -->
+<div class="modal fade" id="detailsModal1" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content shadow rounded-4">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editModalLabel"><i class="bi bi-pencil-square"></i> Edit Customer & Enquiry Details</h5>
+                <h5 class="modal-title" id="detailsModalLabel"><i class="bi bi-person-circle"></i> Customer & Order Details</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editEnquiryForm">
-                <div class="modal-body">
-                    <!-- Hidden field to store the Database ID -->
-                    <input type="hidden" id="edit_db_id" name="db_id">
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="card border-0 bg-light p-2">
-                                <label for="edit_customer_name" class="form-label text-muted small mb-1">Customer Name</label>
-                                <input type="text" class="form-control fw-bold border-0 bg-white" id="edit_customer_name" name="customer_name" required>
-                            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Order Number</small>
+                            <h6 class="fw-bold mb-0" id="modalOrderNumber">--</h6>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card border-0 bg-light p-2">
-                                <label for="edit_phone" class="form-label text-muted small mb-1">Phone Number</label>
-                                <input type="text" class="form-control fw-bold border-0 bg-white" id="edit_phone" name="phone_number" required>
-                            </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Customer Name</small>
+                            <h6 class="fw-bold mb-0" id="modalCustomerName1">--</h6>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card border-0 bg-light p-2">
-                                <label for="edit_email" class="form-label text-muted small mb-1">Email Address</label>
-                                <input type="email" class="form-control fw-bold border-0 bg-white" id="edit_email" name="email" required>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Fabric Type</small>
+                            <h6 class="fw-bold mb-0" id="modalFabric1">--</h6>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card border-0 bg-light p-2">
-                                <label for="edit_quantity" class="form-label text-muted small mb-1">Quantity (Kg)</label>
-                                <input type="number" step="0.01" class="form-control fw-bold border-0 bg-white" id="edit_quantity" name="quantity" required>
-                            </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Color</small>
+                            <h6 class="fw-bold mb-0" id="modalColor1">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Quantity</small>
+                            <h6 class="fw-bold mb-0" id="modalQuantity">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Price per Kg</small>
+                            <h6 class="fw-bold mb-0" id="modalPricePerKg">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Total Amount</small>
+                            <h6 class="fw-bold mb-0 text-success" id="modalTotalAmount">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Status</small><br>
+                            <span class="badge bg-secondary" id="modalStatusBadge1">--</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Order Date</small>
+                            <h6 class="fw-bold mb-0" id="modalOrderDate">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Delivery Date</small>
+                            <h6 class="fw-bold mb-0" id="modalDeliveryDate">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Created By Name</small>
+                            <h6 class="fw-bold mb-0" id="modalCreatedBy">--</h6>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card border-0 bg-light p-2">
+                            <small class="text-muted">Description / Remarks</small>
+                            <p class="mb-0 mt-1" id="modalRemarks1">--</p>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4">Update</button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>
+
+    <!-- View Enquiry Modal -->
+<div class="modal fade" id="viewEnquiryModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="viewModalLabel"><i class="bi bi-person-lines-fill me-2"></i>Customer Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalLoading" class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="modalDetails" style="display: none;">
+          <div class="row g-3">
+            <div class="col-md-6"><strong>Customer Name:</strong> <span id="v_customer_name" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Company Name:</strong> <span id="v_company_name" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Phone Number:</strong> <span id="v_phone_number" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Fabric Type:</strong> <span id="v_fabric_type" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Color:</strong> <span id="v_color" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Price:</strong> <span id="v_price" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Quantity:</strong> <span id="v_quantity" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>City:</strong> <span id="v_city" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>State:</strong> <span id="v_state" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Created At:</strong> <span id="v_created_at" class="text-muted"></span></div>
+            <div class="col-md-6"><strong>Created By Name:</strong> <span id="v_created_by_name" class="text-muted"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 </main>
 
@@ -936,10 +1039,19 @@
         }
 
         // 4. Update the active CSS class in the sidebar
-        const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
-        if (activeNavItem) {
-            activeNavItem.classList.add('active');
-        }
+    const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
+    }
+
+    // 5. Automatically reload data & reset filters for Marketing screens
+    if (pageId === "page1" && typeof loadMarketingDashboard === "function") {
+        loadMarketingDashboard(); // Dashboard Overview
+    } else if (pageId === "Enquiry" && typeof loadEnquiries === "function") {
+        fetchEnquiryData(); // Customer Enquiries
+    } else if (pageId === "page3" && typeof loadOrdersAndKPIs === "function") {
+        loadOrdersAndKPIs(); // Orders
+    }
 
         // 5. Save current page in URL hash and localStorage
         if (pageId !== "logout") {

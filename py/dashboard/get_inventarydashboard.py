@@ -32,18 +32,18 @@ try:
 
     # 4. Deliveries Count (Card 4)
     try:
-        cursor.execute(
-            "SELECT COUNT(*) FROM purchased_order WHERE expected_delivery IS NOT NULL AND expected_delivery <= CURDATE()")
+        cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE LOWER(status) = 'rejected'")
         due_deliveries = cursor.fetchone()[0] or 0
     except Exception:
         due_deliveries = 0
 
     # 5. Fetch Materials to generate Main Inventory Summary Bento Cards
-    # (Removed 'reorder_level' column from SQL query)
+    # Grouping by material_name to sum opening_stock and remove duplicates
     cursor.execute("""
-        SELECT material_name, opening_stock, unit 
+        SELECT material_name, SUM(opening_stock) AS total_opening_stock, MAX(unit) AS unit 
         FROM materials 
-        ORDER BY material_id DESC
+        GROUP BY LOWER(material_name)
+        ORDER BY MAX(material_id) DESC
     """)
     materials_list = cursor.fetchall()
 

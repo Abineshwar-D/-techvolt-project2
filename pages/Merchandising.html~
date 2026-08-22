@@ -1060,25 +1060,20 @@
     if (!page) return;
     page.style.display = (pageId === "logout") ? "flex" : "block";
 
-     // 4. Update active sidebar item
+    // 4. Update active sidebar item
     const activeNavItem = document.querySelector(`.sidebar .nav-item[onclick*="'${pageId}'"]`);
     if (activeNavItem) activeNavItem.classList.add('active');
-
-    // 5. Automatically reload data & reset filters for Merchandising screens
-    if (pageId === "page1" && typeof fetchKPIData === "function") {
-        fetchKPIData(); // Dashboard
-    } else if (pageId === "page3" && typeof loadOrdersAndKPIs === "function") {
-        loadOrdersAndKPIs(); // Orders
-    } else if (pageId === "page5" && typeof refreshAllData === "function") {
-        refreshAllData(); // Purchase Orders
-    } else if (pageId === "page4" && typeof loadSuppliersAndKPIs === "function") {
-        loadSuppliersAndKPIs(); // Suppliers
-    }
 
     // 5. Save current page
     if (pageId !== "logout") {
         window.location.hash = pageId;
         localStorage.setItem("activePage", pageId);
+    }
+
+    // --- CLEAR ORDERS SEARCH ON TAB SWITCH ---
+    const searchOrder = document.getElementById("searchOrder");
+    if (searchOrder) {
+        searchOrder.value = "";
     }
 }
 

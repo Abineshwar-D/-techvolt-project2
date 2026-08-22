@@ -6,6 +6,7 @@ import pymysql
 import json
 import os
 import time
+import re
 
 cgitb.enable()
 print("Content-Type: application/json\r\n\r\n")
@@ -25,6 +26,29 @@ def get_db_connection():
         database="techvoltproject2",
         cursorclass=pymysql.cursors.DictCursor
     )
+
+
+def validate_password(password):
+    """
+    Validates password criteria:
+    - Minimum 8 characters
+    - At least 1 uppercase letter
+    - At least 1 lowercase letter
+    - At least 1 number
+    - At least 1 special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return False, "Password must contain at least one number."
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>/?]", password):
+        return False, "Password must contain at least one special character."
+
+    return True, "Valid"
 
 
 if user_id:
@@ -57,48 +81,47 @@ if user_id:
             if "profile_pic" in form:
                 fileitem = form["profile_pic"]
 
-                # Retrieve filename safely
-                filename_orig = getattr(fileitem, 'filename', None)
+                # Check for file content
+                if fileitem.file or fileitem.value:
+                    # Explicit absolute path to XAMPP htdocs uploads folder
+                    upload_dir = r"C:\xampp\htdocs\techvoltInstituteProject\uploads"
 
-                if filename_orig:
-                    # Target physical folder: C:\xampp\htdocs\techvoltInstituteProject\uploads
-                    script_dir = os.path.dirname(os.path.abspath(__file__))
-                    project_root = os.path.dirname(script_dir)
-                    upload_dir = os.path.join(project_root, "uploads")
-
-                    # Ensure directory exists
                     if not os.path.exists(upload_dir):
-                        os.makedirs(upload_dir, exist_ok=True)
+                        try:
+                            os.makedirs(upload_dir, exist_ok=True)
+                        except Exception as mkdir_err:
+                            raise Exception(f"Cannot create uploads directory at {upload_dir}: {str(mkdir_err)}")
 
+                    filename_orig = getattr(fileitem, 'filename', 'avatar.png')
                     ext = os.path.splitext(os.path.basename(filename_orig))[1].lower()
-                    if not ext:
+                    if not ext or len(ext) > 5:
                         ext = ".png"
 
                     new_filename = f"avatar_{user_id}_{int(time.time())}{ext}"
                     filepath = os.path.join(upload_dir, new_filename)
 
-                    # --- FAIL-SAFE FILE WRITING ---
-                    file_data = None
-
-                    # Method A: Try reading binary file stream
+                    # Extract file bytes properly
+                    data_to_write = None
                     if hasattr(fileitem, 'file') and fileitem.file:
                         fileitem.file.seek(0)
-                        file_data = fileitem.file.read()
+                        data_to_write = fileitem.file.read()
+                    elif hasattr(fileitem, 'value') and fileitem.value:
+                        data_to_write = fileitem.value
 
-                    # Method B: Fallback to .value
-                    if not file_data and hasattr(fileitem, 'value'):
-                        file_data = fileitem.value
+                    if data_to_write:
+                        # Write binary bytes to physical disk
+                        try:
+                            with open(filepath, "wb") as f:
+                                if isinstance(data_to_write, str):
+                                    f.write(data_to_write.encode('utf-8', errors='ignore'))
+                                else:
+                                    f.write(data_to_write)
+                        except Exception as write_err:
+                            raise Exception(f"Write Permission Denied for {filepath}: {str(write_err)}")
 
-                    if file_data:
-                        # Write bytes to disk
-                        with open(filepath, "wb") as f:
-                            if isinstance(file_data, str):
-                                f.write(file_data.encode('latin1'))
-                            else:
-                                f.write(file_data)
-
-                        # Check if file was physically created
+                        # Verify file exists on disk
                         if os.path.exists(filepath) and os.path.getsize(filepath) > 0:
+                            # Absolute URL Path for XAMPP Browser
                             web_path = f"/techvoltInstituteProject/uploads/{new_filename}"
 
                             rows = cur.execute("UPDATE users SET profile_pic=%s WHERE employee_id=%s",
@@ -114,29 +137,33 @@ if user_id:
                                 "image_url": web_path
                             }
                         else:
-                            response = {"success": False, "message": f"File created but empty at path: {filepath}"}
+                            response = {"success": False, "message": f"File could not be verified at {filepath}"}
                     else:
-                        response = {"success": False, "message": "Could not read binary data from uploaded file."}
+                        response = {"success": False, "message": "Unable to read binary contents of file upload."}
                 else:
-                    response = {"success": False, "message": "No file chosen or filename missing."}
+                    response = {"success": False, "message": "No file content received."}
             else:
-                response = {"success": False, "message": "Form field 'profile_pic' missing."}
+                response = {"success": False, "message": "Form input parameter 'profile_pic' missing."}
 
-        # CHANGE PASSWORD
+        # CHANGE PASSWORD WITH VALIDATION
         elif action == "change_password":
             new_password = form.getvalue("new_password")
             if new_password:
-                rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
-                if rows == 0:
-                    cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                is_valid, val_message = validate_password(new_password)
+                if not is_valid:
+                    response = {"success": False, "message": val_message}
+                else:
+                    rows = cur.execute("UPDATE users SET password=%s WHERE employee_id=%s", (new_password, user_id))
+                    if rows == 0:
+                        cur.execute("UPDATE admin SET password=%s WHERE employee_id=%s", (new_password, user_id))
 
-                con.commit()
-                response = {"success": True, "message": "Password updated successfully!"}
+                    con.commit()
+                    response = {"success": True, "message": "Password updated successfully!"}
             else:
                 response = {"success": False, "message": "New password is required"}
 
         con.close()
     except Exception as e:
-        response = {"success": False, "message": f"Python Script Error: {str(e)}"}
+        response = {"success": False, "message": f"Server Error: {str(e)}"}
 
 print(json.dumps(response))

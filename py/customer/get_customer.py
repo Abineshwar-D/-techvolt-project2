@@ -159,10 +159,10 @@ try:
             <td class="customer-info">{created_by_display}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="action-btn" title="View" onclick="viewCustomer({db_id})"><i class="bi bi-eye"></i></button>
-                    <button 
-    class="action-btn"
-    value="{row[5]}" 
+                    <button class="action-btn" title="View" onclick="viewCustomer({db_id})"><i class="bi 
+                    bi-eye"></i></button>
+                    
+                     <button class="action-btn" value="{row[5]}"
     data-bs-toggle="modal"
     data-bs-target="#editMarketingModal"
     onclick="editEnquiry(this.value)">

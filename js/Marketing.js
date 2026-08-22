@@ -42,12 +42,8 @@ document.querySelectorAll('.nav-item').forEach(item => {
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function() {
-    calculateTotal();
-    updateFabric();
-    calculateTotal();
-    loadFabricType();
-    updateFabric();
 
+    loadFabricType();
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -76,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchEnquiryData();
-    setInterval(fetchEnquiryData, 10000);
+//    setInterval(fetchEnquiryData, 10000);
 
     updateDashboardStats();
     setInterval(updateDashboardStats, 5000);
@@ -217,227 +213,86 @@ function updateDashboardStats() {
    04. ORDERS SCREEN (PAGE 3)
    ========================================================================== */
 
-function updateFabric() {
-    var fabricSelect = document.querySelector('[name="fabric_type"]');
-    var gsmInput = document.querySelector('[name="gsm"]');
-    var summaryFabric = document.getElementById("summaryFabric");
-    if (fabricSelect && summaryFabric) {
-        var fabricText = fabricSelect.options[fabricSelect.selectedIndex]?.text || "Select Fabric";
-        var gsmText = gsmInput ? gsmInput.value : "0";
-        summaryFabric.textContent = fabricText + " / " + gsmText + " GSM";
-    }
-}
 
-function calculateTotal() {
-    var qtyInput = document.getElementById("quantity1");
-    var priceInput = document.getElementById("price");
-    var summaryTotal = document.getElementById("summaryTotal");
-    var totalAmounts = document.getElementById('totalAmounts');
-    var summaryValue = document.getElementById('summaryValue');
-
-    if (qtyInput && priceInput) {
-        var qty = parseFloat(qtyInput.value) || 0;
-        var priceVal = parseFloat(priceInput.value) || 0;
-        var total = qty * priceVal;
-
-        if (summaryTotal) summaryTotal.textContent = "₹ " + total.toLocaleString();
-
-        var formatter = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0
-        });
-
-        var formattedTotal = formatter.format(total);
-
-        if (totalAmounts) totalAmounts.innerText = formattedTotal;
-        if (summaryValue) summaryValue.textContent = formattedTotal;
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function() {
-    document.addEventListener('click', function (event) {
-        var btn = event.target.closest('.view-details-btn');
-        if (btn) {
-            event.preventDefault();
-
-            var customer = btn.getAttribute('data-customer');
-            var contact = btn.getAttribute('data-contact');
-            var orderNo = btn.getAttribute('data-order');
-            var fabric = btn.getAttribute('data-fabric');
-            var gsm = btn.getAttribute('data-gsm');
-            var color = btn.getAttribute('data-color');
-            var total = btn.getAttribute('data-total');
-            var remarks = btn.getAttribute('data-remarks');
-            var priority = btn.getAttribute('data-priority');
-
-            document.getElementById('modalCustomerName').innerText = customer || "--";
-            document.getElementById('modalEmail').innerText = contact || "--";
-            document.getElementById('modalPhone').innerText = orderNo || "--";
-            document.getElementById('modalFabric').innerText = (fabric || "") + " (" + (gsm || "") + " GSM)";
-            document.getElementById('modalColor').innerText = color || "--";
-            document.getElementById('modalPrice').innerText = "₹" + (total || "0");
-            document.getElementById('modalRemarks').innerText = remarks || "No remarks.";
-
-            var badge = document.getElementById('modalStatusBadge');
-            if (badge) {
-                badge.innerText = (priority || "Active").toUpperCase();
-                badge.className = (priority && priority.toLowerCase() === 'high') ? "badge bg-danger" : "badge bg-primary";
-            }
-        }
-    });
-
-    var searchOrder = document.getElementById("searchOrder");
-    if (searchOrder) {
-        searchOrder.addEventListener("input", function() {
-            var search = this.value.trim().toLowerCase();
-            var rows = document.querySelectorAll("#ordersTableBody tr");
-            rows.forEach(function(row) {
-                row.style.display = row.innerText.toLowerCase().includes(search) ? "" : "none";
-            });
-        });
-    }
-
-    updateFabric();
-    calculateTotal();
-
-    var orderValue = document.getElementById("order_value");
-    var summaryOrderNo = document.getElementById("summaryOrderNo");
-    if (orderValue && summaryOrderNo) {
-        orderValue.addEventListener("input", function() {
-            summaryOrderNo.textContent = this.value;
-        });
-    }
-
-    var quantity1 = document.getElementById("quantity1");
-    var summaryWeight = document.getElementById("summaryWeight");
-    if (quantity1 && summaryWeight) {
-        quantity1.addEventListener("input", function() {
-            summaryWeight.textContent = (Number(this.value) || 0).toLocaleString() + " Kg";
-            calculateTotal();
-        });
-    }
-
-    var fabricSelect = document.querySelector('[name="fabric_type"]');
-    var gsmInput = document.querySelector('[name="gsm"]');
-    if (fabricSelect) fabricSelect.addEventListener("change", updateFabric);
-    if (gsmInput) gsmInput.addEventListener("input", updateFabric);
-
-    var price = document.getElementById("price");
-    if (price) price.addEventListener("input", calculateTotal);
-
-    var orderForm = document.getElementById("orderForm");
-    if (orderForm) {
-        orderForm.addEventListener("submit", function(e) {
-            var submitBtn = this.querySelector('button[type="submit"]') || this.querySelector('.btn-secondary');
-            if (submitBtn) {
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-                submitBtn.disabled = true;
-            }
-        });
-    }
-});
-
+// THIS FUNCTION LOAD TABLE DATA
 function loadOrdersAndKPIs() {
-    console.log("Loading orders and KPIs at:", new Date().toLocaleTimeString());
-
-    const ordersTableBody = document.getElementById("ordersTableBody");
+    var ordersTableBody = document.getElementById("ordersTableBody");
     const urlParams = new URLSearchParams(window.location.search);
-    const currentUserId = urlParams.get('user_id') || ''; // Defined here
+    const currentUserId = urlParams.get('user_id') || '';
 
-    if (!ordersTableBody) {
-        console.error(" ordersTableBody not found");
-        return;
+    if (ordersTableBody) {
+        fetch(`../py/orders/get_orders.py?user_id=${encodeURIComponent(currentUserId)}&t=${new Date().getTime()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success" || data.kpis) {
+                document.getElementById("kpiTotalOrders").innerText = data.kpis.total.toLocaleString();
+                document.getElementById("kpiRunningOrders").innerText = data.kpis.running.toLocaleString();
+                document.getElementById("kpiCompletedOrders").innerText = data.kpis.completed.toLocaleString();
+                document.getElementById("kpiPendingOrders").innerText = data.kpis.pending.toLocaleString();
+
+                ordersTableBody.innerHTML = data.rows_html;
+            } else {
+                ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Failed to load data.</td></tr>";
+            }
+
+             // Reset Search Bar & Orders Status Dropdown
+    const searchInput = document.getElementById("searchOrder");
+    const statusFilter = document.querySelector("#page3 .filter-select");
+
+    if (searchInput) searchInput.value = "";
+    if (statusFilter) statusFilter.value = "All Status";
+        })
+        .catch(err => {
+            console.error("Error loading orders and KPIs:", err);
+            ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Error connecting to server.</td></tr>";
+        });
     }
-
-    const timestamp = new Date().getTime();
-
-    // FIXED: Used currentUserId and fixed parenthesis syntax in fetch()
-    fetch(`../py/orders/get_orders.py?t=${timestamp}&user_id=${currentUserId}`, {
-        headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("Data received successfully");
-
-        if (data.status === "success") {
-            if (document.getElementById("kpiTotalOrders"))
-                document.getElementById("kpiTotalOrders").innerText = data.kpis.total;
-            if (document.getElementById("kpiRunningOrders"))
-                document.getElementById("kpiRunningOrders").innerText = data.kpis.running;
-            if (document.getElementById("kpiCompletedOrders"))
-                document.getElementById("kpiCompletedOrders").innerText = data.kpis.completed;
-            if (document.getElementById("kpiPendingOrders"))
-                document.getElementById("kpiPendingOrders").innerText = data.kpis.pending;
-
-            ordersTableBody.innerHTML = data.rows_html;
-
-            console.log(" Orders and KPIs updated successfully");
-        } else {
-            ordersTableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-danger text-center">
-                         ${data.message || 'Failed to load data'}
-                    </td>
-                </tr>
-            `;
-        }
-    })
-    .catch(err => {
-        console.error("Error:", err);
-        ordersTableBody.innerHTML = `
-            <tr>
-                <td colspan="6" class="text-danger text-center">
-                     Error connecting to server
-                </td>
-            </tr>
-        `;
-    });
 }
 
+// Auto-refresh logic
 document.addEventListener("DOMContentLoaded", function() {
-    console.log(" Page loaded");
     loadOrdersAndKPIs();
-
-    setInterval(loadOrdersAndKPIs, 30000);
+//    setInterval(loadOrdersAndKPIs, 5000);
 });
 
-window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-        console.log("Page from cache - refreshing");
-        loadOrdersAndKPIs();
+window.addEventListener("focus", function() {
+    loadOrdersAndKPIs();
+});
+
+
+//THIS FUNCTION IS USED TO SEARCH ORDER
+document.addEventListener('DOMContentLoaded', function () {
+    const searchOrder = document.getElementById('searchOrder');
+    const ordersTableBody = document.getElementById('ordersTableBody');
+
+    function filterOrders() {
+        const query = searchOrder.value.toLowerCase().trim();
+        const rows = ordersTableBody.getElementsByTagName('tr');
+
+        Array.from(rows).forEach(row => {
+            // Get text from each column
+            const orderNo = row.children[0]?.textContent.toLowerCase() || '';
+            const customer = row.children[1]?.textContent.toLowerCase() || '';
+            const quantity = row.children[2]?.textContent.toLowerCase() || '';
+            const deliveryDate = row.children[3]?.textContent.toLowerCase() || '';
+
+            // Match query against ANY column (Order No, Customer, Quantity, or Date)
+            const matches = orderNo.includes(query) ||
+                            customer.includes(query) ||
+                            quantity.includes(query) ||
+                            deliveryDate.includes(query);
+
+            if (matches) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        });
     }
+
+    // Trigger search on input
+    searchOrder.addEventListener('input', filterOrders);
 });
-
-document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-        console.log("Tab visible - refreshing");
-        loadOrdersAndKPIs();
-    }
-});
-
-console.log(" Script loaded successfully");
-
-//THIS FUNCTION UPDATES THE BALANCE IN THE ENQUIRY FORM
-function updateBalanceFromTotal() {
-    // Read total text, remove '₹' and commas, convert to number
-    let totalText = document.getElementById('totalAmounts').innerText;
-    let totalValue = parseFloat(totalText.replace(/[^0-9.-]+/g, "")) || 0;
-
-    // Calculate 50%
-    let balanceValue = totalValue * 0.50;
-
-    // Update the balance element
-    document.getElementById('balanceAmount').innerText = '₹' + balanceValue.toLocaleString('en-IN');
-}
 
 //THIS FUNCTION HANDLE ORDER VIEW MODAL
 function populateModalDetails(btn) {
@@ -468,35 +323,44 @@ function populateModalDetails(btn) {
     }
 }
 
-// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
-document.addEventListener("DOMContentLoaded", function () {
-    const statusSelect = document.querySelector(".filter-select");
-    const tableBody = document.getElementById("ordersTableBody");
+// THIS FUNCTION HANDLES ORDERS STATUS FILTER
+document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "orderStatusFilter") {
+        const selectedFilter = e.target.value.trim().toLowerCase();
+        const tableBody = document.getElementById("ordersTableBody");
 
-    if (statusSelect && tableBody) {
-        statusSelect.addEventListener("change", function () {
-            const selectedFilter = this.value.trim().toLowerCase();
-
-            // Loop through each table row
+        if (tableBody) {
             const rows = tableBody.querySelectorAll("tr");
 
-            rows.forEach(row => {
-                // Find the Status column badge inside the row (7th column)
+            rows.forEach(function (row) {
                 const statusBadge = row.querySelector("td:nth-child(6) .badge");
 
                 if (statusBadge) {
                     const rowStatus = statusBadge.textContent.trim().toLowerCase();
 
-                    // Show all rows if "All Status" selected, or match selected option
-                    if (selectedFilter === "all status" || rowStatus === selectedFilter) {
+                    if (selectedFilter === "all status" || rowStatus.includes(selectedFilter) || selectedFilter.includes(rowStatus)) {
                         row.style.display = "";
                     } else {
                         row.style.display = "none";
                     }
                 }
             });
-        });
+        }
     }
+});
+
+
+// Ensure both search inputs are cleared immediately upon soft-reload restoration
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const orderSearch = document.getElementById("searchOrder");
+
+        if (orderSearch) orderSearch.value = "";
+
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
 });
 
 // THIS FUNCTION HANDLES ORDER DELETION
@@ -529,7 +393,6 @@ function deleteOrder(orderNo) {
 /* ==========================================================================
    05. CREATE ORDER SCREEN
    ========================================================================== */
-
 function loadOrderDropdown() {
     console.log("Attempting to fetch dropdown...");
 
@@ -608,6 +471,27 @@ function fillOrderForm(enqId) {
         .catch(err => console.error("Form Fill Error:", err));
 }
 
+
+function updateBalanceFromTotal() {
+    // 1. Get the DOM elements
+    const totalElement = document.getElementById('totalAmounts');
+    const balanceElement = document.getElementById('balanceAmount');
+
+    if (!totalElement || !balanceElement) return;
+
+    // 2. Extract numbers only from the string (removes '₹', commas, spaces)
+    const totalText = totalElement.innerText || totalElement.textContent;
+    const numericTotal = parseFloat(totalText.replace(/[^0-9.]/g, '')) || 0;
+
+    // 3. Calculate 50% (Total minus 50% is 50% of Total)
+    const balance = numericTotal * 0.5;
+
+    // 4. Update the Balance Amount HTML with Indian Rupee formatting
+    balanceElement.innerText = '₹' + balance.toLocaleString('en-IN', {
+        maximumFractionDigits: 2
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const select = document.getElementById("customerSelect");
 
@@ -672,6 +556,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
 /* ==========================================================================
    06. CUSTOMER ENQUIRIES SCREEN
    ========================================================================== */
@@ -713,6 +598,14 @@ function fetchEnquiryData() {
                 if (tableBody) {
                     tableBody.innerHTML = data.rows_html;
                 }
+
+                // Reset Search Bar & Status Filter Dropdown
+    const searchInput = document.getElementById("searchEnquiry");
+    const statusFilter = document.getElementById("statusFilter");
+
+    if (searchInput) searchInput.value = "";
+    if (statusFilter) statusFilter.value = "ALL";
+
             } else {
                 console.error('API returned error:', data.message);
             }
@@ -721,6 +614,19 @@ function fetchEnquiryData() {
             console.error('Error fetching enquiry data:', error);
         });
 }
+
+// Individual listener only for searchEnquiry
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("searchEnquiry");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
 
 // 2. Single Event Listener for "Send Sample" & "Send Quotation" Actions
 document.addEventListener("DOMContentLoaded", function () {
@@ -813,7 +719,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Load Initial Data and start auto-refresh
     fetchEnquiryData();
-    setInterval(fetchEnquiryData, 5000);
+//    setInterval(fetchEnquiryData, 5000);
 });
 
 window.addEventListener("focus", function () {
@@ -929,6 +835,49 @@ function filterEnquiriesByStatus() {
       });
     }
   }
+
+  //THIS FUNCTION IS FOR VIEWING CUSTOMER DETAILS
+function viewCustomer(id) {
+    // Show Modal
+    var viewModal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
+    viewModal.show();
+
+    // Toggle Loader/Data view
+    document.getElementById('modalLoading').style.display = 'block';
+    document.getElementById('modalDetails').style.display = 'none';
+
+    // Call the Python CGI script
+    fetch(`../py/customer/get_customer_details.py?id=${id}`)
+        .then(response => response.json())
+        .then(res => {
+            if (res.status === 'success') {
+                const d = res.data;
+                // Populate data inside modal
+                document.getElementById('v_customer_name').innerText = d.customer_name || 'N/A';
+                document.getElementById('v_company_name').innerText = d.company_name || 'N/A';
+                document.getElementById('v_phone_number').innerText = d.phone_number || 'N/A';
+                document.getElementById('v_fabric_type').innerText = d.fabric_type || 'N/A';
+                document.getElementById('v_color').innerText = d.color || 'N/A';
+                document.getElementById('v_price').innerText = d.price ? `₹${d.price}` : 'N/A';
+                document.getElementById('v_quantity').innerText = d.quantity || 'N/A';
+                document.getElementById('v_city').innerText = d.city || 'N/A';
+                document.getElementById('v_state').innerText = d.state || 'N/A';
+                document.getElementById('v_created_at').innerText = d.created_at || 'N/A';
+                document.getElementById('v_created_by_name').innerText = d.created_by_name || 'N/A';
+
+                // Show data
+                document.getElementById('modalLoading').style.display = 'none';
+                document.getElementById('modalDetails').style.display = 'block';
+            } else {
+                alert('Error fetching customer details: ' + res.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to connect to the server.');
+        });
+}
+
 /* ==========================================================================
    07. CREATE ENQUIRY SCREEN
    ========================================================================== */

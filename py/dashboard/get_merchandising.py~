@@ -22,11 +22,11 @@ try:
     cursor.execute("SELECT COUNT(*) FROM orders")
     card1_total_orders = cursor.fetchone()[0]
 
-    # ---------------------------------------------------------
-    # CARD 2: Machine Allocations count where status = 'completed'
-    # ---------------------------------------------------------
-    cursor.execute("SELECT COUNT(*) FROM production_plan WHERE LOWER(status) = 'completed'")
-    card2_completed_allocations = cursor.fetchone()[0]
+    # # ---------------------------------------------------------
+    # # CARD 2: Machine Allocations count where status = 'completed'
+    # # ---------------------------------------------------------
+    # cursor.execute("SELECT COUNT(*) FROM production_plan WHERE LOWER(status) = 'completed'")
+    # card2_completed_allocations = cursor.fetchone()[0]
 
     # ---------------------------------------------------------
     # CARD 3: Total count from 'purchased_order' table
@@ -56,7 +56,7 @@ try:
     # ---------------------------------------------------------
     # CARD 6: Machine Allocations count where end_date <= TODAY
     # ---------------------------------------------------------
-    cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE end_date < CURDATE()")
+    cursor.execute("SELECT COUNT(*) FROM purchased_order WHERE expected_delivery < CURDATE()")
     card6_pending_allocations = cursor.fetchone()[0]
 
     cursor.close()

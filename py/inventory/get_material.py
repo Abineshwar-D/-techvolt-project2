@@ -150,8 +150,8 @@ try:
                 </button>
             """
         else:
-            status_text = "Stored"
-            status_badge = '<span class="badge bg-success">Stored</span>'
+            status_text = "IN STOCK"
+            status_badge = '<span class="badge bg-success"> IN STOCK</span>'
             edit_btn = f"""
                 <button class="action-btn edit-stock-btn" 
                         title="Edit Stock" 
@@ -175,7 +175,7 @@ try:
                     data-status="{status_text}"
                     data-delivery="{formatted_delivery_date}"
                     data-createdby="{created_by}"
-                    onclick="openViewModal(this)">
+                    onclick="openViewModal1(this)">
                 <i class="bi bi-eye"></i>
             </button>
         """
@@ -216,7 +216,7 @@ try:
             </td>
 
             <td class="text-right stock-value">
-                {stock:,.2f} {unit}
+                {stock:,.2f} 
             </td>
 
             <td class="text-center">

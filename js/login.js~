@@ -38,9 +38,3 @@
                 this.closest('.input-group-custom').style.boxShadow = 'none';
             });
         });
-
-        // Clear stale active page session data whenever the user lands on the login page
-document.addEventListener("DOMContentLoaded", function() {
-    localStorage.removeItem("activePage");
-    sessionStorage.removeItem("activePage");
-});

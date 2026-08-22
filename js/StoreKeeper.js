@@ -83,7 +83,10 @@ function loadStoreInventory() {
 
 document.addEventListener("DOMContentLoaded", loadStoreInventory);
 
+window.addEventListener("focus", function() {
+    loadStoreInventory();
 
+});
 /* ==========================================================================
    03. INVENTORY SCREEN (PAGE 6)
    ========================================================================== */
@@ -123,46 +126,101 @@ document.querySelectorAll('.table-custom tbody tr').forEach(row => {
     });
 });
 
-// 1. Get user_id from the browser URL parameter (e.g. StoreKeeper.html?user_id=EMP004#page6)
-const urlParams = new URLSearchParams(window.location.search);
-const userId = urlParams.get('user_id') || '';
 
-// Function to load material table data and KPIs
-function loadMaterialsData() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get('user_id') || '';
+// THIS FUNCTION LOADS MATERIAL TABLE DATA & KPIS
+function loadMaterialsAndKPIs() {
+    var materialTableBody = document.getElementById("materialTableBody");
 
-    // Cache-busting parameter added to force fresh data from server
-    fetch(`../py/inventory/get_material.py?user_id=${encodeURIComponent(userId)}&_t=${new Date().getTime()}`)
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            console.error("Database Error:", data.error);
-            return;
-        }
+    if (materialTableBody) {
+        // Extract user_id from browser URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id') || '';
 
-        const totalMat = document.getElementById("totalMaterials");
-        const availStock = document.getElementById("availableStock");
-        const poMatched = document.getElementById("poMatchedMaterials");
-        const matTbody = document.getElementById("materialTableBody");
+        // Pass user_id and cache-busting timestamp parameter in the fetch request
+        fetch(`../py/inventory/get_material.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error("Database Error:", data.error);
+                return;
+            }
 
-        if (totalMat) totalMat.innerText = data.total_materials;
-        if (availStock) availStock.innerText = data.available_stock;
-        if (poMatched) poMatched.innerText = data.po_matched_count;
-        if (matTbody) matTbody.innerHTML = data.table_html;
-    })
-    .catch(error => console.error("Fetch Error:", error));
+            // Update KPI Cards
+            const totalMat = document.getElementById("totalMaterials");
+            const availStock = document.getElementById("availableStock");
+            const poMatched = document.getElementById("poMatchedMaterials");
+
+            if (totalMat) totalMat.innerText = data.total_materials;
+            if (availStock) availStock.innerText = data.available_stock;
+            if (poMatched) poMatched.innerText = data.po_matched_count;
+
+            // Update Table
+            materialTableBody.innerHTML = data.table_html;
+
+            // 1. Force the filter dropdown to "in_stock" on load
+            const statusFilter = document.getElementById("statusFilter2");
+            if (statusFilter) {
+                statusFilter.value = "in_stock";
+            }
+
+           // Add/update inside loadMaterialsAndKPIs() in StoreKeeper.js
+const searchInput = document.getElementById("searchInventory");
+
+
+if (searchInput) searchInput.value = "";
+
+
+            // 3. Apply the filter to hide non-matching rows immediately
+            filterMaterialTable();
+        })
+        .catch(err => {
+            console.error("Error loading materials and KPIs:", err);
+            materialTableBody.innerHTML = "<tr><td colspan='6' class='text-danger text-center'>Error connecting to server.</td></tr>";
+        });
+    }
 }
 
+// THIS FUNCTION FILTERS MATERIAL TABLE DATA BY STATUS
+function filterMaterialTable() {
+    const statusFilter = document.getElementById("statusFilter2");
+    if (!statusFilter) return;
+
+    const selectedFilter = statusFilter.value.trim().toLowerCase();
+    const rows = document.querySelectorAll("#materialTableBody tr");
+
+    rows.forEach(row => {
+        const statusCell = row.cells[4]; // 5th column (Status)
+        if (!statusCell) return;
+
+        const statusText = statusCell.textContent.replace(/\s+/g, ' ').trim().toLowerCase();
+
+        if (selectedFilter === "all") {
+            row.style.display = ""; // Show all rows
+        }
+        else if (selectedFilter === "out_of_stock" && statusText.includes("out of stock")) {
+            row.style.display = ""; // Show Out of Stock
+        }
+        else if (selectedFilter === "in_stock" && statusText.includes("in stock")) {
+            row.style.display = ""; // Show In Stock
+        }
+        else {
+            row.style.display = "none"; // Hide non-matching rows
+        }
+    });
+}
+
+// ATTACH LISTENER TO DROPDOWN
+document.getElementById("statusFilter2")?.addEventListener("change", filterMaterialTable);
+
 // 1. Initial load on page load
-document.addEventListener("DOMContentLoaded", loadMaterialsData);
+document.addEventListener("DOMContentLoaded", loadMaterialsAndKPIs);
 
 // 2. Auto-refresh when user switches back to this tab / window focuses
-window.addEventListener("focus", loadMaterialsData);
+window.addEventListener("focus", loadMaterialsAndKPIs);
 
 document.addEventListener("visibilitychange", function() {
     if (document.visibilityState === "visible") {
-        loadMaterialsData();
+        loadMaterialsAndKPIs();
     }
 });
 
@@ -293,7 +351,7 @@ function submitStockUpdate() {
 }
 
 // THIS FUNCTION IS USED TO OPEN VIEW MODAL AND FETCH DATA OF INVENTORY DETAILS
-function openViewModal(btn) {
+function openViewModal1(btn) {
     document.getElementById('view_material_name').innerText = btn.getAttribute('data-name') || 'N/A';
     document.getElementById('view_unit').innerText = btn.getAttribute('data-unit') || 'N/A';
     document.getElementById('view_opening_stock').innerText = (btn.getAttribute('data-stock') || '0.00') + ' ' + (btn.getAttribute('data-unit') || 'Kg');
@@ -428,8 +486,7 @@ window.addEventListener("focus", function () {
    05. SUPPLIERS SCREEN (PAGE 4)
    ========================================================================== */
 
-
-// THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
+  // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
 function loadSuppliersAndKPIs() {
     var supplierTableBody = document.getElementById("supplierTableBody");
 
@@ -457,6 +514,13 @@ function loadSuppliersAndKPIs() {
 
             // Update Table HTML
             supplierTableBody.innerHTML = data.table_html || '';
+
+           // Add/update inside loadSuppliersAndKPIs() in StoreKeeper.js
+const searchInput = document.getElementById("searchSupplier");
+const supplierStatus = document.getElementById("supplierStatus");
+
+if (searchInput) searchInput.value = "";
+if (supplierStatus) supplierStatus.value = "";
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);
@@ -464,10 +528,23 @@ function loadSuppliersAndKPIs() {
     }
 }
 
+// Individual listener only for searchSupplier
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("searchSupplier");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
 // Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function () {
     loadSuppliersAndKPIs();
-    setInterval(loadSuppliersAndKPIs, 5000);
+//    setInterval(loadSuppliersAndKPIs, 5000);
 });
 
 // Auto-refresh when switching back to this window/screen
@@ -551,12 +628,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Populate Modal Text
             document.getElementById('modalSupplierName').textContent = supplierName;
-            document.getElementById('modalPhone').textContent = phone;
-            document.getElementById('modalEmail').textContent = email;
+            document.getElementById('modalPhone1').textContent = phone;
+            document.getElementById('modalEmail1').textContent = email;
             document.getElementById('modalGstNumber').textContent = gst;
             document.getElementById('modalCity').textContent = city;
             document.getElementById('modalState').textContent = state;
-            document.getElementById('modalCreatedBy').textContent = createdBy;
+            document.getElementById('modalCreatedBy1').textContent = createdBy;
 
             // Handle Material Supplied (Comma split)
             const materialContainer = document.getElementById('modalMaterialSupplied');
@@ -586,6 +663,107 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+
+// Function to open Edit Modal and populate form fields
+function openEditSupplierModal(btn) {
+    const code = btn.getAttribute("data-code");
+    const phone = btn.getAttribute("data-phone") || "";
+    const email = btn.getAttribute("data-email") || "";
+    const materials = btn.getAttribute("data-materials") || "";
+    const status = btn.getAttribute("data-status") || "Active";
+
+    document.getElementById("edit_supplier_code").value = code;
+    document.getElementById("edit_supplier_phone").value = phone;
+    document.getElementById("edit_supplier_email").value = email;
+    document.getElementById("edit_supplier_materials").value = materials;
+
+    const modalEl = document.getElementById("editSupplierModal");
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
+// THIS FUNCTION IS USED TO UPDATE SUPPLIER
+function submitUpdateSupplier() {
+    const code = document.getElementById("edit_supplier_code").value;
+    const phone = document.getElementById("edit_supplier_phone").value;
+    const email = document.getElementById("edit_supplier_email").value;
+    const materials = document.getElementById("edit_supplier_materials").value;
+
+    if (!code) {
+        alert("Supplier Code is missing.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("supplier_code", code);
+    formData.append("phone", phone);
+    formData.append("email", email);
+    formData.append("material_supplied", materials);
+    formData.append("status", status);
+
+    fetch("../py/supplier/update_supplier.py", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            alert(data.message);
+
+            // Hide modal safely
+            const modalEl = document.getElementById("editSupplierModal");
+            const modalInstance = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstance) modalInstance.hide();
+
+            // Refresh table and KPIs
+            if (typeof loadSuppliersAndKPIs === "function") {
+                loadSuppliersAndKPIs();
+            } else {
+                location.reload();
+            }
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(err => {
+        console.error("Update Error:", err);
+        alert("Failed to update supplier record.");
+    });
+}
+
+//THIS FUNCTION IS USED TO TOGGLE SUPPLIER STATUS BLOCK / UNBLOCK
+function toggleSupplierStatus(supplierCode, newStatus) {
+    var actionText = (newStatus.toLowerCase() === 'inactive') ? 'block' : 'unblock';
+
+    // Ask for permission alert
+    var confirmed = confirm("Are you sure you want to " + actionText + " this supplier?");
+
+    if (confirmed) {
+        var formData = new FormData();
+        formData.append('action', 'toggle_status');
+        formData.append('supplier_code', supplierCode);
+        formData.append('new_status', newStatus);
+
+        fetch('../py/supplier/get_supplier.py', {
+            method: 'POST',
+            body: formData
+        })
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(data) {
+            if (data.status === 'success') {
+                alert(data.message);
+                location.reload(); // Reloads table to reflect updated status & toggle button
+            } else {
+                alert('Error: ' + (data.message || 'Failed to update status'));
+            }
+        })
+        .catch(function(error) {
+            alert('Something went wrong while updating status.');
+        });
+    }
+}
 
 /* ==========================================================================
    06. ADD SUPPLIER SCREEN
@@ -635,17 +813,18 @@ function handleSubmit(e) {
    07. PURCHASE ORDERS (PO) SCREEN (PAGE 5)
    ========================================================================== */
 
- const searchInput = document.getElementById("SearchPo");
-    if (searchInput) {
-        searchInput.addEventListener("keyup", function() {
-            let search = this.value.toLowerCase();
-            document.querySelectorAll("#poTableBody tr").forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(search)
-                    ? ""
-                    : "none";
-            });
-        });
-    }
+//SEARCH PO
+document.getElementById("SearchPo").addEventListener("keyup", function () {
+    let search = this.value.toLowerCase();
+
+    document.querySelectorAll("#poTableBody tr").forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(search)
+            ? ""
+            : "none";
+    });
+});
+
+
 
 // Master function to fetch both the Table and the KPIs
 function refreshAllData() {
@@ -653,7 +832,11 @@ function refreshAllData() {
 
     // 1. FETCH TABLE DATA (HTML)
     // Removed the "children.length === 0" check so it can refresh anytime!
-    fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
+   // Get user_id from the current browser URL query string (e.g. ?user_id=AMD007)
+const urlParams = new URLSearchParams(window.location.search);
+const userId = urlParams.get('user_id') || '';
+ // 1. FETCH TABLE DATA (HTML) WITH USER_ID PARAMETER
+    fetch("../py/purchase/get_po_list.py?user_id=" + encodeURIComponent(userId) + "&t=" + new Date().getTime())
         .then(response => {
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
             return response.text();
@@ -661,20 +844,159 @@ function refreshAllData() {
         .then(data => {
             if (data.trim() && tableBody) {
                 tableBody.innerHTML = data;
-            } else {
-                loadSampleData();
+            } else if (tableBody) {
+                // Show a clean message if no data exists instead of crashing
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
             }
+
+            // Set default filter dropdown selection to "new po"
+            const statusFilter = document.getElementById("statusFilter1");
+            if (statusFilter) {
+                statusFilter.value = "new po";
+            }
+
+            // Apply filter immediately after HTML is inserted into table body
+            applyStatusFilter();
+
             if (typeof initializeTableEvents === "function") {
                 initializeTableEvents();
             }
+
+           // Add/update inside refreshAllData() in StoreKeeper.js
+const searchInput = document.getElementById("SearchPo");
+
+
+if (searchInput) searchInput.value = "";
+
         })
         .catch(err => {
             console.error("Table fetch error:", err);
-            loadSampleData();
         });
 
-   // 2. FETCH KPI DATA (JSON)
-fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
+        // Individual listener only for SearchPo
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("SearchPo");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
+
+// Open Modal when pencil button is clicked
+window.openStatusModal = function(poNumber, currentStatus) {
+    document.getElementById('modal_po_number').value = poNumber;
+
+    var selectElem = document.getElementById('modal_status_select');
+    if (currentStatus === "Completed" || currentStatus === "Rejected") {
+        selectElem.value = currentStatus;
+    } else {
+        selectElem.value = "Completed";
+    }
+
+    var myModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
+    myModal.show();
+};
+
+
+// THIS FUNCTION IS USED FOR SUBMITTING THE STATUS UPDATE
+window.submitStatusUpdate = function(event) {
+    if (event) {
+        event.preventDefault(); // Stop native HTML GET form submission
+    }
+
+    var poElem = document.getElementById('modal_po_number');
+    var statusElem = document.getElementById('modal_status_select');
+
+    if (!poElem || !statusElem) {
+        alert("Modal input elements not found.");
+        return;
+    }
+
+    var poNumber = poElem.value;
+    var statusVal = statusElem.value;
+
+    if (!poNumber || !statusVal) {
+        alert("Please select a valid status.");
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('po_number', poNumber);
+    formData.append('status', statusVal);
+
+    // Send POST request to Python backend
+    fetch('../py/purchase/update_po_status.py', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success || data.status === "success") {
+            alert(data.message || "Status updated successfully!");
+
+            // Hide Modal
+            var modalElem = document.getElementById('statusUpdateModal');
+            if (modalElem && typeof bootstrap !== "undefined") {
+                var modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
+                if (modal) modal.hide();
+            }
+
+            // REFRESH TABLE DYNAMICALLY VIA AJAX (DO NOT USE location.reload()!)
+            if (typeof refreshAllData === 'function') {
+                refreshAllData();
+            } else {
+                // Safe fallback preserving user_id in URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('user_id') || localStorage.getItem('user_id') || '';
+                window.location.href = `StoreKeeper.html?user_id=${encodeURIComponent(userId)}#page5`;
+            }
+        } else {
+            alert("Error: " + (data.message || "Failed to update status."));
+        }
+    })
+    .catch(error => {
+        console.error("Status Update Error:", error);
+        alert("System error updating status: " + error);
+    });
+};
+// THIS FUNCTION LOADS TABLE DATA PREFERENCES BY STATUS FILTER
+function applyStatusFilter() {
+    const statusFilter = document.getElementById("statusFilter1");
+    if (!statusFilter) return;
+
+    const filterValue = statusFilter.value.toLowerCase().trim();
+    const rows = document.querySelectorAll("#poTableBody tr");
+
+    rows.forEach(row => {
+        // Skip message row if no records exist
+        if (row.cells.length <= 1) return;
+
+        // Status is in the 5th column (Index 4: 0=PO, 1=Supplier, 2=Material, 3=Qty, 4=Status)
+        const statusCell = row.cells[4];
+
+        if (statusCell) {
+            const statusText = statusCell.textContent.toLowerCase().trim();
+
+            if (filterValue === "all" || statusText === filterValue) {
+                row.style.display = ""; // Show row
+            } else {
+                row.style.display = "none"; // Hide row
+            }
+        }
+    });
+}
+
+
+// 3. LISTEN FOR DROPDOWN CHANGES (When user manually changes option)
+document.getElementById("statusFilter1")?.addEventListener("change", applyStatusFilter);
+
+    // 2. FETCH KPI DATA (JSON)
+   fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
     .then(response => {
         if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
         return response.json();
@@ -709,60 +1031,9 @@ window.addEventListener("focus", function () {
     refreshAllData();
 });
 
-// Open Modal when pencil button is clicked
-window.openStatusModal = function(poNumber, currentStatus) {
-    document.getElementById('modal_po_number').value = poNumber;
-
-    var selectElem = document.getElementById('modal_status_select');
-    if (currentStatus === "Completed" || currentStatus === "Rejected") {
-        selectElem.value = currentStatus;
-    } else {
-        selectElem.value = "Completed";
-    }
-
-    var myModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
-    myModal.show();
-};
-
-// THIS FUNCTION IS USED FOR SUBMITTING THE STATUS UPDATE
-function submitStatusUpdate(event) {
-    event.preventDefault();
-
-    var poNumber = document.getElementById('modal_po_number').value;
-    var statusVal = document.getElementById('modal_status_select').value;
-
-    var formData = new FormData();
-    formData.append('po_number', poNumber);
-    formData.append('status', statusVal);
-
-    // Calls the SEPARATE update script
-    fetch('../py/purchase/update_po_status.py', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            // Hide Modal
-            var modalElem = document.getElementById('statusUpdateModal');
-            var modal = bootstrap.Modal.getInstance(modalElem);
-            if (modal) modal.hide();
-
-            // Reload page or refresh table
-            location.reload();
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(error => {
-        alert("System error: " + error);
-    });
-}
-
 //THIS FUNCTION IS FOR THE DROPDOWN FILTER
 document.addEventListener('DOMContentLoaded', function () {
-    const statusFilter = document.getElementById('statusFilter');
+    const statusFilter = document.getElementById('statusFilter1');
 
     if (statusFilter) {
         statusFilter.addEventListener('change', function () {

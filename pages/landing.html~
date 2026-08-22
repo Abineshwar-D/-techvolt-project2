@@ -710,6 +710,15 @@
                         <input type="email" class="form-control-custom" name="email" placeholder="abc@gmail.com" required>
                     </div>
 
+<!--                    <div class="col-md-6">-->
+<!--                        <label class="form-label-custom">Source</label>-->
+<!--                        <select class="form-select-custom" name="source" required>-->
+<!--                            <option selected>Phone</option>-->
+<!--                            <option>Email</option>-->
+<!--                            <option>Walk-in</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
                     <!-- Clean full-width container for dynamic inputs -->
                     <div class="col-12">
                         <div id="dynamicDropdowns" class="row g-3"></div>

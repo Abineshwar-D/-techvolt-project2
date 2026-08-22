@@ -49,7 +49,11 @@ try:
             }))
             sys.exit()
 
+    # -------------------------------------------------------------
+    # ROLE CHECKING
+    # -------------------------------------------------------------
     is_admin = False
+    is_merchandising = False
     current_user_fullname = ""
 
     if user_id_param:
@@ -78,6 +82,8 @@ try:
                 user_role = (user_row[1] or "").strip().lower()
                 if user_role == "admin":
                     is_admin = True
+                elif "merchandis" in user_role:  # Matches 'merchandising', 'merchandiser', etc.
+                    is_merchandising = True
 
     # 1. Fetch KPI Counts
     cursor.execute("""
@@ -152,12 +158,21 @@ try:
         show_row_edit = False
 
         if is_admin:
+            # Admins can edit all suppliers
             show_row_edit = True
-        elif user_id_param:
-            if current_user_fullname and current_user_fullname.lower() == str(created_by_name).strip().lower():
+        elif is_merchandising:
+            # Only Merchandising can edit:
+            # 1. Created by Admin
+            # 2. Created by themselves (matching Name or ID)
+            if str(created_by_name).strip().lower() == "admin" or str(created_by_id).strip().upper().startswith("AMD"):
+                show_row_edit = True
+            elif current_user_fullname and current_user_fullname.lower() == str(created_by_name).strip().lower():
                 show_row_edit = True
             elif user_id_param.lower() == str(created_by_id).strip().lower():
                 show_row_edit = True
+        else:
+            # StoreKeeper or any other role -> ALWAYS FALSE
+            show_row_edit = False
 
         edit_btn = ""
         if show_row_edit:
@@ -182,7 +197,7 @@ try:
                     <button class="action-btn text-danger" 
                             title="Block Supplier" 
                             onclick="toggleSupplierStatus('{s_code}', 'Inactive')">
-                        <i class="bi bi-slash-circle"></i>
+                       <i class="bi-lock-fill"></i>
                     </button>
                 """
             else:
@@ -190,7 +205,7 @@ try:
                     <button class="action-btn text-success" 
                             title="Unblock Supplier" 
                             onclick="toggleSupplierStatus('{s_code}', 'Active')">
-                        <i class="bi bi-check-circle"></i>
+                         <i class="bi-unlock-fill"></i>
                     </button>
                 """
 

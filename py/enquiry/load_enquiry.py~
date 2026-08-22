@@ -72,7 +72,7 @@ try:
         converted_orders = cursor.fetchone()[0] or 0
 
     # -------------------------------------------------------------
-    # 2. ENQUIRY TABLE QUERY
+    # 2. ENQUIRY TABLE QUERY (Included phone_number and email)
     # -------------------------------------------------------------
     if is_admin:
         cursor.execute("""
@@ -84,7 +84,9 @@ try:
                 created_at, 
                 sample_status, 
                 COALESCE(created_by_name, 'Unassigned') AS created_by,
-                id
+                id,
+                phone_number,
+                email
             FROM customers_enquiries 
             ORDER BY id DESC
         """)
@@ -99,7 +101,9 @@ try:
                 created_at, 
                 sample_status, 
                 COALESCE(created_by_name, 'Unassigned') AS created_by,
-                id
+                id,
+                phone_number,
+                email
             FROM customers_enquiries 
             WHERE LOWER(TRIM(created_by_id)) = %s
             ORDER BY id DESC
@@ -120,6 +124,8 @@ try:
             sample_status,
             created_by,
             db_id,
+            phone_number,
+            email,
         ) = row
 
         display_enq_id = enquiry_id if enquiry_id else f"ENQ00{db_id}"
@@ -127,14 +133,18 @@ try:
         # --- STATUS COLUMN BADGE LOGIC ---
         if sample_status == 0:
             status_text = "New Enquiry"
-            status_badge = '<span class="badge bg-warning text-dark">New Enquiry</span>'
+            status_badge = (
+                '<span class="badge bg-warning text-dark">New Enquiry</span>'
+            )
             btn_text = "Send Sample"
             btn_class = "btn-primary"
             status_val = "0"
             disabled_attr = ""
         elif sample_status == 1:
             status_text = "Sample Sent"
-            status_badge = '<span class="badge bg-info text-dark">Sample Sent</span>'
+            status_badge = (
+                '<span class="badge bg-info text-dark">Sample Sent</span>'
+            )
             btn_text = "Send Quotation"
             btn_class = "btn-success"
             status_val = "1"
@@ -154,9 +164,7 @@ try:
             status_val = "0"
             disabled_attr = ""
 
-        created_date = (
-            created_at.strftime("%d-%m-%Y") if created_at else "N/A"
-        )
+        created_date = created_at.strftime("%d-%m-%Y") if created_at else "N/A"
 
         if is_admin:
             action_button = f"""<button class="table-action-btn delete" onclick="toggleStatus({db_id}, 'block')" title="Block"><i class="bi bi-slash-circle"></i></button>"""
@@ -175,15 +183,23 @@ try:
             <td>{created_by}</td>
             <td class="text-right">
                 <div class="d-flex justify-content-end gap-1">
-                    <button class="table-action-btn" title="Update"><i class="bi bi-pencil"></i></button>
-                    {action_button}
-                    <button class="btn {btn_class} btn-sm action-sample-btn" 
-                            data-id="{db_id}" 
-                            data-enquiry-id="{display_enq_id}"
-                            data-current-status="{status_val}"
-                            {disabled_attr}>
-                        {btn_text}
+                    <button class="table-action-btn edit-btn" 
+                            title="Update"
+                            data-id="{db_id}"
+                            data-name="{customer or ''}"
+                            data-phone="{phone_number or ''}"
+                            data-email="{email or ''}"
+                            data-quantity="{qty or 0}">
+                        <i class="bi bi-pencil"></i>
                     </button>
+                    {action_button}
+                    <button class="btn {btn_class} btn-sm action-sample-btn text-nowrap" 
+        data-id="{db_id}" 
+        data-enquiry-id="{display_enq_id}"
+        data-current-status="{status_val}"
+        {disabled_attr}>
+    {btn_text}
+</button>
                 </div>
             </td>
         </tr>

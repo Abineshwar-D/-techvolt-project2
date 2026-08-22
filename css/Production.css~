@@ -1626,7 +1626,7 @@
     color: #7c839b !important;
 }
 
-        /*========================================= Supervisor screen ================================================= */
+    /*========================================= Supervisor screen ================================================= */
 
 /* 1. Wrapper: Centered, medium width */
 #page13 .table-wrapper {
@@ -1673,11 +1673,13 @@
     background: #f9fafb;
 }
 
-/* 4. Actions Column (small, right-aligned) */
+/* 4. Actions Column (Fixed alignment & width for 3 action buttons) */
 #page13 .table-custom th.text-end,
 #page13 .table-custom td.text-end {
-    text-align: end;
-    width: 140px;               /* slightly wider for 3 buttons */
+    text-align: right;
+    width: 160px;               /* Increased from 140px to prevent button wrapping */
+    min-width: 150px;           /* Prevents cell shrinkage */
+    white-space: nowrap;        /* Guarantees buttons remain in a single row */
 }
 
 #page13 .text-end {
@@ -1690,6 +1692,7 @@
   align-items: center;
   justify-content: flex-end;
   white-space: nowrap;
+  flex-wrap: nowrap;          /* Strictly prevents buttons from dropping to a second line */
 }
 
 #page13 .table-action-btn {
@@ -1703,6 +1706,7 @@
   border-radius: 6px;
   background: #fff;
   box-sizing: border-box;
+  flex-shrink: 0;             /* Prevents button distortion */
 }
 
 #page13 .table-action-btn i {

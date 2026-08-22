@@ -81,25 +81,10 @@ if action == "get_dashboard_data":
         produced_value = production_target
         pending_value = pending_production
 
-        # Calculate Completion & Pending Percentage
+        # Calculate Completion Percentage
         completion_percentage = 0
-        pending_percentage = 0
-
-        # SVG Circle Calculations (Circumference = 2 * PI * 70 ≈ 440)
-        circumference = 440
-        produced_dashoffset = circumference
-        pending_dashoffset = circumference
-
         if target_value > 0:
             completion_percentage = round((produced_value / target_value) * 100)
-            pending_percentage = round((pending_value / target_value) * 100)
-
-            # Produced Circle Offset
-            produced_dashoffset = round(circumference - (circumference * (produced_value / target_value)))
-
-            # Pending Circle Offset (Starts right where Produced ends)
-            combined_val = min(produced_value + pending_value, target_value)
-            pending_dashoffset = round(circumference - (circumference * (combined_val / target_value)))
 
         # ========================================
         # Prepare Response
@@ -117,12 +102,7 @@ if action == "get_dashboard_data":
                 "target_value": str(target_value),
                 "produced_value": str(produced_value),
                 "pending_value": str(pending_value),
-                "completion_percentage": str(completion_percentage),
-                "pending_percentage": str(pending_percentage),
-
-                # SVG Offsets for Chart
-                "produced_dashoffset": str(produced_dashoffset),
-                "pending_dashoffset": str(pending_dashoffset)
+                "completion_percentage": str(completion_percentage)
             }
         }
         print(json.dumps(result))

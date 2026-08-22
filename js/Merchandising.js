@@ -64,17 +64,12 @@ document.querySelectorAll('.nav-item').forEach(item => {
    02. MERCHANDISING DASHBOARD MAIN SCREEN (PAGE 1)
    ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+function fetchKPIData() {
     fetch("../py/dashboard/get_merchandising.py")
         .then(response => response.json())
         .then(data => {
             if (data.status === "success") {
-                document.getElementById("kpi-card1").innerText = data.card1;
-                document.getElementById("kpi-card2").innerText = data.card2;
-                document.getElementById("kpi-card3").innerText = data.card3;
-                document.getElementById("kpi-card4").innerText = data.card4;
-                document.getElementById("kpi-card5").innerText = data.card5;
-                document.getElementById("kpi-card6").innerText = data.card6;
+                updateKPIElements(data);
             } else {
                 console.error("Error fetching KPI data:", data.message);
             }
@@ -82,6 +77,22 @@ document.addEventListener("DOMContentLoaded", function () {
         .catch(error => {
             console.error("Network or script error:", error);
         });
+}
+
+function updateKPIElements(data) {
+    document.getElementById("kpi-card1").innerText = data.card1;
+    document.getElementById("kpi-card3").innerText = data.card3;
+    document.getElementById("kpi-card4").innerText = data.card4;
+    document.getElementById("kpi-card5").innerText = data.card5;
+    document.getElementById("kpi-card6").innerText = data.card6;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    fetchKPIData();
+});
+
+window.addEventListener("focus", function() {
+   fetchKPIData();
 });
 
 
@@ -89,10 +100,15 @@ document.addEventListener("DOMContentLoaded", function () {
    03. ORDERS SCREEN (PAGE 3)
    ========================================================================== */
 
-function loadOrdersData(){
+
+// THIS FUNCTION LOAD TABLE DATA
+function loadOrdersAndKPIs() {
     var ordersTableBody = document.getElementById("ordersTableBody");
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUserId = urlParams.get('user_id') || '';
+
     if (ordersTableBody) {
-        fetch("../py/orders/get_orders.py")
+        fetch(`../py/orders/get_orders.py?user_id=${encodeURIComponent(currentUserId)}&t=${new Date().getTime()}`)
         .then(response => response.json())
         .then(data => {
             if (data.status === "success" || data.kpis) {
@@ -105,6 +121,13 @@ function loadOrdersData(){
             } else {
                 ordersTableBody.innerHTML = "<tr><td colspan='5' class='text-danger'>Failed to load data.</td></tr>";
             }
+
+          // Add inside loadOrdersAndKPIs() in Merchandising.js
+const searchOrderInput = document.getElementById("searchOrder");
+const orderStatusFilter = document.getElementById("orderStatusFilter");
+
+if (searchOrderInput) searchOrderInput.value = "";
+if (orderStatusFilter) orderStatusFilter.value = "All Status";
         })
         .catch(err => {
             console.error("Error loading orders and KPIs:", err);
@@ -113,9 +136,14 @@ function loadOrdersData(){
     }
 }
 
+// Auto-refresh logic
 document.addEventListener("DOMContentLoaded", function() {
-    loadOrdersData();
-    setInterval(loadOrdersData, 5000);
+    loadOrdersAndKPIs();
+//    setInterval(loadOrdersAndKPIs, 5000);
+});
+
+window.addEventListener("focus", function() {
+    loadOrdersAndKPIs();
 });
 
 
@@ -156,6 +184,61 @@ document.addEventListener('DOMContentLoaded', function () {
 //THIS FUNCTION HANDLE ORDER VIEW MODAL
 function populateModalDetails(btn) {
     document.getElementById('modalOrderNumber').innerText = btn.getAttribute('data-order') || '--';
+    document.getElementById('modalCustomerName1').innerText = btn.getAttribute('data-customer') || '--';
+    document.getElementById('modalFabric1').innerText = btn.getAttribute('data-fabric') || '--';
+    document.getElementById('modalColor1').innerText = btn.getAttribute('data-color') || '--';
+    document.getElementById('modalQuantity').innerText = btn.getAttribute('data-qty') || '--';
+    document.getElementById('modalPricePerKg').innerText = "₹" + (btn.getAttribute('data-price') || '0');
+    document.getElementById('modalTotalAmount').innerText = "₹" + (btn.getAttribute('data-total') || '0');
+    document.getElementById('modalOrderDate').innerText = btn.getAttribute('data-orderdate') || '--';
+    document.getElementById('modalDeliveryDate').innerText = btn.getAttribute('data-deliverydate') || '--';
+    document.getElementById('modalCreatedBy').innerText = btn.getAttribute('data-createdby') || '--';
+    document.getElementById('modalRemarks1').innerText = btn.getAttribute('data-remarks') || 'No remarks provided.';
+
+    const statusVal = btn.getAttribute('data-status') || 'New Order';
+    const badgeEl = document.getElementById('modalStatusBadge1');
+    badgeEl.innerText = statusVal;
+
+    if (statusVal.toLowerCase() === 'new order') {
+        badgeEl.className = 'badge bg-secondary';
+    } else if (statusVal.toLowerCase() === 'running') {
+        badgeEl.className = 'badge bg-info text-dark';
+    } else if (statusVal.toLowerCase() === 'completed') {
+        badgeEl.className = 'badge bg-success';
+    } else {
+        badgeEl.className = 'badge bg-primary';
+    }
+}
+
+// THIS FUNCTION HANDLES ORDERS STATUS FILTER
+document.addEventListener("change", function (e) {
+    if (e.target && e.target.id === "orderStatusFilter") {
+        const selectedFilter = e.target.value.trim().toLowerCase();
+        const tableBody = document.getElementById("ordersTableBody");
+
+        if (tableBody) {
+            const rows = tableBody.querySelectorAll("tr");
+
+            rows.forEach(function (row) {
+                const statusBadge = row.querySelector("td:nth-child(6) .badge");
+
+                if (statusBadge) {
+                    const rowStatus = statusBadge.textContent.trim().toLowerCase();
+
+                    if (selectedFilter === "all status" || rowStatus.includes(selectedFilter) || selectedFilter.includes(rowStatus)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        }
+    }
+});
+
+//THIS FUNCTION HANDLE ORDER VIEW MODAL
+function populateModalDetails(btn) {
+    document.getElementById('modalOrderNumber').innerText = btn.getAttribute('data-order') || '--';
     document.getElementById('modalCustomerName').innerText = btn.getAttribute('data-customer') || '--';
     document.getElementById('modalFabric').innerText = btn.getAttribute('data-fabric') || '--';
     document.getElementById('modalColor').innerText = btn.getAttribute('data-color') || '--';
@@ -182,79 +265,24 @@ function populateModalDetails(btn) {
     }
 }
 
-// THIS FUNCTION HANDLES PRODUCTION PLAN FILTER
-document.addEventListener("DOMContentLoaded", function () {
-    const statusSelect = document.querySelector(".filter-select");
-    const tableBody = document.getElementById("ordersTableBody");
 
-    if (statusSelect && tableBody) {
-        statusSelect.addEventListener("change", function () {
-            const selectedFilter = this.value.trim().toLowerCase();
+// Ensure both search inputs are cleared immediately upon soft-reload restoration
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const orderSearch = document.getElementById("searchOrder");
 
-            // Loop through each table row
-            const rows = tableBody.querySelectorAll("tr");
+        if (orderSearch) orderSearch.value = "";
 
-            rows.forEach(row => {
-                // Find the Status column badge inside the row (7th column)
-                const statusBadge = row.querySelector("td:nth-child(6) .badge");
-
-                if (statusBadge) {
-                    const rowStatus = statusBadge.textContent.trim().toLowerCase();
-
-                    // Show all rows if "All Status" selected, or match selected option
-                    if (selectedFilter === "all status" || rowStatus === selectedFilter) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                }
-            });
-        });
-    }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
 });
 
 /* ==========================================================================
    04. PURCHASE ORDERS (PO) SCREEN (PAGE 5)
    ========================================================================== */
 
-document.querySelectorAll('.table-custom tbody tr').forEach(row => {
-    row.addEventListener('click', function() {
-        document.querySelectorAll('.table-custom tbody tr').forEach(r => {
-            r.classList.remove('selected');
-        });
-        this.classList.add('selected');
-
-        const poNumber = this.querySelector('.po-number')?.textContent || 'PO001';
-        const supplier = this.querySelector('.supplier-name')?.textContent || 'ABC Yarns';
-        const material = this.querySelectorAll('td')[2]?.textContent || 'Cotton Yarn';
-        const quantity = this.querySelectorAll('td')[3]?.textContent || '2000 Kg';
-
-        const detailHeader = document.querySelector('.details-header h3');
-        if (detailHeader) detailHeader.textContent = poNumber;
-
-        const detailItems = document.querySelectorAll('.detail-item .value');
-        if (detailItems.length >= 4) {
-            detailItems[0].textContent = supplier;
-            detailItems[2].textContent = quantity;
-        }
-
-        const statusBadge = document.querySelector('.priority-badge');
-        const statusCell = this.querySelector('.status-badge');
-        if (statusBadge && statusCell) {
-            statusBadge.textContent = statusCell.textContent.trim();
-            statusBadge.className = 'priority-badge';
-            if (statusCell.classList.contains('pending')) {
-                statusBadge.style.background = '#e65100';
-            } else if (statusCell.classList.contains('approved')) {
-                statusBadge.style.background = '#2e7d32';
-            } else if (statusCell.classList.contains('rejected')) {
-                statusBadge.style.background = '#c62828';
-            }
-        }
-
-        console.log('PO Selected:', poNumber);
-    });
-});
 
 const searchPoKeyUp = document.getElementById("SearchPo");
 if (searchPoKeyUp) {
@@ -269,86 +297,123 @@ if (searchPoKeyUp) {
     });
 }
 
-//const poTableBodyElem = document.getElementById("poTableBody");
-//if (poTableBodyElem) {
-//    poTableBodyElem.addEventListener("click", function(e) {
-//        const row = e.target.closest("tr");
-//        if (!row) return;
-//
-//        document.querySelectorAll("#poTableBody tr").forEach(r => {
-//            r.classList.remove("selected");
-//        });
-//
-//        row.classList.add("selected");
-//
-//        const poNumber = row.cells[0].textContent.trim();
-//        const supplier = row.cells[1].textContent.trim();
-//        const material = row.cells[2].textContent.trim();
-//        const quantity = row.cells[3].textContent.trim();
-//        const status = row.querySelector(".status-badge").textContent.trim();
-//
-//        document.getElementById("detailPo").textContent = poNumber;
-//        document.getElementById("detailSupplier").textContent = supplier;
-//        document.getElementById("detailMaterial").textContent = material;
-//        document.getElementById("detailQuantity").textContent = quantity;
-//        document.getElementById("Status").textContent = status;
-//    });
-//}
-
 // Master function to fetch both the Table and the KPIs
 function refreshAllData() {
     const tableBody = document.getElementById("poTableBody");
 
-    // 1. FETCH TABLE DATA (HTML)
-fetch("../py/purchase/get_po_list.py?t=" + new Date().getTime())
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-        return response.text();
-    })
-    .then(data => {
-        if (data.trim() && tableBody) {
-            tableBody.innerHTML = data;
-        } else if (tableBody) {
-            //  Show a clean message if no data exists instead of crashing
-            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
-        }
+    // 1. Extract user_id from the current page URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user_id') || '';
 
-        if (typeof initializeTableEvents === "function") {
-            initializeTableEvents();
-        }
-    })
-    .catch(err => {
-        console.error("Table fetch error:", err);
-    });
+    // 2. Pass user_id in the fetch URL query parameters
+    fetch(`../py/purchase/get_po_list.py?user_id=${encodeURIComponent(userId)}&t=${new Date().getTime()}`)
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.text();
+        })
+        .then(data => {
+            if (data.trim() && tableBody) {
+                tableBody.innerHTML = data;
+            } else if (tableBody) {
+                // Show a clean message if no data exists instead of crashing
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;">No PO records found</td></tr>`;
+            }
+
+            const statusFilter = document.getElementById("statusFilter");
+            if (statusFilter) {
+                statusFilter.value = "new po";
+            }
+
+            // Add inside refreshAllData() in Merchandising.js
+const searchInput = document.getElementById("SearchPo");
+
+
+if (searchInput) searchInput.value = "";
+
+
+            // Apply filter immediately after HTML is inserted into table body
+            filterByStatus();
+
+            if (typeof initializeTableEvents === "function") {
+                initializeTableEvents();
+            }
+        })
+        .catch(err => {
+            console.error("Table fetch error:", err);
+        });
 
     // 2. FETCH KPI DATA (JSON)
-   fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
-    .then(response => {
-        if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
-        return response.json();
-    })
-    .then(data => {
-        if (data.status === "success") {
-            const totalPoElem = document.getElementById("kpi-total-po");
-            const pendingPoElem = document.getElementById("kpi-pending-po");
-            const approvedPoElem = document.getElementById("kpi-approved-po");
-            const rejectedPoElem = document.getElementById("kpi-rejected-po");
+    fetch("../py/purchase/get_po_kpis.py?t=" + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
+            return response.json();
+        })
+        .then(data => {
+            if (data.status === "success") {
+                const totalPoElem = document.getElementById("kpi-total-po");
+                const pendingPoElem = document.getElementById("kpi-pending-po");
+                const approvedPoElem = document.getElementById("kpi-approved-po");
+                const rejectedPoElem = document.getElementById("kpi-rejected-po");
 
-            if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
-            if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
-            if (approvedPoElem) approvedPoElem.innerText = data.approved_po ?? 0;
-            if (rejectedPoElem) rejectedPoElem.innerText = data.rejected_po ?? 0;
-        } else {
-            console.error("Error fetching PO KPIs:", data.message);
+                if (totalPoElem) totalPoElem.innerText = data.total_po ?? 0;
+                if (pendingPoElem) pendingPoElem.innerText = data.pending_po ?? 0;
+                if (approvedPoElem) approvedPoElem.innerText = data.approved_po ?? 0;
+                if (rejectedPoElem) rejectedPoElem.innerText = data.rejected_po ?? 0;
+            } else {
+                console.error("Error fetching PO KPIs:", data.message);
+            }
+        })
+        .catch(error => {
+            console.error("KPI fetch error:", error);
+        });
+}
+
+// Soft reload / cache restoration listener for PO Search
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("SearchPo");
+        if (searchInput) {
+            searchInput.value = "";
         }
-    })
-    .catch(error => {
-        console.error("KPI fetch error:", error);
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
+// Helper function to perform status filtering
+function filterByStatus() {
+    const statusFilter = document.getElementById('statusFilter');
+    if (!statusFilter) return;
+
+    const selectedStatus = statusFilter.value.toLowerCase().trim();
+    const rows = document.querySelectorAll('#poTableBody tr');
+
+    rows.forEach(row => {
+        // Column index 4 is STATUS
+        const statusCell = row.cells[4];
+        if (statusCell) {
+            const cellText = statusCell.innerText.toLowerCase().trim();
+            if (selectedStatus === 'all' || cellText === selectedStatus) {
+                row.style.display = ''; // Show row
+            } else {
+                row.style.display = 'none'; // Hide row
+            }
+        }
     });
+}
+
+// Attach change listener to dropdown and trigger initial load
+function applyStatusFilter() {
+    const statusFilter = document.getElementById('statusFilter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterByStatus);
+    }
 }
 
 // 1. Trigger when DOM page finishes loading
 document.addEventListener('DOMContentLoaded', function() {
+    applyStatusFilter();
     refreshAllData();
 });
 
@@ -357,91 +422,8 @@ window.addEventListener("focus", function () {
     refreshAllData();
 });
 
-// Open Modal when pencil button is clicked
-window.openStatusModal = function(poNumber, currentStatus) {
-    document.getElementById('modal_po_number').value = poNumber;
-
-    var selectElem = document.getElementById('modal_status_select');
-    if (currentStatus === "Completed" || currentStatus === "Rejected") {
-        selectElem.value = currentStatus;
-    } else {
-        selectElem.value = "Completed";
-    }
-
-    var myModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
-    myModal.show();
-};
-
-// THIS FUNCTION IS USED FOR SUBMITTING THE STATUS UPDATE
-function submitStatusUpdate(event) {
-    event.preventDefault();
-
-    var poNumber = document.getElementById('modal_po_number').value;
-    var statusVal = document.getElementById('modal_status_select').value;
-
-    var formData = new FormData();
-    formData.append('po_number', poNumber);
-    formData.append('status', statusVal);
-
-    // Calls the SEPARATE update script
-    fetch('../py/purchase/update_po_status.py', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.message);
-            // Hide Modal
-            var modalElem = document.getElementById('statusUpdateModal');
-            var modal = bootstrap.Modal.getInstance(modalElem);
-            if (modal) modal.hide();
-
-            // Reload page or refresh table
-            location.reload();
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(error => {
-        alert("System error: " + error);
-    });
-}
-
-//THIS FUNCTION IS FOR THE DROPDOWN FILTER
-document.addEventListener('DOMContentLoaded', function () {
-    const statusFilter = document.getElementById('statusFilter');
-
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function () {
-            // Get selected option value
-            const selectedStatus = this.value.toLowerCase().trim();
-
-            // Get all rows in the table
-            const rows = document.querySelectorAll('#poTableBody tr');
-
-            rows.forEach(row => {
-                // Column index 4 is STATUS
-                const statusCell = row.cells[4];
-
-                if (statusCell) {
-                    // innerText strips HTML tags (like <span class="badge">)
-                    const cellText = statusCell.innerText.toLowerCase().trim();
-
-                    if (selectedStatus === 'all' || cellText === selectedStatus) {
-                        row.style.display = ''; // Show row
-                    } else {
-                        row.style.display = 'none'; // Hide row
-                    }
-                }
-            });
-        });
-    }
-});
-
 // THIS FUNCTION IS USED TO OPEN VIEW MODAL
 function openViewModal(btn) {
-    // Read data attributes from the clicked button
     const po = btn.getAttribute('data-po');
     const supplier = btn.getAttribute('data-supplier');
     const material = btn.getAttribute('data-material');
@@ -452,7 +434,6 @@ function openViewModal(btn) {
     const createdBy = btn.getAttribute('data-created-by');
     const remarks = btn.getAttribute('data-remarks');
 
-    // Populate modal fields
     document.getElementById('v_po_number').innerText = po;
     document.getElementById('v_supplier_name').innerText = supplier;
     document.getElementById('v_material').innerText = material;
@@ -463,7 +444,6 @@ function openViewModal(btn) {
     document.getElementById('v_created_by').innerText = createdBy;
     document.getElementById('v_remarks').innerText = remarks;
 
-    // Show the Bootstrap Modal
     const viewModal = new bootstrap.Modal(document.getElementById('viewPoModal'));
     viewModal.show();
 }
@@ -662,7 +642,8 @@ document.addEventListener("DOMContentLoaded", function() {
    06. SUPPLIER SCREEN (PAGE 4)
    ========================================================================== */
 
-// THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
+
+   // THIS FUNCTION LOADS SUPPLIER TABLE DATA & KPIS
 function loadSuppliersAndKPIs() {
     var supplierTableBody = document.getElementById("supplierTableBody");
 
@@ -690,6 +671,13 @@ function loadSuppliersAndKPIs() {
 
             // Update Table HTML
             supplierTableBody.innerHTML = data.table_html || '';
+
+            // Add inside loadSuppliersAndKPIs() in Merchandising.js
+const searchInput = document.getElementById("searchSupplier");
+const supplierStatus = document.getElementById("supplierStatus");
+
+if (searchInput) searchInput.value = "";
+if (supplierStatus) supplierStatus.value = "";
         })
         .catch(error => {
             console.error("Error fetching supplier data:", error);
@@ -697,16 +685,30 @@ function loadSuppliersAndKPIs() {
     }
 }
 
+// Individual listener only for searchSupplier
+window.addEventListener("pageshow", function () {
+    let attempts = 0;
+    const interval = setInterval(function () {
+        const searchInput = document.getElementById("searchSupplier");
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        attempts++;
+        if (attempts > 5) clearInterval(interval);
+    }, 100);
+});
+
 // Auto-refresh logic on DOM load and 5-second interval
 document.addEventListener("DOMContentLoaded", function () {
     loadSuppliersAndKPIs();
-    setInterval(loadSuppliersAndKPIs, 5000);
+//    setInterval(loadSuppliersAndKPIs, 5000);
 });
 
 // Auto-refresh when switching back to this window/screen
 window.addEventListener("focus", function () {
     loadSuppliersAndKPIs();
 });
+
 
 //THIS FUNCTION IS USED TO SEARCH SUPPLIER
 document.addEventListener('DOMContentLoaded', function () {
@@ -753,14 +755,8 @@ document.addEventListener('DOMContentLoaded', function () {
     searchSupplier.addEventListener('input', filterSuppliers);
     supplierStatus.addEventListener('change', filterSuppliers);
 
-    // Refresh/Reset Button
-    supplierRefresh.addEventListener('click', function () {
-        searchSupplier.value = '';
-        supplierStatus.value = '';
-        filterSuppliers();
-    });
-});
 
+});
 
 //THIS FUNCTION IS USED TO VIEW SUPPLIER
 document.addEventListener('DOMContentLoaded', function () {
@@ -832,7 +828,6 @@ function openEditSupplierModal(btn) {
     document.getElementById("edit_supplier_phone").value = phone;
     document.getElementById("edit_supplier_email").value = email;
     document.getElementById("edit_supplier_materials").value = materials;
-    document.getElementById("edit_supplier_status").value = status;
 
     const modalEl = document.getElementById("editSupplierModal");
     const modal = new bootstrap.Modal(modalEl);
@@ -845,7 +840,6 @@ function submitUpdateSupplier() {
     const phone = document.getElementById("edit_supplier_phone").value;
     const email = document.getElementById("edit_supplier_email").value;
     const materials = document.getElementById("edit_supplier_materials").value;
-    const status = document.getElementById("edit_supplier_status").value;
 
     if (!code) {
         alert("Supplier Code is missing.");

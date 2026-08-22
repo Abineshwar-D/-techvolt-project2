@@ -87,17 +87,20 @@ async function fetchDashboardData() {
         if (result.success) {
             const data = result.data;
 
+            // Update KPI Cards
             document.getElementById('todayProduction').textContent = data.today_production;
             document.getElementById('productionTarget').textContent = data.production_target;
             document.getElementById('runningOrders').textContent = data.running_orders;
             document.getElementById('pendingProduction').textContent = data.pending_production;
 
-            document.getElementById('targetValue').textContent = data.target_value + ' Kg';
-            document.getElementById('producedValue').textContent = data.produced_value + ' Kg';
-            document.getElementById('pendingValue').textContent = data.pending_value + ' Kg';
+            // Update Production Performance Text
+            document.getElementById('targetValue').textContent = data.target_value;
+            document.getElementById('producedValue').textContent = data.produced_value;
+            document.getElementById('pendingValue').textContent = data.pending_value;
             document.getElementById('completionPercentage').textContent = data.completion_percentage + '%';
 
-            updateCircularProgress(data.completion_percentage);
+            // Update Circular Progress Bar for Produced & Pending
+            updateCircularProgress(data);
 
             console.log('Dashboard data updated successfully:', data);
         } else {
@@ -108,82 +111,157 @@ async function fetchDashboardData() {
     }
 }
 
-function updateCircularProgress(percentage) {
-    const circle = document.getElementById('progressCircle');
-    if (circle) {
-        const circumference = 440;
-        const offset = circumference - (percentage / 100) * circumference;
-        circle.style.strokeDashoffset = offset;
+function updateCircularProgress(data) {
+    const producedCircle = document.getElementById('producedCircle') || document.getElementById('progressCircle');
+    const pendingCircle = document.getElementById('pendingCircle');
 
-        if (percentage < 30) {
-            circle.style.stroke = '#dc3545';
-        } else if (percentage < 70) {
-            circle.style.stroke = '#ffc107';
-        } else {
-            circle.style.stroke = '#006a61';
-        }
+    // 1. Update Produced Circle (Green)
+    if (producedCircle) {
+        producedCircle.style.strokeDashoffset = data.produced_dashoffset;
+        producedCircle.style.stroke = '#006a61'; // Produced Green Color
+    }
+
+    // 2. Update Pending Circle (Yellow / Orange)
+    if (pendingCircle) {
+        pendingCircle.style.strokeDashoffset = data.pending_dashoffset;
+        pendingCircle.style.stroke = '#dc3545'; // Pending Orange Color
     }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchDashboardData();
-    setInterval(fetchDashboardData, 30000);
+//    setInterval(fetchDashboardData, 30000);
 });
 
+
+window.addEventListener("focus", function() {
+    fetchDashboardData();
+
+});
 
 /* ==========================================================================
    03. PRODUCTION PLANNING SCREEN (PAGE 7)
    ========================================================================== */
 
-document.addEventListener('DOMContentLoaded', function() {
+// 1. Reusable Table Filter
+function filterProductionPlans() {
+    var searchInput = document.getElementById("SearchPp");
+    var search = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    var tableRows = document.querySelectorAll("#productionPlanTable tr");
 
+    if (tableRows && tableRows.length > 0) {
+        tableRows.forEach(function(row) {
+            var text = row.textContent.toLowerCase();
+            row.style.display = text.includes(search) ? "" : "none";
+        });
+    }
+}
 
-// THIS CODE LOADS PRODUCTION PLANS DETAILS
-    fetch("../py/inventory/get_production_plan.py")
-    .then(response => response.json())
-    .then(data => {
+// 2. YOUR LOGIC IMPLEMENTATION: Base URL Storage & Pure Reload Clear
+function handleUrlAndSearchReset() {
+    // 1. Get active hash from address bar, or fallback to localStorage
+    var currentHash = window.location.hash;
+    if (!currentHash || currentHash === "#") {
+        currentHash = "#" + (localStorage.getItem("activePage") || "Dashboard");
+    }
+
+    // 2. Build full current URL with active page hash
+    var currentBaseUrl = window.location.protocol + "//" +
+                         window.location.host +
+                         window.location.pathname +
+                         window.location.search +
+                         currentHash;
+
+    // 3. Keep sessionStorage dynamically synced to the current screen
+    sessionStorage.setItem("cleanBaseUrl", currentBaseUrl);
+
+    // 4. Update address bar state silently without breaking history
+    if (window.location.href !== currentBaseUrl) {
+        window.history.replaceState(null, "", currentBaseUrl);
+    }
+
+    // 5. Clear search inputs across screens
+    var searchInputs = [
+        document.getElementById("SearchPp"),
+        document.getElementById("searchFabric"),
+        document.getElementById("searchSupervisor")
+    ];
+
+    searchInputs.forEach(function(input) {
+        if (input) {
+            input.value = "";
+            input.defaultValue = "";
+        }
+    });
+
+    if (typeof filterProductionPlans === "function") {
+        filterProductionPlans();
+    }
+}
+
+// 3. Main Loader
+function loadProductionPlans() {
+    // Execute reset before data load
+    handleUrlAndSearchReset();
+
+    fetch("../py/inventory/get_production_plan.py?t=" + new Date().getTime(), {
+        cache: "no-store"
+    })
+    .then(function(response) {
+        if (!response.ok) throw new Error("HTTP error " + response.status);
+        return response.json();
+    })
+    .then(function(data) {
         if (data.error) {
             console.error("Backend Error:", data.error);
             return;
         }
 
-        if (document.getElementById("totalPlans"))
-            document.getElementById("totalPlans").textContent = data.total_plan;
+        // Update KPIs
+        var totalElem = document.getElementById("totalPlans");
+        var runningElem = document.getElementById("runningPlans");
+        var completedElem = document.getElementById("completedPlans");
+        var pendingElem = document.getElementById("pendingPlans");
 
-        if (document.getElementById("runningPlans"))
-            document.getElementById("runningPlans").textContent = data.running_plan;
+        if (totalElem && data.total_plan !== undefined) totalElem.textContent = data.total_plan;
+        if (runningElem && data.running_plan !== undefined) runningElem.textContent = data.running_plan;
+        if (completedElem && data.completed_plan !== undefined) completedElem.textContent = data.completed_plan;
+        if (pendingElem && data.pending_plan !== undefined) pendingElem.textContent = data.pending_plan;
 
-        if (document.getElementById("completedPlans"))
-            document.getElementById("completedPlans").textContent = data.completed_plan;
-
-        if (document.getElementById("pendingPlans"))
-            document.getElementById("pendingPlans").textContent = data.pending_plan;
-
-        const tableBody = document.getElementById("productionPlanTable");
-        if (tableBody) {
+        // Update Table
+        var tableBody = document.getElementById("productionPlanTable");
+        if (tableBody && data.table_html) {
             tableBody.innerHTML = data.table_html;
         }
+
+         // Add inside loadProductionPlans() in Production.js
+const searchInput = document.getElementById("SearchPp");
+const statusFilter = document.querySelector("#page7 .filter-select");
+
+if (searchInput) searchInput.value = "";
+if (statusFilter) statusFilter.value = "All Status";
+
+        // Execute reset again after table is rendered
+        handleUrlAndSearchReset();
     })
-    .catch(error => console.error("Error loading production plans:", error));
+    .catch(function(error) {
+        console.error("Fetch failed in loadProductionPlans:", error);
+    });
+}
 
-
-//THIS CODE HANDLES ORDER SEARCH
-    const searchInput = document.getElementById("SearchPp");
+// 4. Initialize on DOM Load
+document.addEventListener("DOMContentLoaded", function () {
+    var searchInput = document.getElementById("SearchPp");
     if (searchInput) {
-        searchInput.addEventListener("keyup", function() {
-            let search = this.value.toLowerCase();
-
-            const tableRows = document.querySelectorAll("#productionPlanTable tr");
-            if (tableRows) {
-                tableRows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(search) ? "" : "none";
-                });
-            }
-        });
+        searchInput.addEventListener("input", filterProductionPlans);
     }
 
+    loadProductionPlans();
 });
+
+// Run on page show / navigation
+window.addEventListener("pageshow", handleUrlAndSearchReset);
+
 
 // THIS FUNCTION IS USED TO OPEN VIEW PLAN MODAL
 function openViewPlanModal(btn) {
@@ -1443,7 +1521,7 @@ if (btnCancel) {
                 // Option 2: Fallback hash navigation to main dashboard section
                 const urlParams = new URLSearchParams(window.location.search);
                 const userId = urlParams.get('user_id') || '';
-                window.location.hash = '#page1';
+                window.location.hash = '#Dashboard';
             }
 
             // Reset modal styles for future display

@@ -10,6 +10,7 @@ cgitb.enable()
 sys.stdout.reconfigure(encoding='utf-8')
 print("Content-Type: text/html; charset=utf-8\n")
 
+
 def get_status_badge(status_text):
     status_str = str(status_text).strip() if status_text else "Pending"
     status_lower = status_str.lower()
@@ -26,6 +27,7 @@ def get_status_badge(status_text):
         badge_class = "bg-secondary"
 
     return f'<span class="badge {badge_class}">{status_str}</span>'
+
 
 # Extract user_id from query parameters
 form = cgi.FieldStorage()
@@ -47,8 +49,10 @@ try:
 
     cursor = conn.cursor()
 
-    # --- Role Check (Admin Detection) ---
+    # --- Role Check (Admin & Merchandising Detection) ---
     is_admin = False
+    is_merchandising = False
+
     if user_id:
         # Check admin table or employee ID starting with AMD
         cursor.execute(
@@ -57,14 +61,19 @@ try:
         )
         if cursor.fetchone()[0] > 0 or user_id.upper().startswith("AMD"):
             is_admin = True
-        else:
-            cursor.execute(
-                "SELECT LOWER(role) FROM users WHERE employee_id = %s OR user_id = %s",
-                (user_id, user_id),
-            )
-            role_row = cursor.fetchone()
-            if role_row and role_row[0] == "admin":
+
+        # Check user role from users table
+        cursor.execute(
+            "SELECT LOWER(role) FROM users WHERE employee_id = %s OR user_id = %s",
+            (user_id, user_id),
+        )
+        role_row = cursor.fetchone()
+        if role_row and role_row[0]:
+            user_role = role_row[0].strip().lower()
+            if user_role == "admin":
                 is_admin = True
+            elif user_role == "merchandising":
+                is_merchandising = True
 
     cursor.execute("""
         SELECT 
@@ -122,11 +131,16 @@ try:
             </button>
         """
 
-        # Edit button (Hidden for Admin, visible for non-admin)
-        if not is_admin:
+        # Edit button display logic:
+        # 1. No Edit button for Admin or Merchandising roles.
+        # 2. For other roles, Edit button is shown, but disabled if status is Completed or Rejected.
+        if not is_admin and not is_merchandising:
+            is_disabled = str(current_st).strip().lower() in ["completed", "rejected"]
+            disabled_attr = "disabled" if is_disabled else ""
+
             action_buttons = f"""
                 {view_btn}
-                <button type="button" class="action-btn edit-status-btn" onclick="openStatusModal('{safe_po_num}', '{current_st}')">
+                <button type="button" class="action-btn edit-status-btn" {disabled_attr} onclick="openStatusModal('{safe_po_num}', '{current_st}')">
                     <i class="bi bi-pencil"></i>
                 </button>
             """

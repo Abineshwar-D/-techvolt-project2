@@ -80,44 +80,87 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    const pwdForm = document.getElementById("changePasswordForm");
-    if (pwdForm) {
-        pwdForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const userId = getActiveUserId();
-            const newPwd = document.getElementById("pwd_new").value;
-            const confirmPwd = document.getElementById("pwd_confirm").value;
-
-            if (newPwd !== confirmPwd) {
-                alert("New password and confirm password do not match!");
-                return;
+    // Automatically reset password input fields whenever the Change Password modal is closed/canceled
+    const changePwdModal = document.getElementById("changePasswordModal");
+    if (changePwdModal) {
+        changePwdModal.addEventListener("hidden.bs.modal", function () {
+            const pwdForm = document.getElementById("changePasswordForm");
+            if (pwdForm) {
+                pwdForm.reset();
             }
-
-            let formData = new FormData();
-            formData.append("action", "change_password");
-            formData.append("user_id", userId);
-            formData.append("new_password", newPwd);
-
-            fetch("../py/getuserinformation/get_user_profile.py", {
-                method: "POST",
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    const modalElem = document.getElementById('changePasswordModal');
-                    if (modalElem && typeof bootstrap !== "undefined") {
-                        const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
-                        modal.hide();
-                    }
-                    pwdForm.reset();
-                } else {
-                    alert("Error: " + data.message);
-                }
-            })
-            .catch(err => console.error("Error changing password:", err));
         });
     }
+
+    const pwdForm = document.getElementById("changePasswordForm");
+    if (pwdForm) {
+    pwdForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const userId = getActiveUserId();
+        const newPwd = document.getElementById("pwd_new").value;
+        const confirmPwd = document.getElementById("pwd_confirm").value;
+
+        // 1. Password Match Check
+        if (newPwd !== confirmPwd) {
+            alert("New password and confirm password do not match!");
+            return;
+        }
+
+        // 2. Password Strength Validation (Client-Side)
+        const minLength = newPwd.length >= 8;
+        const hasUpperCase = /[A-Z]/.test(newPwd);
+        const hasLowerCase = /[a-z]/.test(newPwd);
+        const hasNumber = /[0-9]/.test(newPwd);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPwd);
+
+        if (!minLength) {
+            alert("Password must be at least 8 characters long!");
+            return;
+        }
+        if (!hasUpperCase) {
+            alert("Password must contain at least one uppercase letter (A-Z)!");
+            return;
+        }
+        if (!hasLowerCase) {
+            alert("Password must contain at least one lowercase letter (a-z)!");
+            return;
+        }
+        if (!hasNumber) {
+            alert("Password must contain at least one number (0-9)!");
+            return;
+        }
+        if (!hasSpecialChar) {
+            alert("Password must contain at least one special character (!@#$%^&* etc.)!");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("action", "change_password");
+        formData.append("user_id", userId);
+        formData.append("new_password", newPwd);
+
+        fetch("../py/getuserinformation/get_user_profile.py", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                const modalElem = document.getElementById('changePasswordModal');
+                if (modalElem && typeof bootstrap !== "undefined") {
+                    const modal = bootstrap.Modal.getInstance(modalElem) || new bootstrap.Modal(modalElem);
+                    modal.hide();
+                }
+                pwdForm.reset();
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => console.error("Error changing password:", err));
+    });
+}
+
+
+
 });

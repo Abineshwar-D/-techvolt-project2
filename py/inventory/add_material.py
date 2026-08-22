@@ -21,7 +21,7 @@ opening_stock = form.getvalue("opening_stock", "").strip()
 supplier = form.getvalue("supplier", "").strip()
 manufacturing_date = form.getvalue("manufacturing_date", "").strip()
 delivery_date = date.today().strftime("%Y-%m-%d")
-status = "Stored"
+status = "IN STOCK"
 purchase_order = form.getvalue("purchase_order", "").strip()
 description = form.getvalue("description", "").strip()
 
@@ -114,19 +114,6 @@ if errors:
 try:
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
-
-    # 1. Prevent Duplicate Material Names
-    check_sql = "SELECT material_id FROM materials WHERE LOWER(material_name) = LOWER(%s)"
-    cursor.execute(check_sql, (material_name,))
-
-    if cursor.fetchone():
-        print("""
-        <script>
-            alert("Error: A material with this name already exists in inventory!");
-            window.history.back();
-        </script>
-        """)
-        exit()
 
     # 2. Generate Next Material Code (MAT001, MAT002...)
     cursor.execute("""

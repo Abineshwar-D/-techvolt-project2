@@ -115,19 +115,6 @@ try:
     conn = pymysql.connect(**DB_CONFIG)
     cursor = conn.cursor()
 
-    # 1. Prevent Duplicate Material Names
-    check_sql = "SELECT material_id FROM materials WHERE LOWER(material_name) = LOWER(%s)"
-    cursor.execute(check_sql, (material_name,))
-
-    if cursor.fetchone():
-        print("""
-        <script>
-            alert("Error: A material with this name already exists in inventory!");
-            window.history.back();
-        </script>
-        """)
-        exit()
-
     # 2. Generate Next Material Code (MAT001, MAT002...)
     cursor.execute("""
         SELECT material_code
@@ -152,7 +139,7 @@ try:
         po_orderid,  material_code, material_name, category, unit,
         opening_stock, supplier, manufacturing_date, delivery_date, status, description,
         created_by_id, created_by_name
-    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
     cursor.execute(insert_sql, (

@@ -3,11 +3,12 @@ import sys
 import cgitb
 import html
 import pymysql
+import cgi
+import os
 
 cgitb.enable()
 sys.stdout.reconfigure(encoding='utf-8')
 print("Content-Type: text/html; charset=utf-8\n")
-
 
 def get_status_badge(status_text):
     status_str = str(status_text).strip() if status_text else "Pending"
@@ -26,6 +27,14 @@ def get_status_badge(status_text):
 
     return f'<span class="badge {badge_class}">{status_str}</span>'
 
+# Extract user_id from query parameters
+form = cgi.FieldStorage()
+user_id = form.getvalue("user_id", None)
+
+if not user_id:
+    user_id = os.environ.get("HTTP_USER_ID", "").strip()
+else:
+    user_id = str(user_id).strip()
 
 try:
     conn = pymysql.connect(
@@ -37,6 +46,25 @@ try:
     )
 
     cursor = conn.cursor()
+
+    # --- Role Check (Admin Detection) ---
+    is_admin = False
+    if user_id:
+        # Check admin table or employee ID starting with AMD
+        cursor.execute(
+            "SELECT COUNT(*) FROM admin WHERE employee_id = %s OR user_id = %s",
+            (user_id, user_id),
+        )
+        if cursor.fetchone()[0] > 0 or user_id.upper().startswith("AMD"):
+            is_admin = True
+        else:
+            cursor.execute(
+                "SELECT LOWER(role) FROM users WHERE employee_id = %s OR user_id = %s",
+                (user_id, user_id),
+            )
+            role_row = cursor.fetchone()
+            if role_row and role_row[0] == "admin":
+                is_admin = True
 
     cursor.execute("""
         SELECT 
@@ -76,6 +104,39 @@ try:
         safe_created_by = html.escape(str(created_by), quote=True)
         safe_remarks = html.escape(str(remarks), quote=True)
 
+        # View button
+        view_btn = f"""
+            <button type="button" 
+                    class="action-btn view-po-btn" 
+                    data-po="{safe_po_num}"
+                    data-supplier="{safe_supplier}"
+                    data-material="{safe_material}"
+                    data-avail-stock="{available_stock}"
+                    data-req-qty="{required_qty}"
+                    data-delivery="{expected_delivery}"
+                    data-status="{current_st}"
+                    data-created-by="{safe_created_by}"
+                    data-remarks="{safe_remarks}"
+                    onclick="openViewModal(this)">
+                <i class="bi bi-eye"></i>
+            </button>
+        """
+
+        # Edit button (Hidden for Admin, visible for non-admin)
+        if not is_admin:
+            # Check if status is Completed or Rejected to disable the edit button
+            is_disabled = str(current_st).strip().lower() in ["completed", "rejected"]
+            disabled_attr = "disabled" if is_disabled else ""
+
+            action_buttons = f"""
+                {view_btn}
+                <button type="button" class="action-btn edit-status-btn" {disabled_attr} onclick="openStatusModal('{safe_po_num}', '{current_st}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+            """
+        else:
+            action_buttons = f"{view_btn}"
+
         print(f"""
         <tr>
             <td class="po-number">{safe_po_num}</td>
@@ -86,23 +147,7 @@ try:
             <td>{safe_created_by}</td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-1">
-                    <button type="button" 
-                            class="action-btn view-po-btn" 
-                            data-po="{safe_po_num}"
-                            data-supplier="{safe_supplier}"
-                            data-material="{safe_material}"
-                            data-avail-stock="{available_stock}"
-                            data-req-qty="{required_qty}"
-                            data-delivery="{expected_delivery}"
-                            data-status="{current_st}"
-                            data-created-by="{safe_created_by}"
-                            data-remarks="{safe_remarks}"
-                            onclick="openViewModal(this)">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                    <button type="button" class="action-btn edit-status-btn" onclick="openStatusModal('{safe_po_num}', '{current_st}')">
-                        <i class="bi bi-pencil"></i>
-                    </button>
+                    {action_buttons}
                 </div>
             </td>
         </tr>

@@ -234,7 +234,7 @@
         }
 
        #Dashboard  .metric-item.pending {
-            border-left-color: rgba(186, 26, 26, 0.3);
+            border-left-color: rgb(220, 53, 69);
         }
 
         /* ========== PRODUCTION ANALYTICS ========== */

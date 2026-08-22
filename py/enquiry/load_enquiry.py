@@ -183,6 +183,11 @@ try:
             <td>{created_by}</td>
             <td class="text-right">
                 <div class="d-flex justify-content-end gap-1">
+                
+                 <div class="d-flex justify-content-end gap-1">
+                    <button class="action-btn" title="View" onclick="viewCustomer({db_id})"><i class="bi 
+                    bi-eye"></i></button>
+                
                     <button class="table-action-btn edit-btn" 
                             title="Update"
                             data-id="{db_id}"
@@ -193,13 +198,13 @@ try:
                         <i class="bi bi-pencil"></i>
                     </button>
                     {action_button}
-                    <button class="btn {btn_class} btn-sm action-sample-btn" 
-                            data-id="{db_id}" 
-                            data-enquiry-id="{display_enq_id}"
-                            data-current-status="{status_val}"
-                            {disabled_attr}>
-                        {btn_text}
-                    </button>
+                    <button class="btn {btn_class} btn-sm action-sample-btn text-nowrap" 
+        data-id="{db_id}" 
+        data-enquiry-id="{display_enq_id}"
+        data-current-status="{status_val}"
+        {disabled_attr}>
+    {btn_text}
+</button>
                 </div>
             </td>
         </tr>
